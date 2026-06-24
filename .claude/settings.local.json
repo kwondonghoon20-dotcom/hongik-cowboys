@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "PowerShell(npm create vite@latest . -- --template react)",
+      "PowerShell(Test-Path \"C:\\\\Program Files\\\\nodejs\\\\node.exe\"; Test-Path \"$env:APPDATA\\\\nvm\"; Test-Path \"$env:LOCALAPPDATA\\\\Programs\"; where.exe node 2>&1)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -v)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" -v)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm create vite@latest . -- --template react)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm create vite@latest . -- --template react --yes 2>&1 | Select-Object -Last 40)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm install)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm run dev)",
+      "mcp__Claude_in_Chrome__navigate",
+      "PowerShell(Invoke-WebRequest -Uri http://localhost:5173/ -UseBasicParsing)",
+      "PowerShell($r = Invoke-WebRequest -Uri http://localhost:5173/src/pages/Roster.jsx -UseBasicParsing; $r.StatusCode)",
+      "PowerShell($r = Invoke-WebRequest -Uri http://localhost:5173/src/utils/parseExcel.js -UseBasicParsing; $r.StatusCode)",
+      "PowerShell($r = Invoke-WebRequest -Uri http://localhost:5173/src/utils/parseExcel.js -UseBasicParsing; $r.Content.Substring\\(0,200\\))",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

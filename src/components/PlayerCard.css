@@ -1,0 +1,77 @@
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #242424;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.player-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-scarlet);
+}
+
+.player-photo-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #333;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.player-photo-placeholder svg {
+  width: 40px;
+  height: 40px;
+}
+
+.player-card-number {
+  font-family: var(--font-impact);
+  font-size: 30px;
+  color: var(--color-scarlet);
+}
+
+.player-card-name {
+  font-size: 18px;
+  text-transform: none;
+  margin: 4px 0 10px;
+}
+
+.player-card-positions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.position-badge {
+  font-family: var(--font-impact);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: 3px;
+}
+
+.position-badge.offense {
+  background: var(--color-scarlet);
+  color: var(--color-white);
+}
+
+.position-badge.defense {
+  background: #444;
+  color: #ddd;
+}
+
+.player-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #999;
+  font-size: 13px;
+}

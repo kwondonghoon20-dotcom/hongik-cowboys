@@ -1,0 +1,76 @@
+.page-roster {
+  flex: 1;
+  padding-bottom: 60px;
+}
+
+.page-roster .page-hero {
+  background: linear-gradient(135deg, var(--color-scarlet-dark), var(--color-scarlet));
+  padding: 48px 0;
+  margin-bottom: 36px;
+}
+
+.page-roster .page-hero h1 {
+  font-size: 48px;
+  color: var(--color-white);
+}
+
+.page-roster .page-hero p {
+  margin-top: 8px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.filter-group {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.filter-label {
+  font-family: var(--font-impact);
+  font-size: 14px;
+  color: #888;
+  min-width: 48px;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chip {
+  background: #242424;
+  border: 1px solid #3a3a3a;
+  color: #bbb;
+  font-family: var(--font-impact);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  padding: 6px 14px;
+  border-radius: 16px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-scarlet);
+  color: var(--color-white);
+}
+
+.filter-chip.active {
+  background: var(--color-scarlet);
+  border-color: var(--color-scarlet);
+  color: var(--color-white);
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.empty-note {
+  color: #888;
+  font-size: 14px;
+}

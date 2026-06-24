@@ -1,0 +1,67 @@
+.game-card {
+  display: block;
+  background: #242424;
+  border: 1px solid #333;
+  border-left: 5px solid var(--color-scarlet);
+  border-radius: 4px;
+  padding: 20px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.game-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-scarlet);
+}
+
+.game-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.game-card-type {
+  font-family: var(--font-impact);
+  color: #999;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  border: 1px solid #444;
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+
+.game-card-result {
+  font-family: var(--font-impact);
+  font-size: 14px;
+  padding: 2px 10px;
+  border-radius: 3px;
+}
+
+.game-card-result.win {
+  background: var(--color-scarlet);
+  color: var(--color-white);
+}
+
+.game-card-result.loss {
+  background: #444;
+  color: #ccc;
+}
+
+.game-card-opponent {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.game-card-score {
+  font-family: var(--font-impact);
+  font-size: 36px;
+  color: var(--color-white);
+  margin-bottom: 12px;
+}
+
+.game-card-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #999;
+  font-size: 13px;
+}

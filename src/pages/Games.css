@@ -1,0 +1,55 @@
+.page-games {
+  flex: 1;
+  padding-bottom: 60px;
+}
+
+.page-hero {
+  background: linear-gradient(135deg, var(--color-scarlet-dark), var(--color-scarlet));
+  padding: 48px 0;
+  margin-bottom: 36px;
+}
+
+.page-hero h1 {
+  font-size: 48px;
+  color: var(--color-white);
+}
+
+.page-hero p {
+  margin-top: 8px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.season-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #333;
+}
+
+.season-tab {
+  background: none;
+  border: none;
+  font-family: var(--font-impact);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  color: #999;
+  padding: 10px 18px;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.season-tab:hover {
+  color: var(--color-white);
+}
+
+.season-tab.active {
+  color: var(--color-white);
+  border-bottom-color: var(--color-scarlet);
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
