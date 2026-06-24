@@ -34,7 +34,7 @@ export default function PlayerDetail() {
               <span className="position-badge defense">{player.positions.defense}</span>
             </div>
             <p className="player-hero-meta">
-              {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
+              {player.grade}학년 · {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
               {player.weight ? `${player.weight}kg` : '-'}
             </p>
           </div>

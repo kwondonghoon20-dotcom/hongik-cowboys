@@ -1,0 +1,87 @@
+.coach-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #242424;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 24px 16px;
+  text-align: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.coach-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-scarlet);
+}
+
+.coach-photo-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #333;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.coach-photo-placeholder svg {
+  width: 40px;
+  height: 40px;
+}
+
+.coach-role {
+  font-family: var(--font-impact);
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  color: var(--color-scarlet);
+}
+
+.coach-name {
+  font-size: 19px;
+  text-transform: none;
+  margin: 6px 0 10px;
+}
+
+.coach-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  font-size: 13px;
+}
+
+.ob-badge {
+  font-family: var(--font-impact);
+  font-size: 11px;
+  background: #444;
+  color: #ddd;
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+
+.coach-card.large {
+  padding: 36px 24px;
+}
+
+.coach-card.large .coach-photo-placeholder {
+  width: 112px;
+  height: 112px;
+  margin-bottom: 18px;
+}
+
+.coach-card.large .coach-photo-placeholder svg {
+  width: 60px;
+  height: 60px;
+}
+
+.coach-card.large .coach-role {
+  font-size: 20px;
+}
+
+.coach-card.large .coach-name {
+  font-size: 32px;
+  margin: 8px 0 14px;
+}

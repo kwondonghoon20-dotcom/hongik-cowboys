@@ -1,0 +1,44 @@
+.manager-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #242424;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.manager-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-scarlet);
+}
+
+.manager-photo-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #333;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.manager-photo-placeholder svg {
+  width: 36px;
+  height: 36px;
+}
+
+.manager-name {
+  font-size: 17px;
+  text-transform: none;
+  margin-bottom: 6px;
+}
+
+.manager-year {
+  color: #999;
+  font-size: 13px;
+}

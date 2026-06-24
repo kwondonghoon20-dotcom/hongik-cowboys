@@ -16,7 +16,9 @@ export default function PlayerCard({ player }) {
         <span className="position-badge defense">{player.positions.defense}</span>
       </div>
       <div className="player-card-meta">
-        <span>{player.year}학번</span>
+        <span>
+          {player.grade}학년 · {player.year}학번
+        </span>
         <span>
           {player.height ? `${player.height}cm` : '-'} / {player.weight ? `${player.weight}kg` : '-'}
         </span>

@@ -20,6 +20,51 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+.roster-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #333;
+}
+
+.roster-tab {
+  background: none;
+  border: none;
+  font-family: var(--font-impact);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  color: #999;
+  padding: 10px 18px;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.roster-tab:hover {
+  color: var(--color-white);
+}
+
+.roster-tab.active {
+  color: var(--color-white);
+  border-bottom-color: var(--color-scarlet);
+}
+
+.head-coach-wrap {
+  max-width: 320px;
+  margin: 0 auto 32px;
+}
+
+.coach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.manager-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
 .filter-group {
   display: flex;
   align-items: baseline;
