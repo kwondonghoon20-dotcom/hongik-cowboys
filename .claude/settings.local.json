@@ -22,7 +22,9 @@
       "Bash(git branch *)",
       "Bash(git remote *)",
       "Bash(git push *)",
-      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:5173/src/pages/Roster.jsx\" -UseBasicParsing; $r.StatusCode)"
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:5173/src/pages/Roster.jsx\" -UseBasicParsing; $r.StatusCode)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm install recharts)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:5173/src/utils/parseExcel.js\" -UseBasicParsing; $r.StatusCode)"
     ]
   }
 }

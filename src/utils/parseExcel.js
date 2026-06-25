@@ -167,9 +167,17 @@ function isTouchdown(play) {
   return hasTag(play, 'TOUCHDOWN')
 }
 
+// 실제 스크리미지(공격) 플레이만: RUN/PASS/NOPAS. KICKOFF/PUNT/PAT/FG/RETURN/SACK 등 스페셜팀·기타 플레이는 제외.
+function isScrimmagePlay(play) {
+  return isRun(play) || isPassAttempt(play)
+}
+
 // 턴오버: 수비가 회수한 펌블(FUMBLERECDEF), 인터셉트, 명시적 TURNOVER 태그 기준
 // (FUMBLERECOFF는 오펜스가 자기 펌블을 다시 잡은 경우라 턴오버가 아님)
+// 스크리미지 플레이로 한정하는 이유: 턴오버 직후 RETURN 플레이 행에도 같은 태그가
+// 남아있는 경우가 있어, 회수한 팀 쪽에서 한 번 더 중복 집계되는 것을 막기 위함.
 function isTurnover(play) {
+  if (!isScrimmagePlay(play)) return false
   return hasTag(play, 'FUMBLERECDEF') || hasTag(play, 'INTERCEPT') || hasTag(play, 'TURNOVER')
 }
 
@@ -262,19 +270,102 @@ export function calcPlayerStats(plays, playerNum) {
 }
 
 export function pickRushMvp(plays, teamName) {
+  const top = getTopRushers(plays, teamName, 1)
+  return top[0] ?? null
+}
+
+// CARNum이 없거나(null/빈문자) 0인 경우는 캐리어가 지정되지 않은 플레이이므로 제외.
+// isRun()이 이미 PlayType==='RUN'만 통과시키므로 KICKOFF/RETURN/PAT 등 스페셜팀 플레이는 자동 제외됨.
+function hasValidCarrier(play) {
+  const raw = play.CARNum
+  if (raw == null || raw === '') return false
+  return Number(raw) !== 0
+}
+
+export function getTopRushers(plays, teamName, limit = 5) {
   const yardsByCarrier = new Map()
 
   for (const play of plays) {
-    if (!isRun(play) || play.OffenseTeam !== teamName || play.CARNum == null) continue
+    if (!isRun(play) || play.OffenseTeam !== teamName || !hasValidCarrier(play)) continue
     const num = String(play.CARNum)
     yardsByCarrier.set(num, (yardsByCarrier.get(num) ?? 0) + gain(play))
   }
 
-  let best = null
-  for (const [number, yards] of yardsByCarrier) {
-    if (!best || yards > best.yards) best = { number, yards }
+  return [...yardsByCarrier.entries()]
+    .map(([number, yards]) => ({ number, yards }))
+    .sort((a, b) => b.yards - a.yards)
+    .slice(0, limit)
+}
+
+const QUARTER_LABELS = ['Q1', 'Q2', 'Q3', 'Q4']
+
+export function getQuarterPlayCounts(plays, homeTeam, awayTeam) {
+  return QUARTER_LABELS.map((label, idx) => {
+    const quarterPlays = plays.filter((play) => Number(play.Quarter) === idx + 1 && isScrimmagePlay(play))
+    return {
+      quarter: label,
+      home: quarterPlays.filter((play) => play.OffenseTeam === homeTeam).length,
+      away: quarterPlays.filter((play) => play.OffenseTeam === awayTeam).length,
+    }
+  })
+}
+
+const PLAY_TYPE_CATEGORIES = ['RUN', 'PASS', 'NOPAS', 'KICKOFF', 'PUNT', 'PAT', 'FG', 'RETURN']
+
+export function getPlayTypeDistribution(plays, teamName) {
+  const counts = new Map()
+  for (const play of plays.filter((p) => p.OffenseTeam === teamName)) {
+    const type = playType(play)
+    const key = PLAY_TYPE_CATEGORIES.includes(type) ? type : '기타'
+    counts.set(key, (counts.get(key) ?? 0) + 1)
   }
-  return best
+  return [...counts.entries()].map(([name, value]) => ({ name, value }))
+}
+
+// 패널티는 필드 포지션 변화로 기록되기 때문에 GainYard/ToGoYard가 비어있는 경우가 많고,
+// 실제 야드는 StartYard와 EndYard의 차이로 계산해야 한다.
+function penaltyYards(play) {
+  const start = Number(play.StartYard)
+  const end = Number(play.EndYard)
+  if (Number.isNaN(start) || Number.isNaN(end)) return 0
+  return Math.abs(end - start)
+}
+
+// 패널티는 OffenseTeam이 아니라 SignificantPlay 태그("PENALTY.HOME"/"PENALTY.AWAY")로
+// 어느 팀이 범했는지 직접 표시되므로 OffenseTeam 매칭과 무관하게 태그만으로 집계한다.
+export function getPenaltyStats(plays, homeTeam, awayTeam) {
+  const stats = {
+    home: { team: homeTeam, count: 0, yards: 0 },
+    away: { team: awayTeam, count: 0, yards: 0 },
+  }
+
+  for (const play of plays) {
+    const tags = significantPlayTags(play)
+    const isHomePenalty = tags.includes('PENALTY.HOME')
+    const isAwayPenalty = tags.includes('PENALTY.AWAY')
+    if (!isHomePenalty && !isAwayPenalty) continue
+
+    const yards = penaltyYards(play)
+    console.log('[엑셀 파싱 디버그] 패널티 플레이:', {
+      tags,
+      GainYard: play.GainYard,
+      ToGoYard: play.ToGoYard,
+      StartYard: play.StartYard,
+      EndYard: play.EndYard,
+      적용야드: yards,
+    })
+
+    if (isHomePenalty) {
+      stats.home.count += 1
+      stats.home.yards += yards
+    }
+    if (isAwayPenalty) {
+      stats.away.count += 1
+      stats.away.yards += yards
+    }
+  }
+
+  return stats
 }
 
 export function toPlayLogEntries(plays) {

@@ -1,0 +1,25 @@
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 760px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #242424;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.chart-title {
+  font-size: 16px;
+  text-transform: none;
+  color: #ddd;
+  margin-bottom: 8px;
+}

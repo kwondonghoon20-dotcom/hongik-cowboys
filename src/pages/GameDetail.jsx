@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { getGameById } from '../data/gameRepository'
+import GameCharts from '../components/GameCharts'
 import './GameDetail.css'
 
 const STAT_ROWS = [
@@ -87,6 +88,8 @@ export default function GameDetail() {
             </Link>
           </section>
         )}
+
+        <GameCharts game={game} />
 
         <section className="section">
           <h3 className="section-title">플레이 로그</h3>

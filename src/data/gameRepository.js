@@ -52,6 +52,7 @@ function buildFromUpload(record) {
     },
     mvp: resolveMvp(plays, ourTeam),
     playLog: toPlayLogEntries(plays),
+    plays,
   }
 }
 
