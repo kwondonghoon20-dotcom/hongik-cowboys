@@ -184,21 +184,22 @@ export const players = [
   { id: 'p30', grade: 4, year: 20, number: 66, name: '송준석', positions: { offense: 'OL', defense: 'DL' }, height: 180, weight: 93 },
 ]
 
+// 학번은 앞자리 0이 있는 경우(예: 09학번)도 정상 표시되도록 문자열로 저장.
 export const coaches = [
-  { id: 'c1', role: '감독', name: '류두형', year: 11, isOB: true, isHeadCoach: true },
-  { id: 'c2', role: 'OC (오펜스 코디네이터)', name: '김영현', year: 17, isOB: true },
-  { id: 'c3', role: 'DC (디펜스 코디네이터)', name: '권오윤', year: 17, isOB: true },
-  { id: 'c4', role: 'OL/DL 코치', name: '홍원석', year: 13, isOB: true },
-  { id: 'c5', role: 'LB 코치', name: '정구중', year: 9, isOB: true },
-  { id: 'c6', role: 'LB 코치', name: '김상현', year: 19, isOB: true },
+  { id: 'c1', role: '감독', name: '류두형', year: '11', isOB: true, isHeadCoach: true },
+  { id: 'c2', role: 'OC (오펜스 코디네이터)', name: '김영현', year: '17', isOB: true },
+  { id: 'c3', role: 'DC (디펜스 코디네이터)', name: '권오윤', year: '17', isOB: true },
+  { id: 'c4', role: 'OL/DL 코치', name: '홍원석', year: '13', isOB: true },
+  { id: 'c5', role: 'LB 코치', name: '정구중', year: '09', isOB: true },
+  { id: 'c6', role: 'LB 코치', name: '김상현', year: '19', isOB: true },
 ]
 
 export const managers = [
-  { id: 'm1', name: '노경주', year: 22 },
-  { id: 'm2', name: '김영현', year: 22 },
-  { id: 'm3', name: '이서현', year: 23 },
-  { id: 'm4', name: '김예원', year: 25 },
-  { id: 'm5', name: '홍다희', year: 25 },
-  { id: 'm6', name: '김지민', year: 25 },
-  { id: 'm7', name: '서혜림', year: 25 },
+  { id: 'm1', name: '노경주', year: '22' },
+  { id: 'm2', name: '김영현', year: '22' },
+  { id: 'm3', name: '이서현', year: '23' },
+  { id: 'm4', name: '김예원', year: '25' },
+  { id: 'm5', name: '홍다희', year: '25' },
+  { id: 'm6', name: '김지민', year: '25' },
+  { id: 'm7', name: '서혜림', year: '25' },
 ]
