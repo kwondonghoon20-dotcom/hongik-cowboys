@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 배경 원 -->
+  <circle cx="16" cy="16" r="15" fill="#CC0000"/>
+
+  <!-- 소 뿔 (왼쪽) -->
+  <path d="M9 18 C5 14, 4 8, 7 5 C8 4, 9 4, 10 5 C8 8, 8 13, 11 16 Z" fill="white"/>
+  <!-- 소 뿔 (오른쪽) -->
+  <path d="M23 18 C27 14, 28 8, 25 5 C24 4, 23 4, 22 5 C24 8, 24 13, 21 16 Z" fill="white"/>
+
+  <!-- 얼굴 (헬멧 느낌) -->
+  <ellipse cx="16" cy="20" rx="7" ry="6" fill="white"/>
+
+  <!-- 얼굴 마스크 가로줄 -->
+  <rect x="10" y="19" width="12" height="1.5" rx="0.75" fill="#CC0000"/>
+  <rect x="10" y="22" width="12" height="1.5" rx="0.75" fill="#CC0000"/>
+
+  <!-- 코 -->
+  <ellipse cx="16" cy="23.5" rx="3" ry="1.5" fill="#CC0000"/>
+  <circle cx="14.8" cy="23.5" r="0.6" fill="white"/>
+  <circle cx="17.2" cy="23.5" r="0.6" fill="white"/>
+</svg>
