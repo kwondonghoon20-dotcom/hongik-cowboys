@@ -1,11 +1,17 @@
 import { useMemo, useState } from 'react'
-import { getAllGames } from '../data/gameRepository'
+import { getAllGames, useGlobGames } from '../data/gameRepository'
 import GameCard from '../components/GameCard'
 import ExcelUploader from '../components/ExcelUploader'
 import './Games.css'
 
 export default function Games() {
-  const [games, setGames] = useState(() => getAllGames())
+  const [uploadedGames, setUploadedGames] = useState(() => getAllGames())
+  const globGames = useGlobGames()
+  const games = useMemo(() => {
+    const uploadedIds = new Set(uploadedGames.map((g) => g.id))
+    const deduped = globGames.filter((g) => !uploadedIds.has(g.id))
+    return [...uploadedGames, ...deduped]
+  }, [uploadedGames, globGames])
   const seasons = useMemo(() => [...new Set(games.map((g) => g.season))].sort((a, b) => b - a), [games])
   const [activeSeason, setActiveSeason] = useState(null)
   const currentSeason = activeSeason ?? seasons[0]
@@ -23,7 +29,7 @@ export default function Games() {
         </div>
       </div>
       <div className="container">
-        {import.meta.env.DEV && <ExcelUploader onUploaded={() => setGames(getAllGames())} />}
+        {import.meta.env.DEV && <ExcelUploader onUploaded={() => setUploadedGames(getAllGames())} />}
         <div className="season-tabs">
           {seasons.map((season) => (
             <button

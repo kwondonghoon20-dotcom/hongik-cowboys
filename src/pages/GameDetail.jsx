@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { getGameById } from '../data/gameRepository'
+import { getGameById, useGlobGames } from '../data/gameRepository'
 import { pickOffenseMvp, pickDefenseMvp } from '../utils/parseExcel'
 import { players } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
@@ -22,7 +22,8 @@ const STAT_ROWS = [
 
 export default function GameDetail() {
   const { id } = useParams()
-  const game = getGameById(id)
+  const globGames = useGlobGames()
+  const game = getGameById(id) ?? globGames.find((g) => g.id === id) ?? null
 
   if (!game) {
     return (

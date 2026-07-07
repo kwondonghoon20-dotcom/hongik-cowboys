@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { games as dummyGames, players } from './dummy'
-import { calcTeamStats, toPlayLogEntries, pickRushMvp, OUR_TEAM } from '../utils/parseExcel'
+import { calcTeamStats, toPlayLogEntries, pickRushMvp, parseGame, OUR_TEAM } from '../utils/parseExcel'
 import { getUploadedGames } from './uploadedGames'
 
 function resolveMvp(plays, teamName) {
@@ -54,6 +55,36 @@ function buildFromUpload(record) {
     playLog: toPlayLogEntries(plays),
     plays,
   }
+}
+
+// 빌드 시 src/data/games/*.xlsm 파일을 자동 감지 (asset URL로 import)
+const _globUrls = import.meta.glob('./games/*.xlsm', { query: '?url', import: 'default', eager: true })
+
+// 모듈 로드 시 한 번만 실행되는 Promise — 여러 컴포넌트가 공유
+const _globGamesPromise = (async () => {
+  const entries = Object.entries(_globUrls)
+  if (entries.length === 0) return []
+  const results = await Promise.all(
+    entries.map(async ([path, url]) => {
+      try {
+        const { meta, plays } = await parseGame(url)
+        const filename = path.split('/').pop()
+        return buildFromUpload({ id: `glob-${filename}`, meta, plays })
+      } catch (e) {
+        console.error('[gameRepository] 파싱 실패:', path, e)
+        return null
+      }
+    })
+  )
+  return results.filter(Boolean)
+})()
+
+export function useGlobGames() {
+  const [globGames, setGlobGames] = useState([])
+  useEffect(() => {
+    _globGamesPromise.then(setGlobGames)
+  }, [])
+  return globGames
 }
 
 export function getAllGames() {
