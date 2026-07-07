@@ -132,7 +132,7 @@ function driveResultText(d) {
   const g = d.gainYard ?? 0
   const sign = g >= 0 ? '+' : ''
   if (!d.event) return `${sign}${g}야드`
-  if (d.event === 'TD') return `터치다운! (${d.cumYards}야드 드라이브)`
+  if (d.event === 'TD') return '터치다운!'
   if (d.event === 'FG') return `필드골 성공${d.fgDist ? ` (${d.fgDist}야드)` : ''}`
   if (d.event === 'PUNT') return '펀트'
   if (d.event === 'INTERCEPT') return '인터셉트 턴오버'
