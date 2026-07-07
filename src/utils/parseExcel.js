@@ -269,6 +269,7 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
   // PASS/NOPAS/NOPASS: CAR2Num = QB(패서), CARNum = 리시버/타겟
   // SACK:             CAR2Num = QB (새크 당한 QB)
   const stats = new Map()
+  const posCounts = new Map() // key → { pos: count }
 
   function getOrCreate(number, team) {
     const key = `${number}|${team}`
@@ -279,8 +280,18 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
         recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
         passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
       })
+      posCounts.set(key, {})
     }
     return stats.get(key)
+  }
+
+  function recordPos(number, team, pos) {
+    if (!pos || String(pos).trim() === '') return
+    const key = `${number}|${team}`
+    if (!posCounts.has(key)) posCounts.set(key, {})
+    const m = posCounts.get(key)
+    const p = String(pos).trim().toUpperCase()
+    m[p] = (m[p] ?? 0) + 1
   }
 
   function ok(raw) {
@@ -296,6 +307,7 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       // CARNum = 러셔 (QB 스크램블도 러싱으로 집계)
       if (!ok(play.CARNum)) continue
       const s = getOrCreate(String(play.CARNum), team)
+      recordPos(String(play.CARNum), team, play.CARPos)
       s.rushAttempts += 1
       s.rushYards += gain(play)
       if (isTouchdown(play)) s.rushTD += 1
@@ -304,6 +316,7 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       // CAR2Num = QB (패서, CAR2Pos=QB)
       if (ok(play.CAR2Num)) {
         const s = getOrCreate(String(play.CAR2Num), team)
+        recordPos(String(play.CAR2Num), team, play.CAR2Pos)
         s.passAttempts += 1
         s.completions += 1
         s.passYards += gain(play)
@@ -313,6 +326,7 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       // CARNum = 리시버 (볼 받는 선수, CARPos=WR/RB)
       if (ok(play.CARNum)) {
         const s = getOrCreate(String(play.CARNum), team)
+        recordPos(String(play.CARNum), team, play.CARPos)
         s.recTargets += 1
         s.receptions += 1
         s.recYards += gain(play)
@@ -323,16 +337,19 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       // CAR2Num = QB (불완전 패스, 야드 없음)
       if (ok(play.CAR2Num)) {
         getOrCreate(String(play.CAR2Num), team).passAttempts += 1
+        recordPos(String(play.CAR2Num), team, play.CAR2Pos)
       }
       // CARNum = 타겟 (패스 받지 못한 선수)
       if (ok(play.CARNum)) {
         getOrCreate(String(play.CARNum), team).recTargets += 1
+        recordPos(String(play.CARNum), team, play.CARPos)
       }
 
     } else if (pt === 'SACK') {
       // CAR2Num = QB (새크 당한 QB, 음수 야드)
       if (ok(play.CAR2Num)) {
         const s = getOrCreate(String(play.CAR2Num), team)
+        recordPos(String(play.CAR2Num), team, play.CAR2Pos)
         s.passAttempts += 1
         s.passYards += gain(play)
       }
@@ -340,8 +357,15 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
     // PUNT / KICKOFF / RETURN / PAT / FG / NONE: 제외
   }
 
-  const result = [...stats.values()]
-    .map((s) => ({ ...s, scrimmageYards: s.rushYards + s.recYards + s.passYards }))
+  function mainPosition(key) {
+    const m = posCounts.get(key) ?? {}
+    const entries = Object.entries(m)
+    if (entries.length === 0) return null
+    return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0]
+  }
+
+  const result = [...stats.entries()]
+    .map(([key, s]) => ({ ...s, position: mainPosition(key), scrimmageYards: s.rushYards + s.recYards + s.passYards }))
     .sort((a, b) => b.scrimmageYards - a.scrimmageYards)
 
   return result.slice(0, limit)
@@ -349,6 +373,7 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
 
 export function pickOffenseMvp(plays, teamName) {
   const stats = new Map()
+  const posCounts = new Map()
 
   function getOrCreate(key) {
     if (!stats.has(key)) {
@@ -358,8 +383,17 @@ export function pickOffenseMvp(plays, teamName) {
         passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
         receptions: 0, recYards: 0, recTD: 0,
       })
+      posCounts.set(key, {})
     }
     return stats.get(key)
+  }
+
+  function recordPos(key, pos) {
+    if (!pos || String(pos).trim() === '') return
+    const m = posCounts.get(key) ?? {}
+    const p = String(pos).trim().toUpperCase()
+    m[p] = (m[p] ?? 0) + 1
+    posCounts.set(key, m)
   }
 
   for (const play of plays) {
@@ -369,7 +403,9 @@ export function pickOffenseMvp(plays, teamName) {
     if (pt === 'RUN') {
       const raw = play.CARNum
       if (raw == null || raw === '' || Number(raw) === 0) continue
-      const s = getOrCreate(String(raw))
+      const key = String(raw)
+      const s = getOrCreate(key)
+      recordPos(key, play.CARPos)
       s.rushAttempts += 1
       s.rushYards += gain(play)
       if (isTouchdown(play)) s.rushTD += 1
@@ -377,7 +413,9 @@ export function pickOffenseMvp(plays, teamName) {
       // CAR2Num = QB (패서)
       const qbRaw = play.CAR2Num
       if (qbRaw != null && qbRaw !== '' && Number(qbRaw) !== 0) {
-        const s = getOrCreate(String(qbRaw))
+        const key = String(qbRaw)
+        const s = getOrCreate(key)
+        recordPos(key, play.CAR2Pos)
         s.passAttempts += 1
         if (isCompletePass(play)) {
           s.completions += 1
@@ -389,7 +427,9 @@ export function pickOffenseMvp(plays, teamName) {
       // CARNum = 리시버
       const recRaw = play.CARNum
       if (recRaw != null && recRaw !== '' && Number(recRaw) !== 0 && isCompletePass(play)) {
-        const s = getOrCreate(String(recRaw))
+        const key = String(recRaw)
+        const s = getOrCreate(key)
+        recordPos(key, play.CARPos)
         s.receptions += 1
         s.recYards += gain(play)
         if (isTouchdown(play)) s.recTD += 1
@@ -397,22 +437,39 @@ export function pickOffenseMvp(plays, teamName) {
     }
   }
 
+  function mainPosition(key) {
+    const m = posCounts.get(key) ?? {}
+    const entries = Object.entries(m)
+    if (entries.length === 0) return null
+    return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0]
+  }
+
   let best = null
-  for (const s of stats.values()) {
+  for (const [key, s] of stats.entries()) {
     const total = s.rushYards + s.recYards + s.passYards
-    if (!best || total > best.total) best = { ...s, total }
+    if (!best || total > best.total) best = { ...s, position: mainPosition(key), total }
   }
   return best
 }
 
 export function pickDefenseMvp(plays, teamName) {
   const stats = new Map()
+  const posCounts = new Map()
 
   function getOrCreate(num) {
     if (!stats.has(num)) {
       stats.set(num, { number: num, tackles: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 })
+      posCounts.set(num, {})
     }
     return stats.get(num)
+  }
+
+  function recordPos(key, pos) {
+    if (!pos || String(pos).trim() === '') return
+    const m = posCounts.get(key) ?? {}
+    const p = String(pos).trim().toUpperCase()
+    m[p] = (m[p] ?? 0) + 1
+    posCounts.set(key, m)
   }
 
   for (const play of plays) {
@@ -420,10 +477,12 @@ export function pickDefenseMvp(plays, teamName) {
 
     const tags = significantPlayTags(play)
 
-    for (const rawKey of ['TKLNum', 'TKL2Num']) {
+    for (const [rawKey, posKey] of [['TKLNum', 'TKLPos'], ['TKL2Num', 'TKL2Pos']]) {
       const raw = play[rawKey]
       if (raw == null || raw === '' || Number(raw) === 0) continue
-      const s = getOrCreate(String(raw))
+      const key = String(raw)
+      const s = getOrCreate(key)
+      recordPos(key, play[posKey])
       s.tackles += 1
       // TKLNum(1차 태클러)에만 특수 태그 집계
       if (rawKey === 'TKLNum') {
@@ -435,12 +494,19 @@ export function pickDefenseMvp(plays, teamName) {
     }
   }
 
+  function mainPosition(key) {
+    const m = posCounts.get(key) ?? {}
+    const entries = Object.entries(m)
+    if (entries.length === 0) return null
+    return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0]
+  }
+
   let best = null
-  for (const s of stats.values()) {
+  for (const [key, s] of stats.entries()) {
     const turnoversForced = s.interceptions + s.fumbleRec
     const score = s.tackles + turnoversForced * 2 + s.sacks
     if (!best || score > best.score) {
-      best = { ...s, turnoversForced, score }
+      best = { ...s, position: mainPosition(key), turnoversForced, score }
     }
   }
   return best

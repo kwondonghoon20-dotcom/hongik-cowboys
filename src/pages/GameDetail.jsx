@@ -98,7 +98,7 @@ export default function GameDetail() {
                 {offMvp && (
                   <Link to={offPlayer ? `/roster/${offPlayer.id}` : '#'} className="mvp-card">
                     <div className="mvp-badge">⚔️ 오펜스</div>
-                    <div className="mvp-number">#{offMvp.number}</div>
+                    <div className="mvp-number">#{offMvp.number}{offMvp.position ? ` · ${offMvp.position}` : ''}</div>
                     <div className="mvp-info">
                       <div className="mvp-stats">
                         {offMvp.passYards > 0 && (
@@ -118,7 +118,7 @@ export default function GameDetail() {
                 {defMvp && (
                   <Link to={defPlayer ? `/roster/${defPlayer.id}` : '#'} className="mvp-card">
                     <div className="mvp-badge">🛡️ 디펜스</div>
-                    <div className="mvp-number">#{defMvp.number}</div>
+                    <div className="mvp-number">#{defMvp.number}{defMvp.position ? ` · ${defMvp.position}` : ''}</div>
                     <div className="mvp-info">
                       <div className="mvp-stats">
                         <div>Tackles: {defMvp.tackles}</div>

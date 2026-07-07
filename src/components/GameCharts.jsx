@@ -36,7 +36,7 @@ function PlayerTooltip({ active, payload, topPlayers }) {
   if (!p) return null
 
   const {
-    number, team,
+    number, team, position,
     rushAttempts, rushYards, rushTD,
     receptions, recYards, recTD,
     passAttempts, completions, passYards, passTD, passINT,
@@ -56,7 +56,7 @@ function PlayerTooltip({ active, payload, topPlayers }) {
       padding: 12, fontSize: 13, color: '#ddd', minWidth: 240,
     }}>
       <div style={{ color: SCARLET, fontWeight: 700, fontSize: 15, marginBottom: 8 }}>
-        #{number} <span style={{ color: '#aaa', fontWeight: 400 }}>({abbr})</span>
+        #{number}{position ? ` · ${position}` : ''} <span style={{ color: '#aaa', fontWeight: 400 }}>({abbr})</span>
       </div>
       <div style={divider} />
       <table style={{ borderCollapse: 'collapse' }}>
