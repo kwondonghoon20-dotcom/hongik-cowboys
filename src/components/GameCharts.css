@@ -1,3 +1,116 @@
+/* ── 경기 흐름 섹션 ─────────────────────────────────────── */
+
+.game-flow-layout {
+  display: grid;
+  grid-template-columns: 60% 1fr;
+  gap: 20px;
+}
+
+.flow-chart-wrapper {
+  min-width: 0;
+}
+
+.momentum-legend {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Key Stats */
+.key-stats-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.possession-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.possession-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.possession-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #333;
+}
+
+.possession-fill.home {
+  background: #CC0000;
+  transition: width 0.3s;
+}
+
+.possession-fill.away {
+  background: #555;
+  transition: width 0.3s;
+}
+
+.possession-pct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.key-stats-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid #333;
+}
+
+.key-stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.ks-home {
+  color: #CC0000;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.ks-label {
+  color: #888;
+  font-size: 11px;
+  text-align: center;
+  padding: 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ks-away {
+  color: #aaa;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .game-flow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 기존 차트 그리드 ─────────────────────────────────── */
+
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -145,14 +145,15 @@ function hasTag(play, tag) {
   return significantPlayTags(play).includes(tag)
 }
 
-// 실제 PlayType enum: RUN, PASS, NOPAS, KICKOFF, PUNT, PAT, TPT, FG, RETURN, SACK, NONE
+// 실제 PlayType enum: RUN, PASS, NOPAS, NOPASS, KICKOFF, PUNT, PAT, TPT, FG, RETURN, SACK, NONE
 function isRun(play) {
   return playType(play) === 'RUN'
 }
 
-// PASS = 성공, NOPAS = 실패(시도이지만 게인 없음) — 둘 다 패스 시도로 취급
+// PASS = 성공, NOPAS/NOPASS = 실패(시도이지만 게인 없음) — 모두 패스 시도로 취급
 function isPassAttempt(play) {
-  return playType(play) === 'PASS' || playType(play) === 'NOPAS'
+  const pt = playType(play)
+  return pt === 'PASS' || pt === 'NOPAS' || pt === 'NOPASS'
 }
 
 function isCompletePass(play) {
@@ -193,15 +194,22 @@ function gain(play) {
   return Number(play.GainYard ?? 0) || 0
 }
 
+function isOffensePlay(play) {
+  return isRun(play) || isPassAttempt(play) || isSackPlay(play)
+}
+
 export function calcTeamStats(plays, teamName) {
   const offensePlays = plays.filter((play) => play.OffenseTeam === teamName)
-
-  const totalYards = offensePlays.reduce((sum, play) => sum + gain(play), 0)
+  const totalYards = offensePlays.filter(isOffensePlay).reduce((sum, play) => sum + gain(play), 0)
   const rushYards = offensePlays.filter(isRun).reduce((sum, play) => sum + gain(play), 0)
-  const passYards = offensePlays.filter(isPassAttempt).reduce((sum, play) => sum + gain(play), 0)
+  const passYards = offensePlays
+    .filter((play) => isPassAttempt(play) || isSackPlay(play))
+    .reduce((sum, play) => sum + gain(play), 0)
   const turnovers = offensePlays.filter(isTurnover).length
 
-  const thirdDownPlays = offensePlays.filter((play) => Number(play.Down) === 3)
+  const thirdDownPlays = offensePlays.filter(
+    (play) => Number(play.Down) === 3 && isOffensePlay(play),
+  )
   const thirdDownConversions = thirdDownPlays.filter(
     (play) => gain(play) >= Number(play.ToGoYard ?? Infinity) || isTouchdown(play),
   )
@@ -310,7 +318,7 @@ export function getQuarterPlayCounts(plays, homeTeam, awayTeam) {
   })
 }
 
-const PLAY_TYPE_CATEGORIES = ['RUN', 'PASS', 'NOPAS', 'KICKOFF', 'PUNT', 'PAT', 'FG', 'RETURN']
+const PLAY_TYPE_CATEGORIES = ['RUN', 'PASS', 'NOPAS', 'NOPASS', 'KICKOFF', 'PUNT', 'PAT', 'FG', 'RETURN']
 
 export function getPlayTypeDistribution(plays, teamName) {
   const counts = new Map()
@@ -383,6 +391,241 @@ export function toPlayLogEntries(plays) {
       yards: gain(play),
     }
   })
+}
+
+/**
+ * 드라이브 전진 거리 차트용 데이터.
+ * - 각 플레이의 StartYard + StartYardLocation으로 실제 필드 포지션 계산
+ * - OWN N → fieldPos = N, OPP N → fieldPos = 100 - N
+ * - 홈팀 드라이브: 양수 방향, 어웨이팀 드라이브: 음수 방향
+ * - 드라이브 종료 후 null 구분자 삽입
+ */
+function fieldPos(play) {
+  const loc = String(play.StartYardLocation ?? '').trim().toUpperCase()
+  const yard = Number(play.StartYard ?? 0)
+  return loc === 'OPP' ? 100 - yard : yard
+}
+
+export function getDriveMomentum(plays, homeTeam, awayTeam) {
+  const relevant = plays.filter((p) => {
+    const pt = playType(p)
+    return isScrimmagePlay(p) || pt === 'FG' || pt === 'PUNT'
+  })
+
+  // 드라이브 그룹핑: 공격팀 전환 또는 종결 이벤트에서 새 드라이브
+  const drives = []
+  let current = null
+
+  for (const play of relevant) {
+    const team = play.OffenseTeam
+    const tags = significantPlayTags(play)
+    const isDriveEnder =
+      tags.includes('TOUCHDOWN') ||
+      playType(play) === 'FG' ||
+      playType(play) === 'PUNT' ||
+      tags.includes('FUMBLERECDEF') ||
+      tags.includes('INTERCEPT') ||
+      tags.includes('TURNOVER')
+
+    if (!current || current.team !== team) {
+      current = { team, plays: [] }
+      drives.push(current)
+    }
+    current.plays.push(play)
+    if (isDriveEnder) current = null
+  }
+
+  // 4th Down 실패 여부 사전 계산:
+  // 실제 4th Down 플레이이고, 종결 이벤트 없이 팀이 바뀌었으며, 쿼터가 같은 경우만 해당
+  // (쿼터 종료로 끊기는 경우는 sameQuarter=false → is4thDownFail=false)
+  drives.forEach((drive, driveIdx) => {
+    const nextDrive = drives[driveIdx + 1]
+    const lastPlay = drive.plays[drive.plays.length - 1]
+    if (!lastPlay || !nextDrive) return
+    const lastTags = significantPlayTags(lastPlay)
+    const lastPt = playType(lastPlay)
+    const hasTerminal =
+      lastTags.includes('TOUCHDOWN') || lastPt === 'FG' || lastPt === 'PUNT' ||
+      lastTags.includes('FUMBLERECDEF') || lastTags.includes('INTERCEPT') || lastTags.includes('TURNOVER')
+    const teamChanged = nextDrive.team !== drive.team
+    const sameQuarter = Number(nextDrive.plays[0]?.Quarter) === Number(lastPlay.Quarter)
+    const isActual4thDown = Number(lastPlay.Down) === 4
+    drive.is4thDownFail = !hasTerminal && teamChanged && sameQuarter && isActual4thDown
+  })
+
+  // 차트 포인트 생성: 플레이의 실제 필드 포지션 기반 + null 구분자
+  // - OWN N → fieldPos = N, OPP N → fieldPos = 100 - N
+  // - 홈팀: 양수, 어웨이팀: 음수
+  const chartPoints = []
+  const quarterBoundaries = []
+  let pointIndex = 0
+  let lastQuarter = null
+
+  drives.forEach((drive, driveIdx) => {
+    const isHome = drive.team === homeTeam
+    const firstPlay = drive.plays[0]
+
+    // 드라이브 시작점: 첫 플레이의 실제 필드 포지션
+    const firstQ = Number(firstPlay?.Quarter ?? 1)
+    if (firstQ !== lastQuarter) {
+      quarterBoundaries.push({ index: pointIndex, quarter: firstQ })
+      lastQuarter = firstQ
+    }
+    const startFieldPos = firstPlay ? fieldPos(firstPlay) : 0
+    const startDisplay = isHome ? startFieldPos : -startFieldPos
+    chartPoints.push({
+      index: pointIndex,
+      home: isHome ? startDisplay : null,
+      away: isHome ? null : startDisplay,
+      event: null,
+      quarter: firstQ,
+      driveNum: driveIdx + 1,
+    })
+    pointIndex++
+
+    drive.plays.forEach((play, playIdx) => {
+      const q = Number(play.Quarter)
+      if (q !== lastQuarter) {
+        quarterBoundaries.push({ index: pointIndex, quarter: q })
+        lastQuarter = q
+      }
+
+      const pt = playType(play)
+      const isLastPlay = playIdx === drive.plays.length - 1
+      const tags = significantPlayTags(play)
+
+      let event = null
+      if (isLastPlay) {
+        if (tags.includes('TOUCHDOWN')) event = 'TD'
+        else if (pt === 'FG') event = 'FG'
+        else if (tags.includes('INTERCEPT')) event = 'INTERCEPT'
+        else if (tags.includes('FUMBLERECDEF')) event = 'FUMBLE'
+        else if (tags.includes('TURNOVER')) event = 'TURNOVER'
+        else if (pt === 'PUNT') event = 'PUNT'
+        else if (drive.is4thDownFail) event = 'DOWN_FAIL'
+      }
+
+      // TD: 마지막 포인트를 ±100으로 강제 설정
+      const pos = event === 'TD' ? 100 : fieldPos(play)
+      const displayValue = isHome ? pos : -pos
+
+      // FG 거리: OPP {n}야드 기준 → n + 17야드 (스냅 + 엔드존)
+      const fgDist = pt === 'FG'
+        ? (() => {
+            const loc = String(play.StartYardLocation ?? '').trim().toUpperCase()
+            const yard = Number(play.StartYard ?? 0)
+            return loc === 'OPP' ? yard + 17 : Math.max(0, (100 - yard) + 17)
+          })()
+        : null
+
+      chartPoints.push({
+        index: pointIndex,
+        home: isHome ? displayValue : null,
+        away: isHome ? null : displayValue,
+        event,
+        quarter: q,
+        driveNum: driveIdx + 1,
+        fieldPosition: pos,
+        gainYard: gain(play),
+        playTypeStr: pt,
+        fgDist,
+      })
+      pointIndex++
+    })
+
+    // 드라이브 간 null 구분자
+    chartPoints.push({ index: pointIndex, home: null, away: null, event: null, quarter: null })
+    pointIndex++
+  })
+
+  return { points: chartPoints, quarterBoundaries }
+}
+
+/**
+ * Key Stats 섹션용 집계.
+ * 볼 포제션(스크리미지 플레이 수 비율), TD, 레드존 진입, 3rd Down, 턴오버를 반환한다.
+ */
+export function getKeyStats(plays, homeTeam, awayTeam) {
+  const homeStats = calcTeamStats(plays, homeTeam)
+  const awayStats = calcTeamStats(plays, awayTeam)
+
+  const homeScrimmage = plays.filter((p) => p.OffenseTeam === homeTeam && isScrimmagePlay(p)).length
+  const awayScrimmage = plays.filter((p) => p.OffenseTeam === awayTeam && isScrimmagePlay(p)).length
+  const total = homeScrimmage + awayScrimmage || 1
+
+  // PAT 플레이는 TD 집계에서 제외 (PAT도 TOUCHDOWN 태그를 가질 수 있음)
+  const isTDPlay = (p) => isTouchdown(p) && playType(p) !== 'PAT'
+  const homeTDPlays = plays.filter((p) => p.OffenseTeam === homeTeam && isTDPlay(p))
+  const awayTDPlays = plays.filter((p) => p.OffenseTeam === awayTeam && isTDPlay(p))
+  console.log('[Key Stats 디버그] 홈팀 TD 플레이 (총', homeTDPlays.length, '개):', homeTDPlays.map((p) => ({
+    ClipKey: p.ClipKey, Quarter: p.Quarter, PlayType: p.PlayType,
+    OffenseTeam: p.OffenseTeam,
+    SP: p.SignificantPlay, SP2: p.SignificantPlay2, SP3: p.SignificantPlay3, SP4: p.SignificantPlay4,
+  })))
+  console.log('[Key Stats 디버그] 어웨이팀 TD 플레이 (총', awayTDPlays.length, '개):', awayTDPlays.map((p) => ({
+    ClipKey: p.ClipKey, Quarter: p.Quarter, PlayType: p.PlayType,
+    OffenseTeam: p.OffenseTeam,
+    SP: p.SignificantPlay, SP2: p.SignificantPlay2, SP3: p.SignificantPlay3, SP4: p.SignificantPlay4,
+  })))
+  // TOUCHDOWN 태그가 있는 모든 플레이 (PAT 포함) — 혹시 누락된 플레이 확인용
+  const allTDCandidates = plays.filter(isTouchdown)
+  console.log('[Key Stats 디버그] TOUCHDOWN 태그 전체 (PAT 포함, 총', allTDCandidates.length, '개):',
+    allTDCandidates.map((p) => ({
+      ClipKey: p.ClipKey, PlayType: p.PlayType, OffenseTeam: p.OffenseTeam,
+      SP: p.SignificantPlay, SP2: p.SignificantPlay2,
+    }))
+  )
+  const homeTDs = homeTDPlays.length
+  const awayTDs = awayTDPlays.length
+
+  // 레드존: 스크리미지 플레이에서만, 드라이브당 최대 1회 카운트
+  // - EndYardLocation=OPP && EndYard<=20  또는  StartYardLocation=OPP && StartYard<=20
+  const isRedZonePlay = (p) => {
+    if (!isOffensePlay(p)) return false
+    const endLoc = String(p.EndYardLocation ?? '').trim().toUpperCase()
+    const startLoc = String(p.StartYardLocation ?? '').trim().toUpperCase()
+    return (endLoc === 'OPP' && Number(p.EndYard) <= 20) ||
+           (startLoc === 'OPP' && Number(p.StartYard) <= 20)
+  }
+
+  // 드라이브당 1회 카운트: 팀별로 플레이를 순회하며 드라이브 전환을 감지
+  function countRedZoneDrives(teamName) {
+    const teamPlays = plays.filter((p) => p.OffenseTeam === teamName)
+    let count = 0
+    let inRedZoneDrive = false
+    let prevDriveKey = null
+
+    for (const p of teamPlays) {
+      // 드라이브 식별: Quarter + 드라이브 번호가 없으므로 연속 플레이를 기준으로
+      // 레드존 진입 후 레드존 밖으로 나가면 다음 진입을 새 드라이브로 취급하지 않으나,
+      // 실제로는 드라이브가 바뀌면 레드존에서 벗어남. isScrimmagePlay 흐름 상 드라이브
+      // 내에서 레드존을 벗어나는 경우는 없으므로, 첫 진입만 카운트하면 충분.
+      //
+      // 단순 구현: 레드존 진입 플레이가 나올 때마다 직전 플레이가 레드존이 아니었으면 카운트
+      const inRZ = isRedZonePlay(p)
+      if (inRZ && !inRedZoneDrive) {
+        count++
+        inRedZoneDrive = true
+      } else if (!inRZ && isOffensePlay(p)) {
+        inRedZoneDrive = false
+      }
+    }
+    return count
+  }
+
+  const homeRedZone = countRedZoneDrives(homeTeam)
+  const awayRedZone = countRedZoneDrives(awayTeam)
+
+  return {
+    possession: {
+      home: Math.round((homeScrimmage / total) * 100),
+      away: Math.round((awayScrimmage / total) * 100),
+    },
+    touchdowns: { home: homeTDs, away: awayTDs },
+    redZone: { home: homeRedZone, away: awayRedZone },
+    thirdDown: { home: homeStats.thirdDown, away: awayStats.thirdDown },
+    turnovers: { home: homeStats.turnovers, away: awayStats.turnovers },
+  }
 }
 
 const GAME_FILE_PATTERN = /^HIcowboys_(\d{8})_vs_(.+)\.xlsm$/i
