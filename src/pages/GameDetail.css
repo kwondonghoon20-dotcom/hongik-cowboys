@@ -109,6 +109,18 @@
   white-space: nowrap;
 }
 
+.mvp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .mvp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .mvp-card {
   display: flex;
   align-items: center;
@@ -118,7 +130,16 @@
   border-left: 5px solid var(--color-scarlet);
   border-radius: 4px;
   padding: 20px 24px;
-  max-width: 480px;
+  position: relative;
+}
+
+.mvp-badge {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.5px;
 }
 
 .mvp-number {
@@ -126,6 +147,20 @@
   font-size: 40px;
   color: var(--color-scarlet);
   min-width: 64px;
+}
+
+.mvp-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.mvp-total {
+  color: var(--color-scarlet);
+  font-weight: 600;
+  margin-top: 4px;
 }
 
 .mvp-info h3 {

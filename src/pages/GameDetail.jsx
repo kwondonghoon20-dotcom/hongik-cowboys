@@ -1,7 +1,13 @@
 import { useParams, Link } from 'react-router-dom'
 import { getGameById } from '../data/gameRepository'
+import { pickOffenseMvp, pickDefenseMvp } from '../utils/parseExcel'
+import { players } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
 import './GameDetail.css'
+
+function findPlayer(number) {
+  return players.find((p) => String(p.number) === String(number))
+}
 
 const STAT_ROWS = [
   { key: 'totalYards', label: '총 오펜스 야드' },
@@ -9,6 +15,9 @@ const STAT_ROWS = [
   { key: 'passYards', label: '패스 야드' },
   { key: 'turnovers', label: '턴오버' },
   { key: 'thirdDown', label: '3rd Down 성공률' },
+  { key: 'totalPlays', label: '총 플레이 수' },
+  { key: 'rushAttempts', label: '러시 시도' },
+  { key: 'passAttempts', label: '패스 시도' },
 ]
 
 export default function GameDetail() {
@@ -75,19 +84,58 @@ export default function GameDetail() {
           </table>
         </section>
 
-        {game.mvp && (
-          <section className="section">
-            <h3 className="section-title">이 경기의 MVP</h3>
-            <Link to={game.mvp.id ? `/roster/${game.mvp.id}` : '#'} className="mvp-card">
-              <div className="mvp-number">#{game.mvp.number}</div>
-              <div className="mvp-info">
-                <h3>{game.mvp.name}</h3>
-                <span className="mvp-position">{game.mvp.position}</span>
-                <p className="mvp-highlight">{game.mvp.highlight}</p>
+        {Array.isArray(game.plays) && game.plays.length > 0 && (() => {
+          const offMvp = pickOffenseMvp(game.plays, game.homeTeam)
+          const defMvp = pickDefenseMvp(game.plays, game.homeTeam)
+          const offPlayer = offMvp ? findPlayer(offMvp.number) : null
+          const defPlayer = defMvp ? findPlayer(defMvp.number) : null
+
+          return (
+            <section className="section">
+              <h3 className="section-title">이 경기의 MVP</h3>
+              <div className="mvp-grid">
+                {offMvp && (
+                  <Link to={offPlayer ? `/roster/${offPlayer.id}` : '#'} className="mvp-card">
+                    <div className="mvp-badge">⚔️ 오펜스</div>
+                    <div className="mvp-number">#{offMvp.number}</div>
+                    <div className="mvp-info">
+                      <div className="mvp-stats">
+                        {offMvp.passYards > 0 && (
+                          <div>{offMvp.completions}/{offMvp.passAttempts} comp · {offMvp.passYards} yds · {offMvp.passTD} TD · {offMvp.passINT} INT</div>
+                        )}
+                        {offMvp.rushYards > 0 && (
+                          <div>{offMvp.rushAttempts} car · {offMvp.rushYards} yds · {offMvp.rushTD} TD</div>
+                        )}
+                        {offMvp.recYards > 0 && (
+                          <div>{offMvp.receptions} rec · {offMvp.recYards} yds · {offMvp.recTD} TD</div>
+                        )}
+                        <div className="mvp-total">Total {offMvp.total} yds</div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                {defMvp && (
+                  <Link to={defPlayer ? `/roster/${defPlayer.id}` : '#'} className="mvp-card">
+                    <div className="mvp-badge">🛡️ 디펜스</div>
+                    <div className="mvp-number">#{defMvp.number}</div>
+                    <div className="mvp-info">
+                      <div className="mvp-stats">
+                        <div>Tackles: {defMvp.tackles}</div>
+                        {defMvp.sacks > 0 && <div>Sacks: {defMvp.sacks}</div>}
+                        {defMvp.tfl > 0 && <div>TFL: {defMvp.tfl}</div>}
+                        {defMvp.interceptions > 0 && <div>Interceptions: {defMvp.interceptions}</div>}
+                        {defMvp.fumbleRec > 0 && <div>Fumble Recoveries: {defMvp.fumbleRec}</div>}
+                        {defMvp.turnoversForced > 0 && (
+                          <div className="mvp-total">Turnovers Forced: {defMvp.turnoversForced}</div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                )}
               </div>
-            </Link>
-          </section>
-        )}
+            </section>
+          )
+        })()}
 
         <GameCharts game={game} />
 

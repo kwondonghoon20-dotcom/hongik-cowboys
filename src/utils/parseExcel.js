@@ -5,10 +5,20 @@ const OUR_TEAM_ALIASES = ['홍익', 'hongik', 'hicowboys', 'hi cowboys']
 
 const META_KEYS = ['GameKey', 'Date', 'Type', 'Score', 'Region', 'Location', 'Home', 'Away']
 
+const TEAM_NAME_MAP = {
+  samsungbt: 'SamsungBluestorm',
+  samsungbluestorm: 'SamsungBluestorm',
+  gunwipheonix: 'GunwiPheonix',
+  gunwiphonix: 'GunwiPheonix',
+}
+
 function normalizeTeamName(name) {
   if (!name) return name
-  const lower = String(name).toLowerCase()
-  return OUR_TEAM_ALIASES.some((alias) => lower.includes(alias)) ? OUR_TEAM : String(name).trim()
+  const trimmed = String(name).trim()
+  const lower = trimmed.toLowerCase()
+  if (OUR_TEAM_ALIASES.some((alias) => lower.includes(alias))) return OUR_TEAM
+  const key = lower.replace(/[^a-z0-9]/g, '')
+  return TEAM_NAME_MAP[key] ?? trimmed
 }
 
 async function toArrayBuffer(input) {
@@ -61,7 +71,6 @@ export async function parseGameMeta(input) {
 
   const allRows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
   const rows = allRows.slice(0, META_SCAN_ROW_COUNT)
-  console.log('[엑셀 파싱 디버그] Index 시트 스캔 대상 행:', rows)
 
   const raw = {}
   for (const row of rows) {
@@ -79,7 +88,6 @@ export async function parseGameMeta(input) {
   const score = parseScore(raw.Score)
   const home = normalizeTeamName(raw.Home)
   const away = normalizeTeamName(raw.Away)
-
   return {
     gameKey: raw.GameKey ?? null,
     date,
@@ -111,12 +119,6 @@ export async function parsePlays(input, meta) {
 
   const resolvedMeta = meta ?? (await parseGameMeta(workbook))
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: null })
-
-  const uniquePlayTypes = [...new Set(rows.map((row) => row.PlayType))]
-  const uniqueOffenseTeams = [...new Set(rows.map((row) => row.OffenseTeam))]
-  console.log('[엑셀 파싱 디버그] PlayType 값 목록:', uniquePlayTypes)
-  console.log('[엑셀 파싱 디버그] OffenseTeam 값 목록(원본):', uniqueOffenseTeams)
-  console.log('[엑셀 파싱 디버그] meta.home / meta.away:', resolvedMeta.home, '/', resolvedMeta.away)
 
   return rows.map((row) => ({
     ...row,
@@ -207,6 +209,10 @@ export function calcTeamStats(plays, teamName) {
     .reduce((sum, play) => sum + gain(play), 0)
   const turnovers = offensePlays.filter(isTurnover).length
 
+  const rushAttempts = offensePlays.filter(isRun).length
+  const passAttempts = offensePlays.filter(isPassAttempt).length
+  const totalPlays = rushAttempts + passAttempts
+
   const thirdDownPlays = offensePlays.filter(
     (play) => Number(play.Down) === 3 && isOffensePlay(play),
   )
@@ -219,62 +225,13 @@ export function calcTeamStats(plays, teamName) {
     rushYards,
     passYards,
     turnovers,
+    rushAttempts,
+    passAttempts,
+    totalPlays,
     thirdDownAttempts: thirdDownPlays.length,
     thirdDownConversions: thirdDownConversions.length,
-    // GameDetail의 STAT_ROWS가 참조하는 키 (dummy 데이터와 동일한 형식: "성공/시도")
     thirdDown: `${thirdDownConversions.length}/${thirdDownPlays.length}`,
   }
-}
-
-export function calcPlayerStats(plays, playerNum) {
-  const num = String(playerNum)
-
-  const rushing = { attempts: 0, yards: 0, td: 0 }
-  const passing = { attempts: 0, completions: 0, yards: 0, td: 0, interceptions: 0 }
-  const receiving = { receptions: 0, yards: 0, td: 0 }
-  const defense = { tackles: 0, sacks: 0, tfl: 0, interceptions: 0 }
-
-  for (const play of plays) {
-    const carNum = play.CARNum != null ? String(play.CARNum) : null
-    const car2Num = play.CAR2Num != null ? String(play.CAR2Num) : null
-    const tklNum = play.TKLNum != null ? String(play.TKLNum) : null
-    const tkl2Num = play.TKL2Num != null ? String(play.TKL2Num) : null
-
-    if (isRun(play) && carNum === num) {
-      rushing.attempts += 1
-      rushing.yards += gain(play)
-      if (isTouchdown(play)) rushing.td += 1
-    }
-
-    if (isPassAttempt(play)) {
-      if (carNum === num) {
-        passing.attempts += 1
-        if (isCompletePass(play)) {
-          passing.completions += 1
-          passing.yards += gain(play)
-          if (isTouchdown(play)) passing.td += 1
-        }
-        if (isInterception(play)) passing.interceptions += 1
-      }
-      if (car2Num === num && isCompletePass(play)) {
-        receiving.receptions += 1
-        receiving.yards += gain(play)
-        if (isTouchdown(play)) receiving.td += 1
-      }
-    }
-
-    if (tklNum === num || tkl2Num === num) {
-      defense.tackles += 1
-      if (isSackPlay(play)) defense.sacks += 1
-      if (isTFL(play)) defense.tfl += 1
-    }
-
-    if (isInterception(play) && (tklNum === num || tkl2Num === num)) {
-      defense.interceptions += 1
-    }
-  }
-
-  return { rushing, passing, receiving, defense }
 }
 
 export function pickRushMvp(plays, teamName) {
@@ -305,29 +262,188 @@ export function getTopRushers(plays, teamName, limit = 5) {
     .slice(0, limit)
 }
 
-const QUARTER_LABELS = ['Q1', 'Q2', 'Q3', 'Q4']
 
-export function getQuarterPlayCounts(plays, homeTeam, awayTeam) {
-  return QUARTER_LABELS.map((label, idx) => {
-    const quarterPlays = plays.filter((play) => Number(play.Quarter) === idx + 1 && isScrimmagePlay(play))
-    return {
-      quarter: label,
-      home: quarterPlays.filter((play) => play.OffenseTeam === homeTeam).length,
-      away: quarterPlays.filter((play) => play.OffenseTeam === awayTeam).length,
+export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
+  // 확정 규칙 (CARPos/CAR2Pos 검증 기반):
+  // RUN:              CARNum = 러셔 (QB 스크램블 포함)
+  // PASS/NOPAS/NOPASS: CAR2Num = QB(패서), CARNum = 리시버/타겟
+  // SACK:             CAR2Num = QB (새크 당한 QB)
+  const stats = new Map()
+
+  function getOrCreate(number, team) {
+    const key = `${number}|${team}`
+    if (!stats.has(key)) {
+      stats.set(key, {
+        number, team, isHome: team === homeTeam,
+        rushAttempts: 0, rushYards: 0, rushTD: 0,
+        recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
+        passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
+      })
     }
-  })
+    return stats.get(key)
+  }
+
+  function ok(raw) {
+    return raw != null && raw !== '' && Number(raw) !== 0
+  }
+
+  for (const play of plays) {
+    const pt = playType(play)
+    const team = play.OffenseTeam
+    if (team !== homeTeam && team !== awayTeam) continue
+
+    if (pt === 'RUN') {
+      // CARNum = 러셔 (QB 스크램블도 러싱으로 집계)
+      if (!ok(play.CARNum)) continue
+      const s = getOrCreate(String(play.CARNum), team)
+      s.rushAttempts += 1
+      s.rushYards += gain(play)
+      if (isTouchdown(play)) s.rushTD += 1
+
+    } else if (pt === 'PASS') {
+      // CAR2Num = QB (패서, CAR2Pos=QB)
+      if (ok(play.CAR2Num)) {
+        const s = getOrCreate(String(play.CAR2Num), team)
+        s.passAttempts += 1
+        s.completions += 1
+        s.passYards += gain(play)
+        if (isTouchdown(play)) s.passTD += 1
+        if (hasTag(play, 'INTERCEPT')) s.passINT += 1
+      }
+      // CARNum = 리시버 (볼 받는 선수, CARPos=WR/RB)
+      if (ok(play.CARNum)) {
+        const s = getOrCreate(String(play.CARNum), team)
+        s.recTargets += 1
+        s.receptions += 1
+        s.recYards += gain(play)
+        if (isTouchdown(play)) s.recTD += 1
+      }
+
+    } else if (pt === 'NOPAS' || pt === 'NOPASS') {
+      // CAR2Num = QB (불완전 패스, 야드 없음)
+      if (ok(play.CAR2Num)) {
+        getOrCreate(String(play.CAR2Num), team).passAttempts += 1
+      }
+      // CARNum = 타겟 (패스 받지 못한 선수)
+      if (ok(play.CARNum)) {
+        getOrCreate(String(play.CARNum), team).recTargets += 1
+      }
+
+    } else if (pt === 'SACK') {
+      // CAR2Num = QB (새크 당한 QB, 음수 야드)
+      if (ok(play.CAR2Num)) {
+        const s = getOrCreate(String(play.CAR2Num), team)
+        s.passAttempts += 1
+        s.passYards += gain(play)
+      }
+    }
+    // PUNT / KICKOFF / RETURN / PAT / FG / NONE: 제외
+  }
+
+  const result = [...stats.values()]
+    .map((s) => ({ ...s, scrimmageYards: s.rushYards + s.recYards + s.passYards }))
+    .sort((a, b) => b.scrimmageYards - a.scrimmageYards)
+
+  return result.slice(0, limit)
 }
 
-const PLAY_TYPE_CATEGORIES = ['RUN', 'PASS', 'NOPAS', 'NOPASS', 'KICKOFF', 'PUNT', 'PAT', 'FG', 'RETURN']
+export function pickOffenseMvp(plays, teamName) {
+  const stats = new Map()
 
-export function getPlayTypeDistribution(plays, teamName) {
-  const counts = new Map()
-  for (const play of plays.filter((p) => p.OffenseTeam === teamName)) {
-    const type = playType(play)
-    const key = PLAY_TYPE_CATEGORIES.includes(type) ? type : '기타'
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+  function getOrCreate(key) {
+    if (!stats.has(key)) {
+      stats.set(key, {
+        number: key,
+        rushAttempts: 0, rushYards: 0, rushTD: 0,
+        passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
+        receptions: 0, recYards: 0, recTD: 0,
+      })
+    }
+    return stats.get(key)
   }
-  return [...counts.entries()].map(([name, value]) => ({ name, value }))
+
+  for (const play of plays) {
+    if (play.OffenseTeam !== teamName) continue
+    const pt = playType(play)
+
+    if (pt === 'RUN') {
+      const raw = play.CARNum
+      if (raw == null || raw === '' || Number(raw) === 0) continue
+      const s = getOrCreate(String(raw))
+      s.rushAttempts += 1
+      s.rushYards += gain(play)
+      if (isTouchdown(play)) s.rushTD += 1
+    } else if (isPassAttempt(play)) {
+      // CAR2Num = QB (패서)
+      const qbRaw = play.CAR2Num
+      if (qbRaw != null && qbRaw !== '' && Number(qbRaw) !== 0) {
+        const s = getOrCreate(String(qbRaw))
+        s.passAttempts += 1
+        if (isCompletePass(play)) {
+          s.completions += 1
+          s.passYards += gain(play)
+          if (isTouchdown(play)) s.passTD += 1
+        }
+        if (hasTag(play, 'INTERCEPT')) s.passINT += 1
+      }
+      // CARNum = 리시버
+      const recRaw = play.CARNum
+      if (recRaw != null && recRaw !== '' && Number(recRaw) !== 0 && isCompletePass(play)) {
+        const s = getOrCreate(String(recRaw))
+        s.receptions += 1
+        s.recYards += gain(play)
+        if (isTouchdown(play)) s.recTD += 1
+      }
+    }
+  }
+
+  let best = null
+  for (const s of stats.values()) {
+    const total = s.rushYards + s.recYards + s.passYards
+    if (!best || total > best.total) best = { ...s, total }
+  }
+  return best
+}
+
+export function pickDefenseMvp(plays, teamName) {
+  const stats = new Map()
+
+  function getOrCreate(num) {
+    if (!stats.has(num)) {
+      stats.set(num, { number: num, tackles: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 })
+    }
+    return stats.get(num)
+  }
+
+  for (const play of plays) {
+    if (play.OffenseTeam === teamName) continue
+
+    const tags = significantPlayTags(play)
+
+    for (const rawKey of ['TKLNum', 'TKL2Num']) {
+      const raw = play[rawKey]
+      if (raw == null || raw === '' || Number(raw) === 0) continue
+      const s = getOrCreate(String(raw))
+      s.tackles += 1
+      // TKLNum(1차 태클러)에만 특수 태그 집계
+      if (rawKey === 'TKLNum') {
+        if (tags.includes('SACK')) s.sacks += 1
+        if (tags.includes('TFL')) s.tfl += 1
+        if (tags.includes('INTERCEPT')) s.interceptions += 1
+        if (tags.includes('FUMBLERECDEF')) s.fumbleRec += 1
+      }
+    }
+  }
+
+  let best = null
+  for (const s of stats.values()) {
+    const turnoversForced = s.interceptions + s.fumbleRec
+    const score = s.tackles + turnoversForced * 2 + s.sacks
+    if (!best || score > best.score) {
+      best = { ...s, turnoversForced, score }
+    }
+  }
+  return best
 }
 
 // 패널티는 필드 포지션 변화로 기록되기 때문에 GainYard/ToGoYard가 비어있는 경우가 많고,
@@ -354,14 +470,6 @@ export function getPenaltyStats(plays, homeTeam, awayTeam) {
     if (!isHomePenalty && !isAwayPenalty) continue
 
     const yards = penaltyYards(play)
-    console.log('[엑셀 파싱 디버그] 패널티 플레이:', {
-      tags,
-      GainYard: play.GainYard,
-      ToGoYard: play.ToGoYard,
-      StartYard: play.StartYard,
-      EndYard: play.EndYard,
-      적용야드: yards,
-    })
 
     if (isHomePenalty) {
       stats.home.count += 1
@@ -557,24 +665,6 @@ export function getKeyStats(plays, homeTeam, awayTeam) {
   const isTDPlay = (p) => isTouchdown(p) && playType(p) !== 'PAT'
   const homeTDPlays = plays.filter((p) => p.OffenseTeam === homeTeam && isTDPlay(p))
   const awayTDPlays = plays.filter((p) => p.OffenseTeam === awayTeam && isTDPlay(p))
-  console.log('[Key Stats 디버그] 홈팀 TD 플레이 (총', homeTDPlays.length, '개):', homeTDPlays.map((p) => ({
-    ClipKey: p.ClipKey, Quarter: p.Quarter, PlayType: p.PlayType,
-    OffenseTeam: p.OffenseTeam,
-    SP: p.SignificantPlay, SP2: p.SignificantPlay2, SP3: p.SignificantPlay3, SP4: p.SignificantPlay4,
-  })))
-  console.log('[Key Stats 디버그] 어웨이팀 TD 플레이 (총', awayTDPlays.length, '개):', awayTDPlays.map((p) => ({
-    ClipKey: p.ClipKey, Quarter: p.Quarter, PlayType: p.PlayType,
-    OffenseTeam: p.OffenseTeam,
-    SP: p.SignificantPlay, SP2: p.SignificantPlay2, SP3: p.SignificantPlay3, SP4: p.SignificantPlay4,
-  })))
-  // TOUCHDOWN 태그가 있는 모든 플레이 (PAT 포함) — 혹시 누락된 플레이 확인용
-  const allTDCandidates = plays.filter(isTouchdown)
-  console.log('[Key Stats 디버그] TOUCHDOWN 태그 전체 (PAT 포함, 총', allTDCandidates.length, '개):',
-    allTDCandidates.map((p) => ({
-      ClipKey: p.ClipKey, PlayType: p.PlayType, OffenseTeam: p.OffenseTeam,
-      SP: p.SignificantPlay, SP2: p.SignificantPlay2,
-    }))
-  )
   const homeTDs = homeTDPlays.length
   const awayTDs = awayTDPlays.length
 
@@ -638,26 +728,3 @@ export function parseGameFilename(filename) {
   return { date, opponent }
 }
 
-/**
- * src/data/games/*.xlsm 파일을 모두 읽어 파싱 결과 배열로 반환.
- * Vite의 import.meta.glob으로 빌드 시 폴더 내 파일을 자동 수집한다.
- */
-export async function loadGamesFromFolder() {
-  const modules = import.meta.glob('../data/games/*.xlsm', {
-    eager: true,
-    query: '?url',
-    import: 'default',
-  })
-
-  const entries = Object.entries(modules)
-  const games = await Promise.all(
-    entries.map(async ([path, url]) => {
-      const filename = path.split('/').pop()
-      const fileInfo = parseGameFilename(filename)
-      const game = await parseGame(url)
-      return { filename, fileInfo, ...game }
-    }),
-  )
-
-  return games
-}

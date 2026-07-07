@@ -117,8 +117,21 @@
   gap: 20px;
 }
 
+.charts-grid--3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .charts-grid--3col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 760px) {
   .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .charts-grid--3col {
     grid-template-columns: 1fr;
   }
 }
