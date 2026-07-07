@@ -31,7 +31,11 @@
       "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; cd \"C:\\\\Users\\\\doon2\\\\Desktop\\\\hongik-cowboys\"; npx vite build 2>&1 | Select-Object -Last 8)",
       "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; cd \"C:\\\\Users\\\\doon2\\\\Desktop\\\\hongik-cowboys\"; npx vite build 2>&1 | Select-Object -Last 6)",
       "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; cd \"C:\\\\Users\\\\doon2\\\\Desktop\\\\hongik-cowboys\"; npx vite build 2>&1 | Select-Object -Last 5)",
-      "Bash(find /c/Users/doon2 -name \"*.xlsm\" 2>/dev/null | head -20)"
+      "Bash(find /c/Users/doon2 -name \"*.xlsm\" 2>/dev/null | head -20)",
+      "Bash(npm run *)",
+      "mcp__visualize__show_widget",
+      "Bash(ls /home/claude/ 2>&1)",
+      "PowerShell($env:Path += \";C:\\\\Program Files\\\\nodejs\"; cd \"C:\\\\Users\\\\doon2\\\\Desktop\\\\hongik-cowboys\"; npm run build 2>&1)"
     ]
   }
 }
