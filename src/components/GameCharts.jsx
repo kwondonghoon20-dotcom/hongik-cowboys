@@ -357,10 +357,11 @@ export default function GameCharts({ game }) {
   const topPlayers = hasRawPlays
     ? (() => {
         const raw = getPlayerTotalYards(game.plays, game.homeTeam, game.awayTeam, 5)
-        console.log('[Total Yards TOP 5] getPlayerTotalYards 결과:', raw)
         return raw.map((r) => ({
           ...r,
-          label: `#${r.number} (${teamAbbr(r.team)})`,
+          label: r.position
+            ? `#${r.number} · ${r.position} (${teamAbbr(r.team)})`
+            : `#${r.number} (${teamAbbr(r.team)})`,
           fill: r.isHome ? SCARLET : CHARCOAL_GRAY,
         }))
       })()
