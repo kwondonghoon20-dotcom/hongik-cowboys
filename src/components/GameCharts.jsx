@@ -7,7 +7,12 @@ import {
   getPenaltyStats, getPlayerTotalYards,
   getDriveMomentum, getKeyStats,
 } from '../utils/parseExcel'
+import { players as rosterPlayers } from '../data/dummy'
 import './GameCharts.css'
+
+function findRosterPlayer(number) {
+  return rosterPlayers.find((p) => String(p.number) === String(number)) ?? null
+}
 
 const SCARLET = '#CC0000'
 const CHARCOAL_GRAY = '#888888'
@@ -43,7 +48,9 @@ function PlayerTooltip({ active, payload, topPlayers }) {
     scrimmageYards,
   } = p
   const abbr = teamAbbr(team)
-  const divider = { borderTop: '1px solid #333', margin: '8px 0' }
+  const roster = findRosterPlayer(number)
+  const displayName = roster ? roster.name : null
+  const divider = { borderTop: '1px solid #333', margin: '6px 0 8px' }
   const lbl = { color: '#888', paddingRight: 14, paddingBottom: 4, whiteSpace: 'nowrap' }
 
   const showPassing = passAttempts > 0
@@ -55,8 +62,11 @@ function PlayerTooltip({ active, payload, topPlayers }) {
       background: '#1a1a1a', border: '1px solid #333', borderRadius: 6,
       padding: 12, fontSize: 13, color: '#ddd', minWidth: 240,
     }}>
-      <div style={{ color: SCARLET, fontWeight: 700, fontSize: 15, marginBottom: 8 }}>
-        #{number}{position ? ` · ${position}` : ''} <span style={{ color: '#aaa', fontWeight: 400 }}>({abbr})</span>
+      <div style={{ color: SCARLET, fontWeight: 700, fontSize: 16 }}>
+        {displayName ?? `#${number}`}
+      </div>
+      <div style={{ color: '#888', fontSize: 12, marginBottom: 6 }}>
+        {[position, `#${number}`].filter(Boolean).join(' · ')}{` (${abbr})`}
       </div>
       <div style={divider} />
       <table style={{ borderCollapse: 'collapse' }}>

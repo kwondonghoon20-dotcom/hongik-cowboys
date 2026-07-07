@@ -98,17 +98,21 @@ export default function GameDetail() {
                 {offMvp && (
                   <Link to={offPlayer ? `/roster/${offPlayer.id}` : '#'} className="mvp-card">
                     <div className="mvp-badge">⚔️ 오펜스</div>
-                    <div className="mvp-number">#{offMvp.number}{offMvp.position ? ` · ${offMvp.position}` : ''}</div>
                     <div className="mvp-info">
+                      <div className="mvp-name">{offPlayer ? offPlayer.name : `#${offMvp.number}`}</div>
+                      <div className="mvp-meta">
+                        {[offMvp.position, `#${offMvp.number}`].filter(Boolean).join(' · ')}
+                      </div>
+                      <div className="mvp-divider" />
                       <div className="mvp-stats">
                         {offMvp.passYards > 0 && (
-                          <div>{offMvp.completions}/{offMvp.passAttempts} comp · {offMvp.passYards} yds · {offMvp.passTD} TD · {offMvp.passINT} INT</div>
+                          <div>Passing: {offMvp.completions}/{offMvp.passAttempts} comp · {offMvp.passYards} yds · {offMvp.passTD} TD · {offMvp.passINT} INT</div>
                         )}
                         {offMvp.rushYards > 0 && (
-                          <div>{offMvp.rushAttempts} car · {offMvp.rushYards} yds · {offMvp.rushTD} TD</div>
+                          <div>Rushing: {offMvp.rushAttempts} car · {offMvp.rushYards} yds · {offMvp.rushTD} TD</div>
                         )}
                         {offMvp.recYards > 0 && (
-                          <div>{offMvp.receptions} rec · {offMvp.recYards} yds · {offMvp.recTD} TD</div>
+                          <div>Receiving: {offMvp.receptions} rec · {offMvp.recYards} yds · {offMvp.recTD} TD</div>
                         )}
                         <div className="mvp-total">Total {offMvp.total} yds</div>
                       </div>
@@ -118,8 +122,12 @@ export default function GameDetail() {
                 {defMvp && (
                   <Link to={defPlayer ? `/roster/${defPlayer.id}` : '#'} className="mvp-card">
                     <div className="mvp-badge">🛡️ 디펜스</div>
-                    <div className="mvp-number">#{defMvp.number}{defMvp.position ? ` · ${defMvp.position}` : ''}</div>
                     <div className="mvp-info">
+                      <div className="mvp-name">{defPlayer ? defPlayer.name : `#${defMvp.number}`}</div>
+                      <div className="mvp-meta">
+                        {[defMvp.position, `#${defMvp.number}`].filter(Boolean).join(' · ')}
+                      </div>
+                      <div className="mvp-divider" />
                       <div className="mvp-stats">
                         <div>Tackles: {defMvp.tackles}</div>
                         {defMvp.sacks > 0 && <div>Sacks: {defMvp.sacks}</div>}

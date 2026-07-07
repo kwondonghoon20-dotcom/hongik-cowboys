@@ -142,11 +142,22 @@
   letter-spacing: 0.5px;
 }
 
-.mvp-number {
-  font-family: var(--font-impact);
-  font-size: 40px;
-  color: var(--color-scarlet);
-  min-width: 64px;
+.mvp-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-scarlet, #CC0000);
+  margin-bottom: 2px;
+}
+
+.mvp-meta {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.mvp-divider {
+  border-top: 1px solid #333;
+  margin: 8px 0;
 }
 
 .mvp-stats {
