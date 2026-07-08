@@ -115,7 +115,7 @@
   gap: 16px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .mvp-grid {
     grid-template-columns: 1fr;
   }
@@ -218,4 +218,52 @@
 .placeholder-note {
   color: #888;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  /* 스코어보드: 세로 배치 */
+  .scoreboard-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .scoreboard-team:first-child {
+    order: 1;
+  }
+
+  .scoreboard-score {
+    order: 2;
+    font-size: 40px;
+  }
+
+  .scoreboard-team:last-child {
+    order: 3;
+  }
+
+  .scoreboard-team h2 {
+    font-size: 20px;
+  }
+
+  .scoreboard-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  /* 팀 스탯 비교표 */
+  .stats-table th {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .stats-table td {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .stats-table-label {
+    font-size: 12px;
+  }
 }
