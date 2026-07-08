@@ -53,3 +53,17 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
+
+@media (max-width: 768px) {
+  .page-hero h1 {
+    font-size: 36px;
+  }
+
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .season-tabs {
+    flex-wrap: wrap;
+  }
+}

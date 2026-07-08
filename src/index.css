@@ -18,6 +18,8 @@ body {
   background: var(--color-charcoal);
   color: var(--color-white);
   font-family: var(--font-body);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 #root {
@@ -50,4 +52,10 @@ button {
   width: 100%;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
 }

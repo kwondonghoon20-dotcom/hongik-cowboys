@@ -119,3 +119,24 @@
   color: #888;
   font-size: 14px;
 }
+
+@media (max-width: 768px) {
+  .page-roster .page-hero h1 {
+    font-size: 36px;
+  }
+
+  .roster-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .filter-group {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .roster-tabs {
+    flex-wrap: wrap;
+  }
+}
