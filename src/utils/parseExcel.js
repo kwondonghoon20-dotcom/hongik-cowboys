@@ -24,10 +24,15 @@ const KOREAN_TEAM_MAP = {
 
 function normalizeTeamName(name) {
   if (!name) return name
-  const trimmed = String(name).trim()
+  // NFC 정규화로 Excel NFD/NFC 인코딩 차이 흡수
+  const trimmed = String(name).trim().normalize('NFC')
   if (KOREAN_TEAM_MAP[trimmed]) return KOREAN_TEAM_MAP[trimmed]
   const lower = trimmed.toLowerCase()
   if (OUR_TEAM_ALIASES.some((alias) => lower.includes(alias))) return OUR_TEAM
+  // 한글 키워드 포함 여부로 재시도 (Unicode 변형 대비)
+  if (lower.includes('홍익')) return OUR_TEAM
+  if (lower.includes('국민')) return 'Kookmin'
+  if (lower.includes('건국')) return 'Konkuk'
   const key = lower.replace(/[^a-z0-9]/g, '')
   return TEAM_NAME_MAP[key] ?? trimmed
 }
@@ -150,53 +155,40 @@ export async function parseGame(input) {
  * - OffenseTeam이 한글로 기록됨 → normalizeTeamName으로 변환
  * - meta는 호출자가 하드코딩해서 전달
  */
-// OffenseTeam 컬럼을 가리킬 수 있는 후보 헤더 이름 (한글/영문 혼용 파일 대응)
-const OFFENSE_TEAM_ALIASES = ['OffenseTeam', '공격팀', 'Offense Team', 'offense_team']
-
 export async function parseAlternateGame(input, overrideMeta) {
   const workbook = input?.SheetNames ? input : await readWorkbook(input)
   const sheetName = workbook.SheetNames[0]
   const sheet = workbook.Sheets[sheetName]
   if (!sheet) throw new Error(`시트를 찾을 수 없습니다: ${sheetName}`)
 
-  // 헤더 행을 자동 탐색: 빈 행 건너뛰고 컬럼이 가장 많은 행을 헤더로 사용
-  // (user 지정 6번째 행 우선, 못 찾으면 자동 탐색)
   const allRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null })
 
-  let headerIdx = 5 // 기본값: 6번째 행 (0-indexed)
-  // 지정 행에 의미 있는 값이 없으면 자동 탐색
-  const candidateHeaders = (allRows[headerIdx] ?? []).filter((h) => h != null && String(h).trim() !== '')
-  if (candidateHeaders.length < 3) {
-    for (let i = 0; i < Math.min(allRows.length, 15); i++) {
-      const cols = (allRows[i] ?? []).filter((h) => h != null && String(h).trim() !== '')
-      if (cols.length > candidateHeaders.length) headerIdx = i
-    }
+  // 유효한 셀이 가장 많은 행을 헤더로 자동 탐색 (최대 15행)
+  let headerIdx = 0, maxCols = 0
+  for (let i = 0; i < Math.min(allRows.length, 15); i++) {
+    const count = (allRows[i] ?? []).filter((v) => v != null && String(v).trim() !== '').length
+    if (count > maxCols) { maxCols = count; headerIdx = i }
   }
 
   const headers = (allRows[headerIdx] ?? []).map((h) => String(h ?? '').trim())
   const dataRows = allRows.slice(headerIdx + 1)
 
-  console.log('[parseAlternateGame] 시트:', sheetName, '| 헤더 행 index:', headerIdx)
-  console.log('[parseAlternateGame] 헤더:', headers)
-
-  // OffenseTeam 컬럼 인덱스 탐색
-  const offenseTeamIdx = headers.findIndex((h) =>
-    OFFENSE_TEAM_ALIASES.some((alias) => alias.toLowerCase() === h.toLowerCase())
+  // OffenseTeam 컬럼 인덱스 탐색 (영문/한글 헤더 모두 대응)
+  const TEAM_COL_ALIASES = ['OffenseTeam', 'offenseteam', '공격팀', 'offense team', 'offense_team']
+  const teamColIdx = headers.findIndex((h) =>
+    TEAM_COL_ALIASES.some((a) => a.toLowerCase() === h.toLowerCase())
   )
-  console.log('[parseAlternateGame] OffenseTeam 컬럼 index:', offenseTeamIdx, '| 컬럼명:', headers[offenseTeamIdx])
 
   const plays = dataRows
     .map((row) => {
       const obj = Object.fromEntries(headers.map((h, i) => [h, row[i] ?? null]))
-      // OffenseTeam 컬럼을 찾아 정규화 (컬럼명이 한글/영문 둘 다 대응)
-      const rawTeam = offenseTeamIdx >= 0 ? (row[offenseTeamIdx] ?? null) : obj['OffenseTeam']
+      // teamColIdx 우선, 없으면 obj['OffenseTeam'] fallback
+      const rawTeam = teamColIdx >= 0 ? row[teamColIdx] : obj['OffenseTeam']
+      // 항상 'OffenseTeam' 키로 정규화된 영문 팀명 저장
       obj['OffenseTeam'] = normalizeTeamName(rawTeam)
       return obj
     })
     .filter((row) => Object.values(row).some((v) => v != null && v !== ''))
-
-  const teamSample = [...new Set(plays.map((p) => p.OffenseTeam))].slice(0, 5)
-  console.log('[parseAlternateGame] 파싱 완료 | plays:', plays.length, '| OffenseTeam 샘플:', teamSample)
 
   return { meta: overrideMeta, plays }
 }
