@@ -173,18 +173,41 @@ export async function parseAlternateGame(input, overrideMeta) {
   const headers = (allRows[headerIdx] ?? []).map((h) => String(h ?? '').trim())
   const dataRows = allRows.slice(headerIdx + 1)
 
+  // 디버깅: 실제 비어있지 않은 헤더 목록 출력
+  const nonEmptyHeaders = headers
+    .map((h, i) => ({ h, i }))
+    .filter(({ h }) => h !== '')
+  console.log('[parseAlternateGame] 비어있지 않은 헤더:', nonEmptyHeaders.map(({ h, i }) => `[${i}]${h}`).join(', '))
+
   // OffenseTeam 컬럼 인덱스 탐색 (영문/한글 헤더 모두 대응)
-  const TEAM_COL_ALIASES = ['OffenseTeam', 'offenseteam', '공격팀', 'offense team', 'offense_team']
+  const TEAM_COL_ALIASES = ['OffenseTeam', 'offenseteam', '공격팀', 'offense team', 'offense_team', '팀']
   const teamColIdx = headers.findIndex((h) =>
     TEAM_COL_ALIASES.some((a) => a.toLowerCase() === h.toLowerCase())
   )
+  console.log('[parseAlternateGame] OffenseTeam 컬럼 idx:', teamColIdx)
+
+  // 알려진 한글 팀명 패턴 (value-scan fallback용)
+  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', 'cowboys', 'kookmin', 'konkuk', OUR_TEAM.toLowerCase()]
 
   const plays = dataRows
     .map((row) => {
       const obj = Object.fromEntries(headers.map((h, i) => [h, row[i] ?? null]))
-      // teamColIdx 우선, 없으면 obj['OffenseTeam'] fallback
-      const rawTeam = teamColIdx >= 0 ? row[teamColIdx] : obj['OffenseTeam']
-      // 항상 'OffenseTeam' 키로 정규화된 영문 팀명 저장
+
+      let rawTeam = teamColIdx >= 0 ? row[teamColIdx] : obj['OffenseTeam']
+
+      // 컬럼명으로 못 찾은 경우: 각 셀 값을 스캔해서 한글 팀명 탐색
+      if (!rawTeam) {
+        for (let i = 0; i < row.length; i++) {
+          const v = row[i]
+          if (v == null || typeof v !== 'string') continue
+          const lower = v.trim().toLowerCase()
+          if (KNOWN_TEAM_PATTERNS.some((p) => lower.includes(p))) {
+            rawTeam = v.trim()
+            break
+          }
+        }
+      }
+
       obj['OffenseTeam'] = normalizeTeamName(rawTeam)
       return obj
     })
