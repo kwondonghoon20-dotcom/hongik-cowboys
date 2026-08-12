@@ -35,7 +35,10 @@
       "Bash(npm run *)",
       "mcp__visualize__show_widget",
       "Bash(ls /home/claude/ 2>&1)",
-      "PowerShell($env:Path += \";C:\\\\Program Files\\\\nodejs\"; cd \"C:\\\\Users\\\\doon2\\\\Desktop\\\\hongik-cowboys\"; npm run build 2>&1)"
+      "PowerShell($env:Path += \";C:\\\\Program Files\\\\nodejs\"; cd \"C:\\\\Users\\\\doon2\\\\Desktop\\\\hongik-cowboys\"; npm run build 2>&1)",
+      "Bash(git -C /c/Users/doon2/Desktop/hongik-cowboys config user.name)",
+      "Bash(git -C /c/Users/doon2/Desktop/hongik-cowboys config user.email)",
+      "Bash(cd /c/Users/doon2/Desktop && ls -la setup_data.sh 2>&1; ls -la open 2>&1 | head -20)"
     ]
   }
 }

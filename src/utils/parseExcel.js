@@ -12,9 +12,20 @@ const TEAM_NAME_MAP = {
   gunwiphonix: 'GunwiPheonix',
 }
 
+// 한글 팀명 직접 매핑 (OffenseTeam에 한글로 기록된 파일용)
+const KOREAN_TEAM_MAP = {
+  '홍익대': OUR_TEAM,
+  '홍익': OUR_TEAM,
+  '국민대': 'Kookmin',
+  '국민': 'Kookmin',
+  '건국대': 'Konkuk',
+  '건국': 'Konkuk',
+}
+
 function normalizeTeamName(name) {
   if (!name) return name
   const trimmed = String(name).trim()
+  if (KOREAN_TEAM_MAP[trimmed]) return KOREAN_TEAM_MAP[trimmed]
   const lower = trimmed.toLowerCase()
   if (OUR_TEAM_ALIASES.some((alias) => lower.includes(alias))) return OUR_TEAM
   const key = lower.replace(/[^a-z0-9]/g, '')
@@ -131,6 +142,33 @@ export async function parseGame(input) {
   const meta = await parseGameMeta(workbook)
   const plays = await parsePlays(workbook, meta)
   return { meta, plays }
+}
+
+/**
+ * Index 시트 없이 Sheet1 단독으로 구성된 xlsx 파일 파서.
+ * - 헤더가 6번째 행(index 5)에 위치
+ * - OffenseTeam이 한글로 기록됨 → normalizeTeamName으로 변환
+ * - meta는 호출자가 하드코딩해서 전달
+ */
+export async function parseAlternateGame(input, overrideMeta) {
+  const workbook = input?.SheetNames ? input : await readWorkbook(input)
+  const sheetName = workbook.SheetNames[0]
+  const sheet = workbook.Sheets[sheetName]
+  if (!sheet) throw new Error(`시트를 찾을 수 없습니다: ${sheetName}`)
+
+  const allRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null })
+  const headers = (allRows[5] ?? []).map((h) => String(h ?? '').trim())
+  const dataRows = allRows.slice(6)
+
+  const plays = dataRows
+    .map((row) => Object.fromEntries(headers.map((h, i) => [h, row[i] ?? null])))
+    .filter((row) => Object.values(row).some((v) => v != null && v !== ''))
+    .map((row) => ({
+      ...row,
+      OffenseTeam: normalizeTeamName(row.OffenseTeam),
+    }))
+
+  return { meta: overrideMeta, plays }
 }
 
 function significantPlayTags(play) {

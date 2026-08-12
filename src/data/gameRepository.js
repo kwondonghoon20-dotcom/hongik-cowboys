@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { games as dummyGames, players } from './dummy'
-import { calcTeamStats, toPlayLogEntries, pickRushMvp, parseGame, OUR_TEAM } from '../utils/parseExcel'
+import { calcTeamStats, toPlayLogEntries, pickRushMvp, parseGame, parseAlternateGame, OUR_TEAM } from '../utils/parseExcel'
 import { getUploadedGames } from './uploadedGames'
 
 function resolveMvp(plays, teamName) {
@@ -57,21 +57,50 @@ function buildFromUpload(record) {
   }
 }
 
-// 빌드 시 src/data/games/*.xlsm 파일을 자동 감지 (asset URL로 import)
-const _globUrls = import.meta.glob('./games/*.xlsm', { query: '?url', import: 'default', eager: true })
+// 빌드 시 src/data/games/*.xlsm — 표준 형식 (Index 시트 포함)
+const _xlsmUrls = import.meta.glob('./games/*.xlsm', { query: '?url', import: 'default', eager: true })
+
+// 빌드 시 src/data/games/*.xlsx — 대체 형식 (한글 팀명, 헤더 6행, Index 시트 없음)
+const _xlsxUrls = import.meta.glob('./games/*.xlsx', { query: '?url', import: 'default', eager: true })
+
+// xlsx 파일별 하드코딩 메타 (Index 시트가 없는 파일용)
+// 새 경기 파일 추가 시 여기에 파일명과 메타를 추가하면 자동 반영됨
+const XLSX_META_MAP = {
+  '홍익 1경기 vs 국민 플레이별 데이터.xlsx': {
+    gameKey: 'HIcowboys_20250913_vs_Kookmin',
+    date: '2025-09-13',
+    type: 'League',
+    home: 'Kookmin',
+    away: OUR_TEAM,
+    homeScore: 6,
+    awayScore: 9,
+    location: '',
+  },
+}
 
 // 모듈 로드 시 한 번만 실행되는 Promise — 여러 컴포넌트가 공유
 const _globGamesPromise = (async () => {
-  const entries = Object.entries(_globUrls)
-  if (entries.length === 0) return []
+  const xlsmEntries = Object.entries(_xlsmUrls).map(([path, url]) => ({ path, url, type: 'xlsm' }))
+  const xlsxEntries = Object.entries(_xlsxUrls).map(([path, url]) => ({ path, url, type: 'xlsx' }))
+  const allEntries = [...xlsmEntries, ...xlsxEntries]
+
+  if (allEntries.length === 0) return []
+
   const results = await Promise.all(
-    entries.map(async ([path, url]) => {
+    allEntries.map(async ({ path, url, type }) => {
+      const filename = path.split('/').pop()
       try {
-        const { meta, plays } = await parseGame(url)
-        const filename = path.split('/').pop()
+        let meta, plays
+        if (type === 'xlsx') {
+          const overrideMeta = XLSX_META_MAP[filename]
+          if (!overrideMeta) return null // 메타 미등록 파일 건너뜀
+          ;({ meta, plays } = await parseAlternateGame(url, overrideMeta))
+        } else {
+          ;({ meta, plays } = await parseGame(url))
+        }
         return buildFromUpload({ id: `glob-${filename}`, meta, plays })
       } catch (e) {
-        console.error('[gameRepository] 파싱 실패:', path, e)
+        console.error('[gameRepository] 파싱 실패:', filename, e)
         return null
       }
     })
