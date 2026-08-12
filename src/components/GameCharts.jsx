@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import {
   getPenaltyStats, getPlayerTotalYards,
-  getDriveMomentum, getKeyStats,
+  getDriveMomentum, getKeyStats, OUR_TEAM,
 } from '../utils/parseExcel'
 import { players as rosterPlayers } from '../data/dummy'
 import './GameCharts.css'
@@ -357,13 +357,20 @@ export default function GameCharts({ game }) {
   const topPlayers = hasRawPlays
     ? (() => {
         const raw = getPlayerTotalYards(game.plays, game.homeTeam, game.awayTeam, 5)
-        return raw.map((r) => ({
-          ...r,
-          label: r.position
-            ? `#${r.number} · ${r.position} (${teamAbbr(r.team)})`
-            : `#${r.number} (${teamAbbr(r.team)})`,
-          fill: r.isHome ? SCARLET : CHARCOAL_GRAY,
-        }))
+        return raw.map((r) => {
+          const rPlayer = r.team === OUR_TEAM ? findRosterPlayer(r.number) : null
+          const abbr = teamAbbr(r.team)
+          let label
+          if (rPlayer) {
+            const pos = r.position ? `${r.position} · ` : ''
+            label = `${rPlayer.name} (${pos}#${r.number} · ${abbr})`
+          } else {
+            label = r.position
+              ? `#${r.number} · ${r.position} (${abbr})`
+              : `#${r.number} (${abbr})`
+          }
+          return { ...r, label, fill: r.isHome ? SCARLET : CHARCOAL_GRAY }
+        })
       })()
     : []
 

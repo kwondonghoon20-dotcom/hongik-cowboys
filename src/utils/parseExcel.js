@@ -16,8 +16,8 @@ const TEAM_NAME_MAP = {
 const KOREAN_TEAM_MAP = {
   '홍익대': OUR_TEAM,
   '홍익': OUR_TEAM,
-  '국민대': 'Kookmin',
-  '국민': 'Kookmin',
+  '국민대': 'KMrazorbacks',
+  '국민': 'KMrazorbacks',
   '건국대': 'Konkuk',
   '건국': 'Konkuk',
 }
@@ -31,7 +31,7 @@ function normalizeTeamName(name) {
   if (OUR_TEAM_ALIASES.some((alias) => lower.includes(alias))) return OUR_TEAM
   // 한글 키워드 포함 여부로 재시도 (Unicode 변형 대비)
   if (lower.includes('홍익')) return OUR_TEAM
-  if (lower.includes('국민')) return 'Kookmin'
+  if (lower.includes('국민')) return 'KMrazorbacks'
   if (lower.includes('건국')) return 'Konkuk'
   const key = lower.replace(/[^a-z0-9]/g, '')
   return TEAM_NAME_MAP[key] ?? trimmed

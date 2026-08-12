@@ -67,10 +67,10 @@ const _xlsxUrls = import.meta.glob('./games/*.xlsx', { query: '?url', import: 'd
 // 새 경기 파일 추가 시 여기에 파일명과 메타를 추가하면 자동 반영됨
 const XLSX_META_MAP = {
   '홍익 1경기 vs 국민 플레이별 데이터.xlsx': {
-    gameKey: 'HIcowboys_20250913_vs_Kookmin',
+    gameKey: 'HIcowboys_20250913_vs_KMrazorbacks',
     date: '2025-09-13',
     type: 'League',
-    home: 'Kookmin',
+    home: 'KMrazorbacks',
     away: OUR_TEAM,
     homeScore: 6,
     awayScore: 9,

@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { getGameById, useGlobGames } from '../data/gameRepository'
-import { pickOffenseMvp, pickDefenseMvp } from '../utils/parseExcel'
+import { pickOffenseMvp, pickDefenseMvp, OUR_TEAM } from '../utils/parseExcel'
 import { players } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
 import './GameDetail.css'
@@ -86,8 +86,8 @@ export default function GameDetail() {
         </section>
 
         {Array.isArray(game.plays) && game.plays.length > 0 && (() => {
-          const offMvp = pickOffenseMvp(game.plays, game.homeTeam)
-          const defMvp = pickDefenseMvp(game.plays, game.homeTeam)
+          const offMvp = pickOffenseMvp(game.plays, OUR_TEAM)
+          const defMvp = pickDefenseMvp(game.plays, OUR_TEAM)
           const offPlayer = offMvp ? findPlayer(offMvp.number) : null
           const defPlayer = defMvp ? findPlayer(defMvp.number) : null
 
