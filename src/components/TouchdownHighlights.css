@@ -1,6 +1,6 @@
 .td-highlights-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 
@@ -11,6 +11,8 @@
   overflow: hidden;
 }
 
+/* ── 헤더 ──────────────────────────────────────────────── */
+
 .td-card-header {
   display: flex;
   align-items: center;
@@ -20,22 +22,44 @@
   border-bottom: 1px solid #2e2e2e;
 }
 
-.td-badge {
-  font-family: var(--font-impact);
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  background: var(--color-scarlet);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.td-type {
+.td-team-label {
   font-family: var(--font-impact);
   font-size: 13px;
   letter-spacing: 0.04em;
-  color: #aaa;
+  font-weight: 700;
+}
+
+.td-team-label.ours {
+  color: var(--color-scarlet);
+}
+
+.td-team-label.opponent {
+  color: #888;
+}
+
+.td-quarter {
+  font-family: var(--font-impact);
+  font-size: 12px;
+  color: #666;
+}
+
+.td-badge {
+  font-family: var(--font-impact);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
   flex: 1;
+}
+
+.td-badge.run {
+  background: var(--color-scarlet);
+  color: #fff;
+}
+
+.td-badge.pass {
+  background: #1a4fa0;
+  color: #fff;
 }
 
 .td-yards {
@@ -43,6 +67,8 @@
   font-size: 16px;
   color: var(--color-white);
 }
+
+/* ── 득점자 ────────────────────────────────────────────── */
 
 .td-card-scorer {
   padding: 10px 14px 8px;
@@ -71,7 +97,22 @@
   margin: 0 4px;
 }
 
-/* ── 필드 SVG ────────────────────────────────────────── */
+/* ── 영상 iframe ─────��──────────────────────────────────── */
+
+.td-video-wrap {
+  padding: 12px 14px;
+}
+
+.td-video-iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 8px;
+  display: block;
+  background: #111;
+}
+
+/* ── 필드 SVG ────────────────────────────────────────────── */
 
 .td-field-wrap {
   padding: 12px 14px 10px;
@@ -98,7 +139,7 @@
 .td-legend-dot-start { color: #ffd700; }
 .td-legend-dot-end { color: var(--color-scarlet); }
 
-/* ── 경로 데이터 없음 ───────────────────────────────── */
+/* ── 영상 없음 ──────────────────────────────────────────── */
 
 .td-no-route {
   display: flex;
@@ -113,7 +154,7 @@
   font-size: 18px;
 }
 
-/* ── 모바일 ─────────────────────────────────────────── */
+/* ── 모바일 ─────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .td-highlights-grid {

@@ -1,6 +1,7 @@
 import React from 'react'
 import { players } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
+import { getTouchdownClip } from '../data/touchdownClips'
 import { OUR_TEAM } from '../utils/parseExcel'
 
 const FIELD_WIDTH = 53.333
@@ -44,16 +45,13 @@ function FieldSvg({ route }) {
       className="td-field-svg"
       aria-label="터치다운 경로"
     >
-      {/* 필드 배경 */}
       <rect x={0} y={0} width={fieldLength} height={FIELD_WIDTH} fill="#193f19" />
-      {/* 엔드존 */}
       {hasEndZones && (
         <>
           <rect x={0} y={0} width={10} height={FIELD_WIDTH} fill="#122e12" />
           <rect x={fieldLength - 10} y={0} width={10} height={FIELD_WIDTH} fill="#1b361b" />
         </>
       )}
-      {/* 야드 라인 */}
       {yardLineXs.map((x) => (
         <line
           key={x}
@@ -62,7 +60,6 @@ function FieldSvg({ route }) {
           strokeWidth={x === 0 || x === fieldLength || x === fieldLength / 2 ? 0.45 : 0.2}
         />
       ))}
-      {/* QB 경로 (있을 때만, 흰색 점선) */}
       {passerPts.length >= 2 && (
         <path
           d={catmullRomPath(passerPts)}
@@ -73,7 +70,6 @@ function FieldSvg({ route }) {
           strokeLinecap="round"
         />
       )}
-      {/* 득점 선수 경로 */}
       {pts.length >= 2 && (
         <path
           d={catmullRomPath(pts)}
@@ -84,11 +80,9 @@ function FieldSvg({ route }) {
           strokeLinejoin="round"
         />
       )}
-      {/* 시작 점 (노란색) */}
       {pts.length > 0 && (
         <circle cx={pts[0].x} cy={pts[0].y} r={1.3} fill="#ffd700" />
       )}
-      {/* 터치다운 지점 (빨간 ���두리) */}
       {pts.length > 1 && (
         <circle
           cx={pts[pts.length - 1].x}
@@ -109,28 +103,28 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const isRun = pt === 'RUN'
   const isOurTD = play.OffenseTeam === OUR_TEAM
 
-  // 득점 선수/QB 정보
   const scorerNum = play.CARNum ? String(play.CARNum) : null
   const qbNum = play.CAR2Num ? String(play.CAR2Num) : null
   const yards = play.GainYard ?? play.Gain ?? 0
   const quarter = play.Quarter ? `Q${play.Quarter}` : '-'
 
-  // 이름: OUR_TEAM 소속일 때만 로스터 매칭
   const scorerPlayer = isOurTD && scorerNum ? findRosterPlayer(scorerNum) : null
   const qbPlayer = isOurTD && qbNum ? findRosterPlayer(qbNum) : null
   const scorerName = scorerPlayer ? scorerPlayer.name : scorerNum ? `#${scorerNum}` : '-'
   const qbName = qbPlayer ? qbPlayer.name : qbNum ? `#${qbNum}` : null
 
-  const teamLabel = play.OffenseTeam === OUR_TEAM ? 'HIC' : (play.OffenseTeam ?? '?')
-  const tdTypeLabel = isPass ? '패스 TD' : isRun ? '러시 TD' : 'TD'
+  const teamLabel = isOurTD ? 'HIcowboys' : (play.OffenseTeam ?? '?')
+  const tdTypeLabel = isPass ? 'PASS TD' : isRun ? 'RUN TD' : 'TD'
 
   const route = game.gameKey ? getTouchdownRoute(game.gameKey, play.ClipKey) : null
+  const clipUrl = game.gameKey ? getTouchdownClip(game.gameKey, play.OffenseTeam) : null
 
   return (
     <div className="td-card">
       <div className="td-card-header">
-        <span className="td-badge">{quarter} · {teamLabel}</span>
-        <span className="td-type">{tdTypeLabel}</span>
+        <span className={`td-team-label ${isOurTD ? 'ours' : 'opponent'}`}>{teamLabel}</span>
+        <span className="td-quarter">{quarter}</span>
+        <span className={`td-badge ${isPass ? 'pass' : 'run'}`}>{tdTypeLabel}</span>
         <span className="td-yards">{yards}야드</span>
       </div>
 
@@ -146,7 +140,17 @@ export default function TouchdownFieldDiagram({ play, game }) {
         )}
       </div>
 
-      {route ? (
+      {clipUrl ? (
+        <div className="td-video-wrap">
+          <iframe
+            src={clipUrl}
+            title={`TD 클립 · ${teamLabel} · ${quarter}`}
+            allow="autoplay"
+            allowFullScreen
+            className="td-video-iframe"
+          />
+        </div>
+      ) : route ? (
         <div className="td-field-wrap">
           <FieldSvg route={route} />
           <div className="td-field-legend">
@@ -161,7 +165,7 @@ export default function TouchdownFieldDiagram({ play, game }) {
       ) : (
         <div className="td-no-route">
           <span className="td-no-route-icon">📹</span>
-          <span>��밀 경로 데이터 준비 중</span>
+          <span>영상 준비 중</span>
         </div>
       )}
     </div>
