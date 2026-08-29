@@ -153,6 +153,7 @@ function driveResultText(d) {
 }
 
 function DriveMomentumChart({ game }) {
+  const opponent = game.homeTeam === OUR_TEAM ? game.awayTeam : game.homeTeam
   const { points: chartData, quarterBoundaries } = getDriveMomentum(
     game.plays, game.homeTeam, game.awayTeam,
   )
@@ -164,8 +165,8 @@ function DriveMomentumChart({ game }) {
     <div className="flow-chart-wrapper chart-card">
       <h4 className="chart-title">드라이브 전진 거리</h4>
       <div className="momentum-legend">
-        <span style={{ color: SCARLET }}>■</span> {game.homeTeam}&nbsp;&nbsp;
-        <span style={{ color: '#555' }}>■</span> {game.awayTeam}&nbsp;&nbsp;
+        <span style={{ color: SCARLET }}>■</span> {OUR_TEAM}&nbsp;&nbsp;
+        <span style={{ color: '#555' }}>■</span> {opponent}&nbsp;&nbsp;
         <span style={{ color: '#FFD700' }}>●</span> TD&nbsp;
         <span style={{ color: '#00BFFF' }}>●</span> FG&nbsp;
         <span style={{ color: '#FF6B00' }}>✕</span> 턴오버&nbsp;
@@ -198,9 +199,9 @@ function DriveMomentumChart({ game }) {
               if (!active || !payload?.length) return null
               const d = payload[0]?.payload
               if (d.home == null && d.away == null) return null
-              const isHome = d.home != null
-              const team = isHome ? game.homeTeam : game.awayTeam
-              const teamColor = isHome ? SCARLET : '#aaa'
+              const isOurs = d.home != null
+              const team = isOurs ? OUR_TEAM : opponent
+              const teamColor = isOurs ? SCARLET : '#aaa'
               const eventColors = {
                 TD: '#FFD700', FG: '#00BFFF',
                 INTERCEPT: SCARLET, FUMBLE: SCARLET, TURNOVER: SCARLET,

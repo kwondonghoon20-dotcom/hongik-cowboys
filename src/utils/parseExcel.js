@@ -204,8 +204,10 @@ export async function parseAlternateGame(input, overrideMeta) {
   )
   console.log('[parseAlternateGame] OffenseTeam 컬럼 idx:', teamColIdx)
 
-  // 알려진 한글 팀명 패턴 (value-scan fallback용)
-  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', 'cowboys', 'kookmin', 'konkuk', OUR_TEAM.toLowerCase()]
+  console.log('[parseAlternateGame] meta 팀명 변환:', { home: overrideMeta?.home, away: overrideMeta?.away })
+
+  // 알려진 한글 팀명 패턴 (value-scan fallback용) — 'home'/'away'도 포함해 컬럼 못 찾을 때 대비
+  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', 'cowboys', 'kookmin', 'konkuk', OUR_TEAM.toLowerCase(), 'home', 'away']
 
   const plays = dataRows
     .map((row) => {
@@ -234,6 +236,9 @@ export async function parseAlternateGame(input, overrideMeta) {
       return obj
     })
     .filter((row) => Object.values(row).some((v) => v != null && v !== ''))
+
+  const teamSample = [...new Set(plays.slice(0, 30).map((p) => p.OffenseTeam).filter(Boolean))]
+  console.log('[parseAlternateGame] OffenseTeam 변환 결과 샘플:', teamSample)
 
   return { meta: overrideMeta, plays }
 }
@@ -809,7 +814,8 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
   let lastQuarter = null
 
   drives.forEach((drive, driveIdx) => {
-    const isHome = drive.team === homeTeam
+    // HIcowboys는 항상 위쪽(양수)에 표시 — home/away 여부에 무관
+    const isOurs = drive.team === OUR_TEAM
     const firstPlay = drive.plays[0]
 
     // 드라이브 시작점: 첫 플레이의 실제 필드 포지션
@@ -819,11 +825,11 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
       lastQuarter = firstQ
     }
     const startFieldPos = firstPlay ? fieldPos(firstPlay) : 0
-    const startDisplay = isHome ? startFieldPos : -startFieldPos
+    const startDisplay = isOurs ? startFieldPos : -startFieldPos
     chartPoints.push({
       index: pointIndex,
-      home: isHome ? startDisplay : null,
-      away: isHome ? null : startDisplay,
+      home: isOurs ? startDisplay : null,
+      away: isOurs ? null : startDisplay,
       event: null,
       quarter: firstQ,
       driveNum: driveIdx + 1,
@@ -854,7 +860,7 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
 
       // TD: 마지막 포인트를 ±100으로 강제 설정
       const pos = event === 'TD' ? 100 : fieldPos(play)
-      const displayValue = isHome ? pos : -pos
+      const displayValue = isOurs ? pos : -pos
 
       // FG 거리: OPP {n}야드 기준 → n + 17야드 (스냅 + 엔드존)
       const fgDist = pt === 'FG'
@@ -867,8 +873,8 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
 
       chartPoints.push({
         index: pointIndex,
-        home: isHome ? displayValue : null,
-        away: isHome ? null : displayValue,
+        home: isOurs ? displayValue : null,
+        away: isOurs ? null : displayValue,
         event,
         quarter: q,
         driveNum: driveIdx + 1,
