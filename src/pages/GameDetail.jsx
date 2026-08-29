@@ -3,6 +3,7 @@ import { getGameById, useGlobGames } from '../data/gameRepository'
 import { pickOffenseMvp, pickDefenseMvp, OUR_TEAM } from '../utils/parseExcel'
 import { players } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
+import TouchdownHighlights from '../components/TouchdownHighlights'
 import './GameDetail.css'
 
 function findPlayer(number) {
@@ -147,6 +148,8 @@ export default function GameDetail() {
         })()}
 
         <GameCharts game={game} />
+
+        <TouchdownHighlights game={game} />
 
         <section className="section">
           <h3 className="section-title">플레이 로그</h3>

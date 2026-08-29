@@ -253,6 +253,10 @@ function isTouchdown(play) {
   return hasTag(play, 'TOUCHDOWN')
 }
 
+export function getTouchdownPlays(plays) {
+  return (plays ?? []).filter((p) => isTouchdown(p) && playType(p) !== 'PAT')
+}
+
 // 실제 스크리미지(공격) 플레이만: RUN/PASS/NOPAS. KICKOFF/PUNT/PAT/FG/RETURN/SACK 등 스페셜팀·기타 플레이는 제외.
 function isScrimmagePlay(play) {
   return isRun(play) || isPassAttempt(play)

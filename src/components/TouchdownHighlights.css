@@ -1,0 +1,127 @@
+.td-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.td-card {
+  background: #242424;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.td-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.td-badge {
+  font-family: var(--font-impact);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  background: var(--color-scarlet);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.td-type {
+  font-family: var(--font-impact);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #aaa;
+  flex: 1;
+}
+
+.td-yards {
+  font-family: var(--font-impact);
+  font-size: 16px;
+  color: var(--color-white);
+}
+
+.td-card-scorer {
+  padding: 10px 14px 8px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  min-height: 36px;
+}
+
+.td-name {
+  font-family: var(--font-impact);
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  color: #ccc;
+}
+
+.td-name.highlight {
+  color: var(--color-white);
+  font-size: 19px;
+}
+
+.td-arrow {
+  color: #666;
+  font-size: 14px;
+  margin: 0 4px;
+}
+
+/* ── 필드 SVG ────────────────────────────────────────── */
+
+.td-field-wrap {
+  padding: 12px 14px 10px;
+}
+
+.td-field-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+  border: 1px solid #2a2a2a;
+}
+
+.td-field-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.td-legend-scorer { color: var(--color-scarlet); }
+.td-legend-passer { color: rgba(255,255,255,0.45); }
+.td-legend-dot-start { color: #ffd700; }
+.td-legend-dot-end { color: var(--color-scarlet); }
+
+/* ── 경로 데이터 없음 ───────────────────────────────── */
+
+.td-no-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 14px;
+  color: #666;
+  font-size: 13px;
+}
+
+.td-no-route-icon {
+  font-size: 18px;
+}
+
+/* ── 모바일 ─────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .td-highlights-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .td-name.highlight {
+    font-size: 17px;
+  }
+}

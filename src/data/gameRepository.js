@@ -36,6 +36,7 @@ function buildFromUpload(record) {
 
   return {
     id: record.id,
+    gameKey: meta.gameKey ?? record.id,
     source: 'upload',
     season: meta.date ? Number(meta.date.slice(0, 4)) : new Date().getFullYear(),
     week: null,
