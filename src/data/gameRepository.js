@@ -77,16 +77,6 @@ const XLSX_META_MAP = {
     awayScore: 9,
     location: '',
   },
-  '건국(Away) vs 홍익 경기 데이터.xlsx': {
-    gameKey: 'HIcowboys_20241019_vs_Konkuk',
-    date: '2024-10-19',
-    type: 'League',
-    home: 'Konkuk',
-    away: OUR_TEAM,
-    homeScore: 25,
-    awayScore: 8,
-    location: '',
-  },
 }
 
 // 모듈 로드 시 한 번만 실행되는 Promise — 여러 컴포넌트가 공유
