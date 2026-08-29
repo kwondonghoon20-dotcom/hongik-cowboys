@@ -163,21 +163,39 @@ export async function parseAlternateGame(input, overrideMeta) {
 
   const allRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null })
 
-  // 유효한 셀이 가장 많은 행을 헤더로 자동 탐색 (최대 15행)
-  let headerIdx = 0, maxCols = 0
-  for (let i = 0; i < Math.min(allRows.length, 15); i++) {
-    const count = (allRows[i] ?? []).filter((v) => v != null && String(v).trim() !== '').length
-    if (count > maxCols) { maxCols = count; headerIdx = i }
+  // 헤더 행 탐색 우선순위:
+  // 1. meta.headerRow 명시 → 그 index 사용
+  // 2. 'ClipKey' 셀을 포함한 행 탐색 (최대 20행)
+  // 3. 유효 셀이 가장 많은 행 (heuristic, 최대 20행)
+  let headerIdx
+  if (overrideMeta?.headerRow != null) {
+    headerIdx = overrideMeta.headerRow
+  } else {
+    let clipKeyRow = -1
+    for (let i = 0; i < Math.min(allRows.length, 20); i++) {
+      if ((allRows[i] ?? []).some((v) => String(v ?? '').trim() === 'ClipKey')) {
+        clipKeyRow = i
+        break
+      }
+    }
+    if (clipKeyRow >= 0) {
+      headerIdx = clipKeyRow
+    } else {
+      let maxCols = 0
+      headerIdx = 0
+      for (let i = 0; i < Math.min(allRows.length, 20); i++) {
+        const count = (allRows[i] ?? []).filter((v) => v != null && String(v).trim() !== '').length
+        if (count > maxCols) { maxCols = count; headerIdx = i }
+      }
+    }
   }
 
   const headers = (allRows[headerIdx] ?? []).map((h) => String(h ?? '').trim())
   const dataRows = allRows.slice(headerIdx + 1)
 
   // 디버깅: 실제 비어있지 않은 헤더 목록 출력
-  const nonEmptyHeaders = headers
-    .map((h, i) => ({ h, i }))
-    .filter(({ h }) => h !== '')
-  console.log('[parseAlternateGame] 비어있지 않은 헤더:', nonEmptyHeaders.map(({ h, i }) => `[${i}]${h}`).join(', '))
+  const nonEmptyHeaders = headers.map((h, i) => ({ h, i })).filter(({ h }) => h !== '')
+  console.log('[parseAlternateGame] 헤더 idx:', headerIdx, '헤더:', nonEmptyHeaders.map(({ h, i }) => `[${i}]${h}`).join(', '))
 
   // OffenseTeam 컬럼 인덱스 탐색 (영문/한글 헤더 모두 대응)
   const TEAM_COL_ALIASES = ['OffenseTeam', 'offenseteam', '공격팀', 'offense team', 'offense_team', '팀']
@@ -201,11 +219,15 @@ export async function parseAlternateGame(input, overrideMeta) {
           const v = row[i]
           if (v == null || typeof v !== 'string') continue
           const lower = v.trim().toLowerCase()
-          if (KNOWN_TEAM_PATTERNS.some((p) => lower.includes(p))) {
-            rawTeam = v.trim()
-            break
-          }
+          if (KNOWN_TEAM_PATTERNS.some((p) => lower.includes(p))) { rawTeam = v.trim(); break }
         }
+      }
+
+      // 'Home'/'Away' 값인 경우 meta의 실제 팀명으로 변환 (건국전 등)
+      if (rawTeam) {
+        const rt = String(rawTeam).trim().toLowerCase()
+        if (rt === 'home' && overrideMeta?.home) rawTeam = overrideMeta.home
+        else if (rt === 'away' && overrideMeta?.away) rawTeam = overrideMeta.away
       }
 
       obj['OffenseTeam'] = normalizeTeamName(rawTeam)
@@ -456,6 +478,70 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
     .sort((a, b) => b.scrimmageYards - a.scrimmageYards)
 
   return result.slice(0, limit)
+}
+
+export function getPlayerStats(plays, playerNum, teamName) {
+  const numStr = String(playerNum)
+  const offense = {
+    rushAttempts: 0, rushYards: 0, rushTD: 0,
+    recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
+    passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
+  }
+  const defense = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
+
+  function ok(raw) {
+    return raw != null && raw !== '' && String(raw).trim() !== '' && Number(raw) !== 0
+  }
+
+  for (const play of plays) {
+    const pt = playType(play)
+    const tags = significantPlayTags(play)
+
+    if (play.OffenseTeam === teamName) {
+      if (pt === 'RUN' && ok(play.CARNum) && String(play.CARNum) === numStr) {
+        offense.rushAttempts += 1
+        offense.rushYards += gain(play)
+        if (isTouchdown(play)) offense.rushTD += 1
+      }
+      if (pt === 'PASS') {
+        if (ok(play.CAR2Num) && String(play.CAR2Num) === numStr) {
+          offense.passAttempts += 1
+          offense.completions += 1
+          offense.passYards += gain(play)
+          if (isTouchdown(play)) offense.passTD += 1
+          if (tags.includes('INTERCEPT')) offense.passINT += 1
+        }
+        if (ok(play.CARNum) && String(play.CARNum) === numStr) {
+          offense.recTargets += 1
+          offense.receptions += 1
+          offense.recYards += gain(play)
+          if (isTouchdown(play)) offense.recTD += 1
+        }
+      }
+      if ((pt === 'NOPAS' || pt === 'NOPASS')) {
+        if (ok(play.CAR2Num) && String(play.CAR2Num) === numStr) offense.passAttempts += 1
+        if (ok(play.CARNum) && String(play.CARNum) === numStr) offense.recTargets += 1
+      }
+      if (pt === 'SACK' && ok(play.CAR2Num) && String(play.CAR2Num) === numStr) {
+        offense.passAttempts += 1
+        offense.passYards += gain(play)
+      }
+    } else {
+      // 상대 팀 오펜스 = 우리 팀 디펜스 플레이
+      if (ok(play.TKLNum) && String(play.TKLNum) === numStr) {
+        defense.tackles += 1
+        if (tags.includes('SACK')) defense.sacks += 1
+        if (tags.includes('TFL')) defense.tfl += 1
+        if (tags.includes('INTERCEPT')) defense.interceptions += 1
+        if (tags.includes('FUMBLERECDEF')) defense.fumbleRec += 1
+      }
+      if (ok(play.TKL2Num) && String(play.TKL2Num) === numStr) {
+        defense.assists += 1
+      }
+    }
+  }
+
+  return { offense, defense }
 }
 
 export function pickOffenseMvp(plays, teamName) {

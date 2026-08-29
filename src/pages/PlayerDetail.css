@@ -120,3 +120,12 @@
 .gamelog-table td a {
   color: var(--color-scarlet);
 }
+
+.gamelog-scroll {
+  overflow-x: auto;
+}
+
+.empty-note {
+  color: #888;
+  font-size: 14px;
+}
