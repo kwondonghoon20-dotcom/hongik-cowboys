@@ -1,0 +1,1335 @@
+{
+  "gameKey": "HIcowboys_20250913_vs_KMrazorbacks",
+  "clipKey": "34",
+  "scorerJerseyNumber": 25,
+  "playType": "run",
+  "ownGoalEdge": "bottom",
+  "route": [
+    {
+      "frame_id": 413,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 414,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 415,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 416,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 417,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 418,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 419,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 420,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 421,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 422,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 423,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 424,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 425,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 426,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 427,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 428,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 429,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 430,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 431,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 432,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 433,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 434,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 435,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 436,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 437,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 438,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 439,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 440,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 441,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 442,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 443,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 24.09
+    },
+    {
+      "frame_id": 444,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 445,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 24.07
+    },
+    {
+      "frame_id": 446,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 24.05
+    },
+    {
+      "frame_id": 447,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 24.03
+    },
+    {
+      "frame_id": 448,
+      "track_id": 2122,
+      "x_yards": 26.46,
+      "y_yards": 24.02
+    },
+    {
+      "frame_id": 449,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 24.0
+    },
+    {
+      "frame_id": 450,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.98
+    },
+    {
+      "frame_id": 451,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.94
+    },
+    {
+      "frame_id": 452,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.88
+    },
+    {
+      "frame_id": 453,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.82
+    },
+    {
+      "frame_id": 454,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.78
+    },
+    {
+      "frame_id": 455,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.73
+    },
+    {
+      "frame_id": 456,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.65
+    },
+    {
+      "frame_id": 457,
+      "track_id": 2122,
+      "x_yards": 26.56,
+      "y_yards": 23.59
+    },
+    {
+      "frame_id": 458,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 23.55
+    },
+    {
+      "frame_id": 459,
+      "track_id": 2122,
+      "x_yards": 26.66,
+      "y_yards": 23.52
+    },
+    {
+      "frame_id": 460,
+      "track_id": 2122,
+      "x_yards": 26.76,
+      "y_yards": 23.46
+    },
+    {
+      "frame_id": 461,
+      "track_id": 2122,
+      "x_yards": 26.86,
+      "y_yards": 23.38
+    },
+    {
+      "frame_id": 462,
+      "track_id": 2122,
+      "x_yards": 26.96,
+      "y_yards": 23.3
+    },
+    {
+      "frame_id": 463,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 23.32
+    },
+    {
+      "frame_id": 464,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 23.38
+    },
+    {
+      "frame_id": 465,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 23.3
+    },
+    {
+      "frame_id": 466,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 23.22
+    },
+    {
+      "frame_id": 467,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 23.15
+    },
+    {
+      "frame_id": 468,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 23.11
+    },
+    {
+      "frame_id": 469,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 22.88
+    },
+    {
+      "frame_id": 470,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 22.76
+    },
+    {
+      "frame_id": 471,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 22.67
+    },
+    {
+      "frame_id": 472,
+      "track_id": 2122,
+      "x_yards": 27.06,
+      "y_yards": 22.57
+    },
+    {
+      "frame_id": 473,
+      "track_id": 2122,
+      "x_yards": 27.06,
+      "y_yards": 22.5
+    },
+    {
+      "frame_id": 474,
+      "track_id": 2122,
+      "x_yards": 27.16,
+      "y_yards": 22.42
+    },
+    {
+      "frame_id": 475,
+      "track_id": 2122,
+      "x_yards": 27.36,
+      "y_yards": 22.34
+    },
+    {
+      "frame_id": 476,
+      "track_id": 2122,
+      "x_yards": 27.66,
+      "y_yards": 22.3
+    },
+    {
+      "frame_id": 477,
+      "track_id": 2122,
+      "x_yards": 28.06,
+      "y_yards": 22.18
+    },
+    {
+      "frame_id": 489,
+      "track_id": 2122,
+      "x_yards": 29.06,
+      "y_yards": 21.57
+    },
+    {
+      "frame_id": 490,
+      "track_id": 2122,
+      "x_yards": 29.16,
+      "y_yards": 21.49
+    },
+    {
+      "frame_id": 491,
+      "track_id": 2122,
+      "x_yards": 29.36,
+      "y_yards": 21.39
+    },
+    {
+      "frame_id": 492,
+      "track_id": 2122,
+      "x_yards": 29.47,
+      "y_yards": 21.34
+    },
+    {
+      "frame_id": 493,
+      "track_id": 2122,
+      "x_yards": 29.57,
+      "y_yards": 21.3
+    },
+    {
+      "frame_id": 494,
+      "track_id": 2122,
+      "x_yards": 29.67,
+      "y_yards": 21.18
+    },
+    {
+      "frame_id": 495,
+      "track_id": 2122,
+      "x_yards": 29.77,
+      "y_yards": 21.12
+    },
+    {
+      "frame_id": 499,
+      "track_id": 2122,
+      "x_yards": 29.77,
+      "y_yards": 20.87
+    },
+    {
+      "frame_id": 500,
+      "track_id": 2122,
+      "x_yards": 29.77,
+      "y_yards": 20.81
+    },
+    {
+      "frame_id": 501,
+      "track_id": 2122,
+      "x_yards": 30.17,
+      "y_yards": 20.98
+    },
+    {
+      "frame_id": 502,
+      "track_id": 2122,
+      "x_yards": 30.47,
+      "y_yards": 20.94
+    },
+    {
+      "frame_id": 503,
+      "track_id": 2122,
+      "x_yards": 30.78,
+      "y_yards": 20.87
+    },
+    {
+      "frame_id": 504,
+      "track_id": 2122,
+      "x_yards": 30.98,
+      "y_yards": 20.74
+    },
+    {
+      "frame_id": 505,
+      "track_id": 2122,
+      "x_yards": 31.18,
+      "y_yards": 20.62
+    },
+    {
+      "frame_id": 506,
+      "track_id": 2122,
+      "x_yards": 31.28,
+      "y_yards": 20.54
+    },
+    {
+      "frame_id": 507,
+      "track_id": 2122,
+      "x_yards": 31.49,
+      "y_yards": 20.48
+    },
+    {
+      "frame_id": 508,
+      "track_id": 2122,
+      "x_yards": 31.49,
+      "y_yards": 20.4
+    },
+    {
+      "frame_id": 509,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 20.38
+    },
+    {
+      "frame_id": 510,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 20.3
+    },
+    {
+      "frame_id": 511,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 20.21
+    },
+    {
+      "frame_id": 512,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 20.13
+    },
+    {
+      "frame_id": 513,
+      "track_id": 2122,
+      "x_yards": 31.69,
+      "y_yards": 20.03
+    },
+    {
+      "frame_id": 514,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 19.86
+    },
+    {
+      "frame_id": 515,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 19.72
+    },
+    {
+      "frame_id": 516,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 19.66
+    },
+    {
+      "frame_id": 517,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 19.57
+    },
+    {
+      "frame_id": 518,
+      "track_id": 2122,
+      "x_yards": 31.59,
+      "y_yards": 19.49
+    },
+    {
+      "frame_id": 519,
+      "track_id": 2122,
+      "x_yards": 31.39,
+      "y_yards": 19.43
+    },
+    {
+      "frame_id": 520,
+      "track_id": 2122,
+      "x_yards": 30.99,
+      "y_yards": 19.38
+    },
+    {
+      "frame_id": 521,
+      "track_id": 2122,
+      "x_yards": 30.58,
+      "y_yards": 19.31
+    },
+    {
+      "frame_id": 522,
+      "track_id": 2122,
+      "x_yards": 30.18,
+      "y_yards": 19.26
+    },
+    {
+      "frame_id": 523,
+      "track_id": 2122,
+      "x_yards": 29.88,
+      "y_yards": 19.25
+    },
+    {
+      "frame_id": 524,
+      "track_id": 2122,
+      "x_yards": 29.58,
+      "y_yards": 19.19
+    },
+    {
+      "frame_id": 525,
+      "track_id": 2122,
+      "x_yards": 29.48,
+      "y_yards": 19.1
+    },
+    {
+      "frame_id": 526,
+      "track_id": 2122,
+      "x_yards": 29.38,
+      "y_yards": 19.02
+    },
+    {
+      "frame_id": 529,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.97
+    },
+    {
+      "frame_id": 530,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.89
+    },
+    {
+      "frame_id": 531,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.8
+    },
+    {
+      "frame_id": 532,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.7
+    },
+    {
+      "frame_id": 533,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.58
+    },
+    {
+      "frame_id": 534,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.51
+    },
+    {
+      "frame_id": 535,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.45
+    },
+    {
+      "frame_id": 536,
+      "track_id": 2122,
+      "x_yards": 29.28,
+      "y_yards": 18.43
+    },
+    {
+      "frame_id": 537,
+      "track_id": 2122,
+      "x_yards": 29.08,
+      "y_yards": 18.36
+    },
+    {
+      "frame_id": 538,
+      "track_id": 2122,
+      "x_yards": 28.68,
+      "y_yards": 18.33
+    },
+    {
+      "frame_id": 539,
+      "track_id": 2122,
+      "x_yards": 28.48,
+      "y_yards": 18.27
+    },
+    {
+      "frame_id": 540,
+      "track_id": 2122,
+      "x_yards": 28.38,
+      "y_yards": 18.18
+    },
+    {
+      "frame_id": 541,
+      "track_id": 2122,
+      "x_yards": 28.28,
+      "y_yards": 18.12
+    },
+    {
+      "frame_id": 542,
+      "track_id": 2122,
+      "x_yards": 28.18,
+      "y_yards": 18.07
+    },
+    {
+      "frame_id": 543,
+      "track_id": 2122,
+      "x_yards": 27.98,
+      "y_yards": 17.97
+    },
+    {
+      "frame_id": 544,
+      "track_id": 2122,
+      "x_yards": 27.48,
+      "y_yards": 17.89
+    },
+    {
+      "frame_id": 545,
+      "track_id": 2122,
+      "x_yards": 27.28,
+      "y_yards": 17.8
+    },
+    {
+      "frame_id": 546,
+      "track_id": 2122,
+      "x_yards": 27.09,
+      "y_yards": 17.68
+    },
+    {
+      "frame_id": 547,
+      "track_id": 2122,
+      "x_yards": 26.99,
+      "y_yards": 17.59
+    },
+    {
+      "frame_id": 548,
+      "track_id": 2122,
+      "x_yards": 26.99,
+      "y_yards": 17.51
+    },
+    {
+      "frame_id": 549,
+      "track_id": 2122,
+      "x_yards": 26.99,
+      "y_yards": 17.4
+    },
+    {
+      "frame_id": 550,
+      "track_id": 2122,
+      "x_yards": 26.99,
+      "y_yards": 17.28
+    },
+    {
+      "frame_id": 551,
+      "track_id": 2122,
+      "x_yards": 26.99,
+      "y_yards": 17.13
+    },
+    {
+      "frame_id": 552,
+      "track_id": 2122,
+      "x_yards": 26.89,
+      "y_yards": 17.04
+    },
+    {
+      "frame_id": 553,
+      "track_id": 2122,
+      "x_yards": 26.89,
+      "y_yards": 16.94
+    },
+    {
+      "frame_id": 554,
+      "track_id": 2122,
+      "x_yards": 26.89,
+      "y_yards": 16.86
+    },
+    {
+      "frame_id": 555,
+      "track_id": 2122,
+      "x_yards": 26.79,
+      "y_yards": 16.75
+    },
+    {
+      "frame_id": 556,
+      "track_id": 2122,
+      "x_yards": 26.6,
+      "y_yards": 16.62
+    },
+    {
+      "frame_id": 557,
+      "track_id": 2122,
+      "x_yards": 26.3,
+      "y_yards": 16.57
+    },
+    {
+      "frame_id": 558,
+      "track_id": 2122,
+      "x_yards": 26.1,
+      "y_yards": 16.48
+    },
+    {
+      "frame_id": 559,
+      "track_id": 2122,
+      "x_yards": 25.9,
+      "y_yards": 16.43
+    },
+    {
+      "frame_id": 560,
+      "track_id": 2122,
+      "x_yards": 25.8,
+      "y_yards": 16.33
+    },
+    {
+      "frame_id": 561,
+      "track_id": 2122,
+      "x_yards": 25.61,
+      "y_yards": 16.22
+    },
+    {
+      "frame_id": 562,
+      "track_id": 2122,
+      "x_yards": 25.61,
+      "y_yards": 16.09
+    },
+    {
+      "frame_id": 563,
+      "track_id": 2122,
+      "x_yards": 25.61,
+      "y_yards": 15.88
+    },
+    {
+      "frame_id": 564,
+      "track_id": 2122,
+      "x_yards": 25.41,
+      "y_yards": 15.77
+    },
+    {
+      "frame_id": 565,
+      "track_id": 2122,
+      "x_yards": 25.22,
+      "y_yards": 15.68
+    },
+    {
+      "frame_id": 566,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 15.61
+    },
+    {
+      "frame_id": 567,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 15.49
+    },
+    {
+      "frame_id": 568,
+      "track_id": 2122,
+      "x_yards": 24.92,
+      "y_yards": 15.55
+    },
+    {
+      "frame_id": 569,
+      "track_id": 2122,
+      "x_yards": 24.92,
+      "y_yards": 15.53
+    },
+    {
+      "frame_id": 570,
+      "track_id": 2122,
+      "x_yards": 24.92,
+      "y_yards": 15.44
+    },
+    {
+      "frame_id": 571,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 15.34
+    },
+    {
+      "frame_id": 572,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 15.21
+    },
+    {
+      "frame_id": 573,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 15.07
+    },
+    {
+      "frame_id": 574,
+      "track_id": 2122,
+      "x_yards": 25.12,
+      "y_yards": 14.98
+    },
+    {
+      "frame_id": 575,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 14.86
+    },
+    {
+      "frame_id": 576,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 14.77
+    },
+    {
+      "frame_id": 577,
+      "track_id": 2122,
+      "x_yards": 25.02,
+      "y_yards": 14.71
+    },
+    {
+      "frame_id": 578,
+      "track_id": 2122,
+      "x_yards": 24.92,
+      "y_yards": 14.66
+    },
+    {
+      "frame_id": 579,
+      "track_id": 2122,
+      "x_yards": 24.73,
+      "y_yards": 14.57
+    },
+    {
+      "frame_id": 580,
+      "track_id": 2122,
+      "x_yards": 24.53,
+      "y_yards": 14.44
+    },
+    {
+      "frame_id": 581,
+      "track_id": 2122,
+      "x_yards": 24.34,
+      "y_yards": 14.35
+    },
+    {
+      "frame_id": 582,
+      "track_id": 2122,
+      "x_yards": 24.34,
+      "y_yards": 14.23
+    },
+    {
+      "frame_id": 583,
+      "track_id": 2122,
+      "x_yards": 24.24,
+      "y_yards": 14.14
+    },
+    {
+      "frame_id": 584,
+      "track_id": 2122,
+      "x_yards": 24.14,
+      "y_yards": 14.05
+    },
+    {
+      "frame_id": 585,
+      "track_id": 2122,
+      "x_yards": 24.04,
+      "y_yards": 13.97
+    },
+    {
+      "frame_id": 586,
+      "track_id": 2122,
+      "x_yards": 23.85,
+      "y_yards": 13.9
+    },
+    {
+      "frame_id": 587,
+      "track_id": 2122,
+      "x_yards": 23.85,
+      "y_yards": 13.85
+    },
+    {
+      "frame_id": 588,
+      "track_id": 2122,
+      "x_yards": 23.75,
+      "y_yards": 13.77
+    },
+    {
+      "frame_id": 589,
+      "track_id": 2122,
+      "x_yards": 23.75,
+      "y_yards": 13.72
+    },
+    {
+      "frame_id": 590,
+      "track_id": 2122,
+      "x_yards": 23.75,
+      "y_yards": 13.62
+    },
+    {
+      "frame_id": 591,
+      "track_id": 2122,
+      "x_yards": 23.65,
+      "y_yards": 13.53
+    },
+    {
+      "frame_id": 592,
+      "track_id": 2122,
+      "x_yards": 23.65,
+      "y_yards": 13.42
+    },
+    {
+      "frame_id": 593,
+      "track_id": 2122,
+      "x_yards": 23.56,
+      "y_yards": 13.36
+    },
+    {
+      "frame_id": 594,
+      "track_id": 2122,
+      "x_yards": 23.36,
+      "y_yards": 13.29
+    },
+    {
+      "frame_id": 595,
+      "track_id": 2122,
+      "x_yards": 23.26,
+      "y_yards": 13.22
+    },
+    {
+      "frame_id": 596,
+      "track_id": 2122,
+      "x_yards": 23.17,
+      "y_yards": 13.14
+    },
+    {
+      "frame_id": 597,
+      "track_id": 2122,
+      "x_yards": 23.07,
+      "y_yards": 13.03
+    },
+    {
+      "frame_id": 598,
+      "track_id": 2122,
+      "x_yards": 23.07,
+      "y_yards": 12.96
+    },
+    {
+      "frame_id": 599,
+      "track_id": 2122,
+      "x_yards": 22.97,
+      "y_yards": 12.87
+    },
+    {
+      "frame_id": 600,
+      "track_id": 2122,
+      "x_yards": 22.87,
+      "y_yards": 12.79
+    },
+    {
+      "frame_id": 601,
+      "track_id": 2122,
+      "x_yards": 22.88,
+      "y_yards": 12.7
+    },
+    {
+      "frame_id": 602,
+      "track_id": 2122,
+      "x_yards": 22.88,
+      "y_yards": 12.64
+    },
+    {
+      "frame_id": 603,
+      "track_id": 2122,
+      "x_yards": 22.78,
+      "y_yards": 12.57
+    },
+    {
+      "frame_id": 604,
+      "track_id": 2122,
+      "x_yards": 22.68,
+      "y_yards": 12.51
+    },
+    {
+      "frame_id": 605,
+      "track_id": 2122,
+      "x_yards": 22.58,
+      "y_yards": 12.46
+    },
+    {
+      "frame_id": 606,
+      "track_id": 2122,
+      "x_yards": 22.39,
+      "y_yards": 12.41
+    },
+    {
+      "frame_id": 607,
+      "track_id": 2122,
+      "x_yards": 22.19,
+      "y_yards": 12.38
+    },
+    {
+      "frame_id": 608,
+      "track_id": 2122,
+      "x_yards": 22.19,
+      "y_yards": 12.34
+    },
+    {
+      "frame_id": 609,
+      "track_id": 2122,
+      "x_yards": 22.1,
+      "y_yards": 12.29
+    },
+    {
+      "frame_id": 610,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 12.24
+    },
+    {
+      "frame_id": 611,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 12.17
+    },
+    {
+      "frame_id": 612,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 12.09
+    },
+    {
+      "frame_id": 613,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 12.02
+    },
+    {
+      "frame_id": 614,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 11.94
+    },
+    {
+      "frame_id": 615,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 11.88
+    },
+    {
+      "frame_id": 616,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 11.85
+    },
+    {
+      "frame_id": 617,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 11.83
+    },
+    {
+      "frame_id": 618,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 11.79
+    },
+    {
+      "frame_id": 619,
+      "track_id": 2122,
+      "x_yards": 22.2,
+      "y_yards": 11.77
+    },
+    {
+      "frame_id": 620,
+      "track_id": 2122,
+      "x_yards": 22.1,
+      "y_yards": 11.77
+    },
+    {
+      "frame_id": 621,
+      "track_id": 2122,
+      "x_yards": 22.1,
+      "y_yards": 11.74
+    },
+    {
+      "frame_id": 622,
+      "track_id": 2122,
+      "x_yards": 22.0,
+      "y_yards": 11.72
+    },
+    {
+      "frame_id": 623,
+      "track_id": 2122,
+      "x_yards": 22.0,
+      "y_yards": 11.68
+    },
+    {
+      "frame_id": 624,
+      "track_id": 2122,
+      "x_yards": 22.0,
+      "y_yards": 11.64
+    },
+    {
+      "frame_id": 625,
+      "track_id": 2122,
+      "x_yards": 22.0,
+      "y_yards": 11.61
+    },
+    {
+      "frame_id": 626,
+      "track_id": 2122,
+      "x_yards": 21.91,
+      "y_yards": 11.57
+    },
+    {
+      "frame_id": 627,
+      "track_id": 2122,
+      "x_yards": 21.81,
+      "y_yards": 11.54
+    },
+    {
+      "frame_id": 628,
+      "track_id": 2122,
+      "x_yards": 21.71,
+      "y_yards": 11.5
+    },
+    {
+      "frame_id": 629,
+      "track_id": 2122,
+      "x_yards": 21.52,
+      "y_yards": 11.49
+    },
+    {
+      "frame_id": 630,
+      "track_id": 2122,
+      "x_yards": 21.42,
+      "y_yards": 11.44
+    },
+    {
+      "frame_id": 631,
+      "track_id": 2122,
+      "x_yards": 21.23,
+      "y_yards": 11.42
+    },
+    {
+      "frame_id": 632,
+      "track_id": 2122,
+      "x_yards": 21.13,
+      "y_yards": 11.39
+    },
+    {
+      "frame_id": 633,
+      "track_id": 2122,
+      "x_yards": 21.13,
+      "y_yards": 11.35
+    },
+    {
+      "frame_id": 634,
+      "track_id": 2122,
+      "x_yards": 21.13,
+      "y_yards": 11.33
+    },
+    {
+      "frame_id": 635,
+      "track_id": 2122,
+      "x_yards": 21.13,
+      "y_yards": 11.29
+    },
+    {
+      "frame_id": 636,
+      "track_id": 2122,
+      "x_yards": 21.03,
+      "y_yards": 11.28
+    },
+    {
+      "frame_id": 637,
+      "track_id": 2122,
+      "x_yards": 21.03,
+      "y_yards": 11.24
+    },
+    {
+      "frame_id": 638,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.21
+    },
+    {
+      "frame_id": 639,
+      "track_id": 2122,
+      "x_yards": 21.04,
+      "y_yards": 11.16
+    },
+    {
+      "frame_id": 640,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.15
+    },
+    {
+      "frame_id": 641,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.15
+    },
+    {
+      "frame_id": 642,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.13
+    },
+    {
+      "frame_id": 643,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.09
+    },
+    {
+      "frame_id": 644,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.09
+    },
+    {
+      "frame_id": 645,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.07
+    },
+    {
+      "frame_id": 646,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.04
+    },
+    {
+      "frame_id": 647,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.02
+    },
+    {
+      "frame_id": 648,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.0
+    },
+    {
+      "frame_id": 649,
+      "track_id": 2122,
+      "x_yards": 20.94,
+      "y_yards": 11.0
+    }
+  ]
+}

@@ -1,17 +1,17 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { players } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
 import { getTouchdownClip } from '../data/touchdownClips'
 import { OUR_TEAM } from '../utils/parseExcel'
 
-const FIELD_WIDTH = 53.333
+// ── 유틸 ──────────────────────────────────────────────────────
 
 function findRosterPlayer(number) {
   return players.find((p) => String(p.number) === String(number)) ?? null
 }
 
-// Catmull-Rom → cubic bezier SVG path
 function catmullRomPath(pts) {
+  // pts: [{x, y}]
   if (pts.length < 2) return ''
   const p = pts.map((pt) => [pt.x, pt.y])
   let d = `M ${p[0][0].toFixed(2)} ${p[0][1].toFixed(2)}`
@@ -29,75 +29,169 @@ function catmullRomPath(pts) {
   return d
 }
 
-function FieldSvg({ route }) {
-  const fieldLength = route.fieldLength ?? 120
-  const pts = route.points ?? []
-  const passerPts = route.passerPoints ?? []
+function sampleRoute(route, step = 5) {
+  const pts = []
+  for (let i = 0; i < route.length; i += step) pts.push(route[i])
+  if (pts[pts.length - 1] !== route[route.length - 1]) pts.push(route[route.length - 1])
+  return pts
+}
 
+// ── 실측 야드 좌표 SVG (새 형식: route[].x_yards/y_yards) ──────
+
+const FIELD_W = 120
+const FIELD_H = 53.333
+
+function AnimatedRouteSvg({ routeData, isOurTD }) {
+  const pathRef = useRef(null)
+
+  useEffect(() => {
+    const el = pathRef.current
+    if (!el) return
+    try {
+      const len = el.getTotalLength()
+      el.style.strokeDasharray = `${len}`
+      el.style.strokeDashoffset = `${len}`
+      el.getBoundingClientRect() // force reflow
+      el.style.transition = 'stroke-dashoffset 2s ease'
+      el.style.strokeDashoffset = '0'
+    } catch (_) {}
+  }, [])
+
+  const rawPts = routeData.route ?? []
+  const sampled = sampleRoute(rawPts, 5)
+  const pathD = catmullRomPath(sampled.map((p) => ({ x: p.x_yards, y: p.y_yards })))
+  const start = rawPts[0]
+  const end = rawPts[rawPts.length - 1]
+  const pathColor = isOurTD ? '#CC0000' : '#888'
+  const distYards = start && end ? Math.abs(start.x_yards - end.x_yards).toFixed(1) : '?'
+
+  const yardLines = []
+  for (let x = 0; x <= 120; x += 10) yardLines.push(x)
+
+  return (
+    <div className="td-field-wrap">
+      <svg
+        viewBox={`0 0 ${FIELD_W} ${FIELD_H}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="td-field-svg"
+        aria-label="터치다운 경로"
+      >
+        {/* 필드 배경 */}
+        <rect x={0} y={0} width={FIELD_W} height={FIELD_H} fill="#1a5c1a" />
+        {/* 엔드존 */}
+        <rect x={0} y={0} width={10} height={FIELD_H} fill="#0d4d0d" />
+        <rect x={110} y={0} width={10} height={FIELD_H} fill="#0d4d0d" />
+        {/* 야드 라인 */}
+        {yardLines.map((x) => (
+          <line
+            key={x}
+            x1={x} y1={0} x2={x} y2={FIELD_H}
+            stroke="rgba(255,255,255,0.22)"
+            strokeWidth={x === 0 || x === 60 || x === 120 ? 0.5 : 0.2}
+          />
+        ))}
+        {/* 필드 테두리 */}
+        <rect x={0} y={0} width={FIELD_W} height={FIELD_H}
+          fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth={0.4}
+        />
+        {/* 득점 경로 */}
+        {sampled.length >= 2 && (
+          <path
+            ref={pathRef}
+            d={pathD}
+            fill="none"
+            stroke={pathColor}
+            strokeWidth={1.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+        {/* 시작점 */}
+        {start && (
+          <circle cx={start.x_yards} cy={start.y_yards} r={1.5} fill="#fff" opacity={0.9} />
+        )}
+        {/* TD 지점 */}
+        {end && (
+          <circle
+            cx={end.x_yards} cy={end.y_yards} r={1.8}
+            fill={pathColor} stroke="#fff" strokeWidth={0.4}
+          />
+        )}
+      </svg>
+      <div className="td-field-legend">
+        <span style={{ color: pathColor }}>● 득점 경로 ({distYards}야드)</span>
+        <span className="td-legend-dot-start">● 시작</span>
+        <span style={{ color: pathColor }}>● TD</span>
+      </div>
+    </div>
+  )
+}
+
+// ── 구 좌표계 SVG (points 기반, 하위 호환) ─────────────────────
+
+function LegacyRouteSvg({ routeData }) {
+  const fieldLength = routeData.fieldLength ?? 120
+  const pts = routeData.points ?? []
+  const passerPts = routeData.passerPoints ?? []
   const yardLineXs = []
   for (let x = 0; x <= fieldLength; x += 10) yardLineXs.push(x)
   const hasEndZones = fieldLength >= 110
 
   return (
-    <svg
-      viewBox={`0 0 ${fieldLength} ${FIELD_WIDTH}`}
-      preserveAspectRatio="xMidYMid meet"
-      className="td-field-svg"
-      aria-label="터치다운 경로"
-    >
-      <rect x={0} y={0} width={fieldLength} height={FIELD_WIDTH} fill="#193f19" />
-      {hasEndZones && (
-        <>
-          <rect x={0} y={0} width={10} height={FIELD_WIDTH} fill="#122e12" />
-          <rect x={fieldLength - 10} y={0} width={10} height={FIELD_WIDTH} fill="#1b361b" />
-        </>
-      )}
-      {yardLineXs.map((x) => (
-        <line
-          key={x}
-          x1={x} y1={0} x2={x} y2={FIELD_WIDTH}
-          stroke="rgba(255,255,255,0.22)"
-          strokeWidth={x === 0 || x === fieldLength || x === fieldLength / 2 ? 0.45 : 0.2}
-        />
-      ))}
-      {passerPts.length >= 2 && (
-        <path
-          d={catmullRomPath(passerPts)}
-          fill="none"
-          stroke="rgba(255,255,255,0.55)"
-          strokeWidth={0.8}
-          strokeDasharray="2 1.5"
-          strokeLinecap="round"
-        />
-      )}
-      {pts.length >= 2 && (
-        <path
-          d={catmullRomPath(pts)}
-          fill="none"
-          stroke="#CC0000"
-          strokeWidth={1.4}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      )}
-      {pts.length > 0 && (
-        <circle cx={pts[0].x} cy={pts[0].y} r={1.3} fill="#ffd700" />
-      )}
-      {pts.length > 1 && (
-        <circle
-          cx={pts[pts.length - 1].x}
-          cy={pts[pts.length - 1].y}
-          r={1.6}
-          fill="#CC0000"
-          stroke="#fff"
-          strokeWidth={0.35}
-        />
-      )}
-    </svg>
+    <div className="td-field-wrap">
+      <svg
+        viewBox={`0 0 ${fieldLength} ${FIELD_H}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="td-field-svg"
+        aria-label="터치다운 경로"
+      >
+        <rect x={0} y={0} width={fieldLength} height={FIELD_H} fill="#193f19" />
+        {hasEndZones && (
+          <>
+            <rect x={0} y={0} width={10} height={FIELD_H} fill="#122e12" />
+            <rect x={fieldLength - 10} y={0} width={10} height={FIELD_H} fill="#1b361b" />
+          </>
+        )}
+        {yardLineXs.map((x) => (
+          <line key={x} x1={x} y1={0} x2={x} y2={FIELD_H}
+            stroke="rgba(255,255,255,0.22)"
+            strokeWidth={x === 0 || x === fieldLength || x === fieldLength / 2 ? 0.45 : 0.2}
+          />
+        ))}
+        {passerPts.length >= 2 && (
+          <path d={catmullRomPath(passerPts)} fill="none"
+            stroke="rgba(255,255,255,0.55)" strokeWidth={0.8}
+            strokeDasharray="2 1.5" strokeLinecap="round"
+          />
+        )}
+        {pts.length >= 2 && (
+          <path d={catmullRomPath(pts)} fill="none"
+            stroke="#CC0000" strokeWidth={1.4}
+            strokeLinecap="round" strokeLinejoin="round"
+          />
+        )}
+        {pts.length > 0 && <circle cx={pts[0].x} cy={pts[0].y} r={1.3} fill="#ffd700" />}
+        {pts.length > 1 && (
+          <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y}
+            r={1.6} fill="#CC0000" stroke="#fff" strokeWidth={0.35}
+          />
+        )}
+      </svg>
+      <div className="td-field-legend">
+        <span className="td-legend-scorer">● 득점 경로</span>
+        {passerPts.length >= 2 && <span className="td-legend-passer">- - QB 경로</span>}
+        <span className="td-legend-dot-start">● 시작</span>
+        <span className="td-legend-dot-end">● TD</span>
+      </div>
+    </div>
   )
 }
 
+// ── 메인 컴포넌트 ──────────────────────────────────────────────
+
 export default function TouchdownFieldDiagram({ play, game }) {
+  const [tab, setTab] = useState('video')
+
   const pt = String(play.PlayType ?? '').trim().toUpperCase()
   const isPass = pt === 'PASS'
   const isRun = pt === 'RUN'
@@ -116,8 +210,16 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const teamLabel = isOurTD ? 'HIcowboys' : (play.OffenseTeam ?? '?')
   const tdTypeLabel = isPass ? 'PASS TD' : isRun ? 'RUN TD' : 'TD'
 
-  const route = game.gameKey ? getTouchdownRoute(game.gameKey, play.ClipKey) : null
+  const routeData = game.gameKey ? getTouchdownRoute(game.gameKey, play.ClipKey) : null
   const clipUrl = game.gameKey ? getTouchdownClip(game.gameKey, play.OffenseTeam) : null
+
+  const hasNewRoute = (routeData?.route?.length ?? 0) > 0
+  const hasLegacyRoute = (routeData?.points?.length ?? 0) > 0
+  const hasRoute = hasNewRoute || hasLegacyRoute
+  const hasBoth = clipUrl && hasRoute
+
+  const showVideo = clipUrl && (!hasRoute || tab === 'video')
+  const showRoute = hasRoute && (!clipUrl || tab === 'route')
 
   return (
     <div className="td-card">
@@ -140,7 +242,24 @@ export default function TouchdownFieldDiagram({ play, game }) {
         )}
       </div>
 
-      {clipUrl ? (
+      {hasBoth && (
+        <div className="td-tabs">
+          <button
+            className={`td-tab ${tab === 'video' ? 'active' : ''}`}
+            onClick={() => setTab('video')}
+          >
+            📹 영상
+          </button>
+          <button
+            className={`td-tab ${tab === 'route' ? 'active' : ''}`}
+            onClick={() => setTab('route')}
+          >
+            📍 경로
+          </button>
+        </div>
+      )}
+
+      {showVideo && (
         <div className="td-video-wrap">
           <iframe
             src={clipUrl}
@@ -150,19 +269,16 @@ export default function TouchdownFieldDiagram({ play, game }) {
             className="td-video-iframe"
           />
         </div>
-      ) : route ? (
-        <div className="td-field-wrap">
-          <FieldSvg route={route} />
-          <div className="td-field-legend">
-            <span className="td-legend-scorer">● 득점 경로</span>
-            {(route.passerPoints?.length ?? 0) >= 2 && (
-              <span className="td-legend-passer">- - QB 경로</span>
-            )}
-            <span className="td-legend-dot-start">● 시작</span>
-            <span className="td-legend-dot-end">● TD</span>
-          </div>
-        </div>
-      ) : (
+      )}
+
+      {showRoute && hasNewRoute && (
+        <AnimatedRouteSvg key={tab} routeData={routeData} isOurTD={isOurTD} />
+      )}
+      {showRoute && !hasNewRoute && hasLegacyRoute && (
+        <LegacyRouteSvg routeData={routeData} />
+      )}
+
+      {!clipUrl && !hasRoute && (
         <div className="td-no-route">
           <span className="td-no-route-icon">📹</span>
           <span>영상 준비 중</span>

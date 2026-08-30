@@ -97,7 +97,35 @@
   margin: 0 4px;
 }
 
-/* ── 영상 iframe ─────��──────────────────────────────────── */
+/* ── 탭 전환 ────────────────────────────────────────────── */
+
+.td-tabs {
+  display: flex;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.td-tab {
+  flex: 1;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s, border-bottom 0.15s;
+  border-bottom: 2px solid transparent;
+}
+
+.td-tab:hover {
+  color: #ccc;
+}
+
+.td-tab.active {
+  color: var(--color-white);
+  border-bottom: 2px solid var(--color-scarlet);
+}
+
+/* ── 영상 iframe ─────────────────────────────────────────── */
 
 .td-video-wrap {
   padding: 12px 14px;
