@@ -316,6 +316,9 @@ function gain(play) {
   return Number(play.GainYard ?? 0) || 0
 }
 
+// 선수 번호 정규화: '09' → '9', 9 → '9' (앞자리 0 제거 + 타입 통일)
+const normalizeNum = (n) => String(parseInt(n || 0, 10))
+
 function isOffensePlay(play) {
   return isRun(play) || isPassAttempt(play) || isSackPlay(play)
 }
@@ -327,7 +330,16 @@ export function calcTeamStats(plays, teamName) {
   const passYards = offensePlays
     .filter((play) => isPassAttempt(play) || isSackPlay(play))
     .reduce((sum, play) => sum + gain(play), 0)
-  const turnovers = offensePlays.filter(isTurnover).length
+  const seenTurnoverKeys = new Set()
+  const turnovers = offensePlays.filter((play) => {
+    if (!isTurnover(play)) return false
+    const ck = play.ClipKey != null && play.ClipKey !== '' ? String(play.ClipKey) : null
+    if (ck !== null) {
+      if (seenTurnoverKeys.has(ck)) return false
+      seenTurnoverKeys.add(ck)
+    }
+    return true
+  }).length
 
   const rushAttempts = offensePlays.filter(isRun).length
   const passAttempts = offensePlays.filter(isPassAttempt).length
@@ -372,7 +384,7 @@ export function getTopRushers(plays, teamName, limit = 5) {
 
   for (const play of plays) {
     if (!isRun(play) || play.OffenseTeam !== teamName || !hasValidCarrier(play)) continue
-    const num = String(play.CARNum)
+    const num = normalizeNum(play.CARNum)
     yardsByCarrier.set(num, (yardsByCarrier.get(num) ?? 0) + gain(play))
   }
 
@@ -426,8 +438,8 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
     if (pt === 'RUN') {
       // CARNum = 러셔 (QB 스크램블도 러싱으로 집계)
       if (!ok(play.CARNum)) continue
-      const s = getOrCreate(String(play.CARNum), team)
-      recordPos(String(play.CARNum), team, play.CARPos)
+      const s = getOrCreate(normalizeNum(play.CARNum), team)
+      recordPos(normalizeNum(play.CARNum), team, play.CARPos)
       s.rushAttempts += 1
       s.rushYards += gain(play)
       if (isTouchdown(play)) s.rushTD += 1
@@ -435,8 +447,8 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
     } else if (pt === 'PASS') {
       // CAR2Num = QB (패서, CAR2Pos=QB)
       if (ok(play.CAR2Num)) {
-        const s = getOrCreate(String(play.CAR2Num), team)
-        recordPos(String(play.CAR2Num), team, play.CAR2Pos)
+        const s = getOrCreate(normalizeNum(play.CAR2Num), team)
+        recordPos(normalizeNum(play.CAR2Num), team, play.CAR2Pos)
         s.passAttempts += 1
         s.completions += 1
         s.passYards += gain(play)
@@ -445,8 +457,8 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       }
       // CARNum = 리시버 (볼 받는 선수, CARPos=WR/RB)
       if (ok(play.CARNum)) {
-        const s = getOrCreate(String(play.CARNum), team)
-        recordPos(String(play.CARNum), team, play.CARPos)
+        const s = getOrCreate(normalizeNum(play.CARNum), team)
+        recordPos(normalizeNum(play.CARNum), team, play.CARPos)
         s.recTargets += 1
         s.receptions += 1
         s.recYards += gain(play)
@@ -456,20 +468,20 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
     } else if (pt === 'NOPAS' || pt === 'NOPASS') {
       // CAR2Num = QB (불완전 패스, 야드 없음)
       if (ok(play.CAR2Num)) {
-        getOrCreate(String(play.CAR2Num), team).passAttempts += 1
-        recordPos(String(play.CAR2Num), team, play.CAR2Pos)
+        getOrCreate(normalizeNum(play.CAR2Num), team).passAttempts += 1
+        recordPos(normalizeNum(play.CAR2Num), team, play.CAR2Pos)
       }
       // CARNum = 타겟 (패스 받지 못한 선수)
       if (ok(play.CARNum)) {
-        getOrCreate(String(play.CARNum), team).recTargets += 1
-        recordPos(String(play.CARNum), team, play.CARPos)
+        getOrCreate(normalizeNum(play.CARNum), team).recTargets += 1
+        recordPos(normalizeNum(play.CARNum), team, play.CARPos)
       }
 
     } else if (pt === 'SACK') {
       // CAR2Num = QB (새크 당한 QB, 음수 야드)
       if (ok(play.CAR2Num)) {
-        const s = getOrCreate(String(play.CAR2Num), team)
-        recordPos(String(play.CAR2Num), team, play.CAR2Pos)
+        const s = getOrCreate(normalizeNum(play.CAR2Num), team)
+        recordPos(normalizeNum(play.CAR2Num), team, play.CAR2Pos)
         s.passAttempts += 1
         s.passYards += gain(play)
       }
@@ -492,7 +504,7 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
 }
 
 export function getPlayerStats(plays, playerNum, teamName) {
-  const numStr = String(playerNum)
+  const numStr = normalizeNum(playerNum)
   const offense = {
     rushAttempts: 0, rushYards: 0, rushTD: 0,
     recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
@@ -509,20 +521,20 @@ export function getPlayerStats(plays, playerNum, teamName) {
     const tags = significantPlayTags(play)
 
     if (play.OffenseTeam === teamName) {
-      if (pt === 'RUN' && ok(play.CARNum) && String(play.CARNum) === numStr) {
+      if (pt === 'RUN' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
         offense.rushAttempts += 1
         offense.rushYards += gain(play)
         if (isTouchdown(play)) offense.rushTD += 1
       }
       if (pt === 'PASS') {
-        if (ok(play.CAR2Num) && String(play.CAR2Num) === numStr) {
+        if (ok(play.CAR2Num) && normalizeNum(play.CAR2Num) === numStr) {
           offense.passAttempts += 1
           offense.completions += 1
           offense.passYards += gain(play)
           if (isTouchdown(play)) offense.passTD += 1
           if (tags.includes('INTERCEPT')) offense.passINT += 1
         }
-        if (ok(play.CARNum) && String(play.CARNum) === numStr) {
+        if (ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
           offense.recTargets += 1
           offense.receptions += 1
           offense.recYards += gain(play)
@@ -530,23 +542,23 @@ export function getPlayerStats(plays, playerNum, teamName) {
         }
       }
       if ((pt === 'NOPAS' || pt === 'NOPASS')) {
-        if (ok(play.CAR2Num) && String(play.CAR2Num) === numStr) offense.passAttempts += 1
-        if (ok(play.CARNum) && String(play.CARNum) === numStr) offense.recTargets += 1
+        if (ok(play.CAR2Num) && normalizeNum(play.CAR2Num) === numStr) offense.passAttempts += 1
+        if (ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) offense.recTargets += 1
       }
-      if (pt === 'SACK' && ok(play.CAR2Num) && String(play.CAR2Num) === numStr) {
+      if (pt === 'SACK' && ok(play.CAR2Num) && normalizeNum(play.CAR2Num) === numStr) {
         offense.passAttempts += 1
         offense.passYards += gain(play)
       }
     } else {
       // 상대 팀 오펜스 = 우리 팀 디펜스 플레이
-      if (ok(play.TKLNum) && String(play.TKLNum) === numStr) {
+      if (ok(play.TKLNum) && normalizeNum(play.TKLNum) === numStr) {
         defense.tackles += 1
         if (tags.includes('SACK')) defense.sacks += 1
         if (tags.includes('TFL')) defense.tfl += 1
         if (tags.includes('INTERCEPT')) defense.interceptions += 1
         if (tags.includes('FUMBLERECDEF')) defense.fumbleRec += 1
       }
-      if (ok(play.TKL2Num) && String(play.TKL2Num) === numStr) {
+      if (ok(play.TKL2Num) && normalizeNum(play.TKL2Num) === numStr) {
         defense.assists += 1
       }
     }
@@ -587,7 +599,7 @@ export function pickOffenseMvp(plays, teamName) {
     if (pt === 'RUN') {
       const raw = play.CARNum
       if (raw == null || raw === '' || Number(raw) === 0) continue
-      const key = String(raw)
+      const key = normalizeNum(raw)
       const s = getOrCreate(key)
       recordPos(key, play.CARPos)
       s.rushAttempts += 1
@@ -597,7 +609,7 @@ export function pickOffenseMvp(plays, teamName) {
       // CAR2Num = QB (패서)
       const qbRaw = play.CAR2Num
       if (qbRaw != null && qbRaw !== '' && Number(qbRaw) !== 0) {
-        const key = String(qbRaw)
+        const key = normalizeNum(qbRaw)
         const s = getOrCreate(key)
         recordPos(key, play.CAR2Pos)
         s.passAttempts += 1
@@ -611,7 +623,7 @@ export function pickOffenseMvp(plays, teamName) {
       // CARNum = 리시버
       const recRaw = play.CARNum
       if (recRaw != null && recRaw !== '' && Number(recRaw) !== 0 && isCompletePass(play)) {
-        const key = String(recRaw)
+        const key = normalizeNum(recRaw)
         const s = getOrCreate(key)
         recordPos(key, play.CARPos)
         s.receptions += 1
@@ -664,7 +676,7 @@ export function pickDefenseMvp(plays, teamName) {
     for (const [rawKey, posKey] of [['TKLNum', 'TKLPos'], ['TKL2Num', 'TKL2Pos']]) {
       const raw = play[rawKey]
       if (raw == null || raw === '' || Number(raw) === 0) continue
-      const key = String(raw)
+      const key = normalizeNum(raw)
       const s = getOrCreate(key)
       recordPos(key, play[posKey])
       s.tackles += 1
