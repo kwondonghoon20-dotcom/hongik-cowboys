@@ -88,6 +88,17 @@ const XLSX_META_MAP = {
     location: '효창운동장',
     headerRow: 0,
   },
+  '홍익 3경기 vs 연세대 플레이별 데이터.xlsx': {
+    gameKey: 'YonseiEagles_20250921_vs_HIcowboys',
+    date: '2025-09-21',
+    type: 'League',
+    home: 'YonseiEagles',
+    away: OUR_TEAM,
+    homeScore: 28,
+    awayScore: 14,
+    location: '성동구 살곶이 축구장',
+    headerRow: 0,
+  },
 }
 
 // 모듈 로드 시 한 번만 실행되는 Promise — 여러 컴포넌트가 공유

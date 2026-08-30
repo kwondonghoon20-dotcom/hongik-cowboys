@@ -23,6 +23,8 @@ const KOREAN_TEAM_MAP = {
   '한국외대': 'HufsBlackKnights',
   '외대': 'HufsBlackKnights',
   '한국외국어대': 'HufsBlackKnights',
+  '연세대': 'YonseiEagles',
+  '연세': 'YonseiEagles',
 }
 
 function normalizeTeamName(name) {
@@ -37,6 +39,7 @@ function normalizeTeamName(name) {
   if (lower.includes('국민')) return 'KMrazorbacks'
   if (lower.includes('건국')) return 'Konkuk'
   if (lower.includes('외대') || lower.includes('hufs')) return 'HufsBlackKnights'
+  if (lower.includes('연세') || lower.includes('yonsei')) return 'YonseiEagles'
   const key = lower.replace(/[^a-z0-9]/g, '')
   return TEAM_NAME_MAP[key] ?? trimmed
 }
@@ -211,7 +214,7 @@ export async function parseAlternateGame(input, overrideMeta) {
   console.log('[parseAlternateGame] meta 팀명 변환:', { home: overrideMeta?.home, away: overrideMeta?.away })
 
   // 알려진 한글 팀명 패턴 (value-scan fallback용) — 'home'/'away'도 포함해 컬럼 못 찾을 때 대비
-  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', '외대', 'cowboys', 'kookmin', 'konkuk', 'hufs', OUR_TEAM.toLowerCase(), 'home', 'away']
+  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', '외대', '연세', 'cowboys', 'kookmin', 'konkuk', 'hufs', 'yonsei', OUR_TEAM.toLowerCase(), 'home', 'away']
 
   const plays = dataRows
     .map((row) => {

@@ -30,6 +30,7 @@ const TEAM_ABBR_MAP = {
   hicowboys: 'HIC',
   hufsblackknights: 'HUF',
   kmrazorbacks: 'KMU',
+  yonseieagles: 'YSU',
 }
 
 function teamAbbr(teamName) {
