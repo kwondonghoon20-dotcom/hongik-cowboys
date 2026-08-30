@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import { players } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
 import { getTouchdownClip } from '../data/touchdownClips'
-import { OUR_TEAM } from '../utils/parseExcel'
+import { OUR_TEAM, normalizeTeamName } from '../utils/parseExcel'
 
 // ── 유틸 ──────────────────────────────────────────────────────
 
 function findRosterPlayer(number) {
-  return players.find((p) => String(p.number) === String(number)) ?? null
+  const n = parseInt(number, 10)
+  if (isNaN(n)) return null
+  return players.find((p) => p.number === n) ?? null
 }
 
 function catmullRomPath(pts) {
@@ -222,7 +224,7 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const pt = String(play.PlayType ?? '').trim().toUpperCase()
   const isPass = pt === 'PASS'
   const isRun = pt === 'RUN'
-  const isOurTD = play.OffenseTeam === OUR_TEAM
+  const isOurTD = normalizeTeamName(play.OffenseTeam) === OUR_TEAM
 
   const scorerNum = play.CARNum ? String(play.CARNum) : null
   const qbNum = play.CAR2Num ? String(play.CAR2Num) : null

@@ -11,7 +11,9 @@ import { players as rosterPlayers } from '../data/dummy'
 import './GameCharts.css'
 
 function findRosterPlayer(number) {
-  return rosterPlayers.find((p) => String(p.number) === String(number)) ?? null
+  const n = parseInt(number, 10)
+  if (isNaN(n)) return null
+  return rosterPlayers.find((p) => p.number === n) ?? null
 }
 
 const SCARLET = '#CC0000'

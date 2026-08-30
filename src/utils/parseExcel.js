@@ -27,7 +27,7 @@ const KOREAN_TEAM_MAP = {
   '연세': 'YonseiEagles',
 }
 
-function normalizeTeamName(name) {
+export function normalizeTeamName(name) {
   if (!name) return name
   // NFC 정규화로 Excel NFD/NFC 인코딩 차이 흡수
   const trimmed = String(name).trim().normalize('NFC')
@@ -298,10 +298,9 @@ function isScrimmagePlay(play) {
 
 // 턴오버: 수비가 회수한 펌블(FUMBLERECDEF), 인터셉트, 명시적 TURNOVER 태그 기준
 // (FUMBLERECOFF는 오펜스가 자기 펌블을 다시 잡은 경우라 턴오버가 아님)
-// 스크리미지 플레이로 한정하는 이유: 턴오버 직후 RETURN 플레이 행에도 같은 태그가
-// 남아있는 경우가 있어, 회수한 팀 쪽에서 한 번 더 중복 집계되는 것을 막기 위함.
+// calcTeamStats에서 offensePlays(OffenseTeam===teamName)로만 집계하므로
+// RETURN 플레이(다른 팀이 OffenseTeam)는 자동 제외 — PlayType 무관 태그 기준으로 카운트.
 function isTurnover(play) {
-  if (!isScrimmagePlay(play)) return false
   return hasTag(play, 'FUMBLERECDEF') || hasTag(play, 'INTERCEPT') || hasTag(play, 'TURNOVER')
 }
 
