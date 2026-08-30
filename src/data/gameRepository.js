@@ -49,8 +49,8 @@ function buildFromUpload(record) {
     homeScore: meta.homeScore ?? 0,
     awayScore: meta.awayScore ?? 0,
     teamStats: {
-      home: calcTeamStats(plays, homeTeam),
-      away: calcTeamStats(plays, awayTeam),
+      home: { ...calcTeamStats(plays, homeTeam), ...(meta.overrideStats?.home ?? {}) },
+      away: { ...calcTeamStats(plays, awayTeam), ...(meta.overrideStats?.away ?? {}) },
     },
     mvp: resolveMvp(plays, ourTeam),
     playLog: toPlayLogEntries(plays),
@@ -98,6 +98,26 @@ const XLSX_META_MAP = {
     awayScore: 14,
     location: '성동구 살곶이 축구장',
     headerRow: 0,
+    overrideStats: {
+      home: {
+        totalYards: 184,
+        rushYards: 71,
+        rushAttempts: 18,
+        passYards: 113,
+        passAttempts: 17,
+        completions: 8,
+        turnovers: 0,
+      },
+      away: {
+        totalYards: 113,
+        rushYards: 63,
+        rushAttempts: 23,
+        passYards: 50,
+        passAttempts: 13,
+        completions: 8,
+        turnovers: 0,
+      },
+    },
   },
 }
 
