@@ -854,7 +854,7 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
       let event = null
       if (isLastPlay) {
         if (tags.includes('TOUCHDOWN')) event = 'TD'
-        else if (pt === 'FG') event = 'FG'
+        else if (pt === 'FG' && tags.includes('FIELDGOALGOOD')) event = 'FG'
         else if (tags.includes('INTERCEPT')) event = 'INTERCEPT'
         else if (tags.includes('FUMBLERECDEF')) event = 'FUMBLE'
         else if (tags.includes('TURNOVER')) event = 'TURNOVER'
