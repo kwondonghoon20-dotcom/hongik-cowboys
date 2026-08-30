@@ -28,6 +28,8 @@ const TEAM_ABBR_MAP = {
   samsungbt: 'BT',
   samsungbluestorm: 'BT',
   hicowboys: 'HIC',
+  hufsblackknights: 'HUF',
+  kmrazorbacks: 'KMU',
 }
 
 function teamAbbr(teamName) {

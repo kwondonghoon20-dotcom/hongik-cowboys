@@ -77,6 +77,17 @@ const XLSX_META_MAP = {
     awayScore: 9,
     location: '',
   },
+  '홍익 2경기 vs 한국외대 플레이별 데이터.xlsx': {
+    gameKey: 'HIcowboys_20251004_vs_HufsBlackKnights',
+    date: '2025-10-04',
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'HufsBlackKnights',
+    homeScore: 3,
+    awayScore: 6,
+    location: '효창운동장',
+    headerRow: 0,
+  },
 }
 
 // 모듈 로드 시 한 번만 실행되는 Promise — 여러 컴포넌트가 공유
