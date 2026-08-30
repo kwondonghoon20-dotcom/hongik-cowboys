@@ -63,8 +63,9 @@ const FIELD_H = 53.333
 function AnimatedRouteSvg({ routeData, isOurTD }) {
   const mainPathRef = useRef(null)
 
-  // HIcowboys는 x축 반전 → 왼쪽→오른쪽 전진으로 표시
-  const toSvgX = (xYards) => isOurTD ? (FIELD_W - xYards) : xYards
+  // HIcowboys는 x축 반전 + 오프셋으로 경로를 엔드존까지 이동
+  const HONGIK_TD_OFFSET = 10.9
+  const toSvgX = (xYards) => isOurTD ? (FIELD_W - xYards + HONGIK_TD_OFFSET) : xYards
 
   useEffect(() => {
     const el = mainPathRef.current
@@ -93,8 +94,7 @@ function AnimatedRouteSvg({ routeData, isOurTD }) {
   const mainSampled = sampleRoute(mainSeg, 5)
   const mainPathD = catmullRomPath(mainSampled.map((p) => ({ x: toSvgX(p.x_yards), y: p.y_yards })))
 
-  // HIcowboys TD: CV가 엔드존 직전에서 끊기므로 x=8까지 점선으로 연장
-  const tdEndX = isOurTD ? toSvgX(8) : (end ? toSvgX(end.x_yards) : null)
+  const tdEndX = end ? toSvgX(end.x_yards) : null
   const tdEndY = end ? end.y_yards : null
 
   const yardLines = []
@@ -138,16 +138,6 @@ function AnimatedRouteSvg({ routeData, isOurTD }) {
             strokeLinejoin="round"
           />
         )}
-        {/* HIcowboys TD: 마지막 포인트 → 엔드존(x=8) 점선 연장 */}
-        {isOurTD && end && (
-          <line
-            x1={toSvgX(end.x_yards)} y1={end.y_yards}
-            x2={toSvgX(8)} y2={end.y_yards}
-            stroke={pathColor} strokeWidth={0.9}
-            strokeDasharray="1.5 1.2" strokeLinecap="round"
-            opacity={0.75}
-          />
-        )}
         {/* TD 지점 */}
         {tdEndX != null && tdEndY != null && (
           <circle
@@ -159,7 +149,6 @@ function AnimatedRouteSvg({ routeData, isOurTD }) {
       <div className="td-field-legend">
         <span style={{ color: pathColor }}>● 득점 경로</span>
         <span style={{ color: pathColor }}>● TD</span>
-        {isOurTD && <span style={{ color: pathColor, opacity: 0.6 }}>- - 추정 연장</span>}
       </div>
     </div>
   )
