@@ -55,6 +55,9 @@ export const players = [
 
   // 4학년 20학번
   { id: 'p30', grade: 4, year: 20, number: 66, name: '송준석', positions: { offense: 'OL', defense: 'DL' }, height: 180, weight: 93 },
+
+  // 4학년 19학번
+  { id: 'p31', grade: 4, year: 19, number: 49, name: '김상현', positions: { offense: 'RB', defense: 'LB' }, height: 170, weight: 75 },
 ]
 
 // 학번은 앞자리 0이 있는 경우(예: 09학번)도 정상 표시되도록 문자열로 저장.
@@ -74,5 +77,5 @@ export const managers = [
   { id: 'm4', name: '김예원', year: '25' },
   { id: 'm5', name: '홍다희', year: '25' },
   { id: 'm6', name: '김지민', year: '25' },
-  { id: 'm7', name: '서혜림', year: '25' },
+  { id: 'm7', name: '이승아', year: '25' },
 ]
