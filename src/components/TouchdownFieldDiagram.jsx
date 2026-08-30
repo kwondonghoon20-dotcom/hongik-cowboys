@@ -36,16 +36,38 @@ function sampleRoute(route, step = 5) {
   return pts
 }
 
+// 5야드 이상 점프 구간에서 세그먼트를 분리 (다른 선수 track_id 섞임 방지)
+function segmentRoute(route, maxGap = 5) {
+  if (!route.length) return []
+  const segs = []
+  let cur = [route[0]]
+  for (let i = 1; i < route.length; i++) {
+    const dx = route[i].x_yards - route[i - 1].x_yards
+    const dy = route[i].y_yards - route[i - 1].y_yards
+    if (Math.sqrt(dx * dx + dy * dy) > maxGap) {
+      segs.push(cur)
+      cur = [route[i]]
+    } else {
+      cur.push(route[i])
+    }
+  }
+  segs.push(cur)
+  return segs
+}
+
 // ── 실측 야드 좌표 SVG (새 형식: route[].x_yards/y_yards) ──────
 
 const FIELD_W = 120
 const FIELD_H = 53.333
 
 function AnimatedRouteSvg({ routeData, isOurTD }) {
-  const pathRef = useRef(null)
+  const mainPathRef = useRef(null)
+
+  // 수정 1: HIcowboys는 x축 반전 → 왼쪽→오른쪽 전진으로 표시
+  const toSvgX = (xYards) => isOurTD ? (FIELD_W - xYards) : xYards
 
   useEffect(() => {
-    const el = pathRef.current
+    const el = mainPathRef.current
     if (!el) return
     try {
       const len = el.getTotalLength()
@@ -58,12 +80,30 @@ function AnimatedRouteSvg({ routeData, isOurTD }) {
   }, [])
 
   const rawPts = routeData.route ?? []
-  const sampled = sampleRoute(rawPts, 5)
-  const pathD = catmullRomPath(sampled.map((p) => ({ x: p.x_yards, y: p.y_yards })))
-  const start = rawPts[0]
-  const end = rawPts[rawPts.length - 1]
+  // 수정 2: 5야드 이상 점프 구간에서 세그먼트 분리
+  const segments = segmentRoute(rawPts, 5)
+  const mainIdx = segments.reduce((best, seg, i) => seg.length > segments[best].length ? i : best, 0)
+  const mainSeg = segments[mainIdx]
+  const secondarySegs = segments.filter((_, i) => i !== mainIdx)
+
   const pathColor = isOurTD ? '#CC0000' : '#888'
+
+  // 거리 계산은 메인 세그먼트 기준
+  const start = mainSeg[0]
+  const end = mainSeg[mainSeg.length - 1]
   const distYards = start && end ? Math.abs(start.x_yards - end.x_yards).toFixed(1) : '?'
+
+  // 메인 세그먼트 path
+  const mainSampled = sampleRoute(mainSeg, 5)
+  const mainPathD = catmullRomPath(mainSampled.map((p) => ({ x: toSvgX(p.x_yards), y: p.y_yards })))
+
+  // 세컨더리 paths (노이즈, 흐리게 표시)
+  const secondaryPathDs = secondarySegs
+    .map((seg) => {
+      const s = sampleRoute(seg, 5)
+      return catmullRomPath(s.map((p) => ({ x: toSvgX(p.x_yards), y: p.y_yards })))
+    })
+    .filter(Boolean)
 
   const yardLines = []
   for (let x = 0; x <= 120; x += 10) yardLines.push(x)
@@ -94,26 +134,35 @@ function AnimatedRouteSvg({ routeData, isOurTD }) {
         <rect x={0} y={0} width={FIELD_W} height={FIELD_H}
           fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth={0.4}
         />
-        {/* 득점 경로 */}
-        {sampled.length >= 2 && (
+        {/* 세컨더리 세그먼트 (노이즈, 점선 + 흐리게) */}
+        {secondaryPathDs.map((d, i) => (
           <path
-            ref={pathRef}
-            d={pathD}
+            key={i} d={d} fill="none"
+            stroke={pathColor} strokeWidth={0.6}
+            strokeOpacity={0.25} strokeDasharray="1.5 1"
+            strokeLinecap="round"
+          />
+        ))}
+        {/* 메인 세그먼트 (실제 TD 경로, 애니메이션) */}
+        {mainPathD && (
+          <path
+            ref={mainPathRef}
+            d={mainPathD}
             fill="none"
             stroke={pathColor}
-            strokeWidth={1.2}
+            strokeWidth={1.3}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         )}
         {/* 시작점 */}
         {start && (
-          <circle cx={start.x_yards} cy={start.y_yards} r={1.5} fill="#fff" opacity={0.9} />
+          <circle cx={toSvgX(start.x_yards)} cy={start.y_yards} r={1.5} fill="#fff" opacity={0.9} />
         )}
         {/* TD 지점 */}
         {end && (
           <circle
-            cx={end.x_yards} cy={end.y_yards} r={1.8}
+            cx={toSvgX(end.x_yards)} cy={end.y_yards} r={1.8}
             fill={pathColor} stroke="#fff" strokeWidth={0.4}
           />
         )}
@@ -122,6 +171,9 @@ function AnimatedRouteSvg({ routeData, isOurTD }) {
         <span style={{ color: pathColor }}>● 득점 경로 ({distYards}야드)</span>
         <span className="td-legend-dot-start">● 시작</span>
         <span style={{ color: pathColor }}>● TD</span>
+        {secondaryPathDs.length > 0 && (
+          <span style={{ color: pathColor, opacity: 0.4 }}>- - 오탐지</span>
+        )}
       </div>
     </div>
   )
