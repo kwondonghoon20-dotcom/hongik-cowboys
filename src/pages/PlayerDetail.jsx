@@ -12,6 +12,27 @@ const ZERO_OFF = {
 }
 const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
 
+// 공식 기록 필드명 → 내부 필드명 변환
+function fromOfficialStats(ps, tackleFraction) {
+  return {
+    offense: {
+      rushAttempts: ps.rushAtt ?? 0,
+      rushYards: ps.rushYds ?? 0,
+      rushTD: ps.rushTD ?? 0,
+      recTargets: ps.recAtt ?? 0,
+      receptions: ps.recAtt ?? 0,
+      recYards: ps.recYds ?? 0,
+      recTD: ps.recTD ?? 0,
+      passAttempts: ps.passAtt ?? 0,
+      completions: ps.passComp ?? 0,
+      passYards: ps.passYds ?? 0,
+      passTD: ps.passTD ?? 0,
+      passINT: ps.passINT ?? 0,
+    },
+    defense: { ...ZERO_DEF, tackles: tackleFraction ?? 0 },
+  }
+}
+
 function addStats(a, b) {
   const r = { ...a }
   for (const k of Object.keys(b)) r[k] = (r[k] ?? 0) + (b[k] ?? 0)
@@ -41,10 +62,18 @@ export default function PlayerDetail() {
   }, [globGames])
 
   const gameRows = useMemo(() => {
-    if (!player) return []
+    if (!player || player.number == null) return []
     return realGames.map((game) => {
+      const isHome = game.homeTeam === OUR_TEAM
+      const side = isHome ? 'home' : 'away'
+      const opponent = isHome ? game.awayTeam : game.homeTeam
+      const officialPS = game.overrideStats?.[side]?.playerStats?.[player.number]
+      const officialTackles = game.overrideStats?.[side]?.tackles?.[player.number]
+      if (officialPS !== undefined) {
+        const s = fromOfficialStats(officialPS, officialTackles)
+        return { game, opponent, offense: s.offense, defense: s.defense }
+      }
       const stats = getPlayerStats(game.plays, player.number, OUR_TEAM)
-      const opponent = game.homeTeam === OUR_TEAM ? game.awayTeam : game.homeTeam
       return { game, opponent, offense: stats.offense, defense: stats.defense }
     })
   }, [realGames, player])

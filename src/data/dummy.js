@@ -7,7 +7,7 @@ export const players = [
   // 1학년 26학번
   { id: 'p1', grade: 1, year: 26, number: 67, name: '김민영', positions: { offense: 'OL', defense: 'DL' }, height: null, weight: null },
   { id: 'p2', grade: 1, year: 26, number: 55, name: '곽정우', positions: { offense: 'OL', defense: 'DL' }, height: null, weight: null },
-  { id: 'p3', grade: 1, year: 26, number: 4, name: '김민석', positions: { offense: 'RB', defense: 'LB' }, height: null, weight: null },
+  { id: 'p3', grade: 1, year: 26, number: null, name: '김민석', positions: { offense: 'RB', defense: 'LB' }, height: null, weight: null },
 
   // 2학년 25학번
   { id: 'p4', grade: 2, year: 25, number: 23, name: '김세윤', positions: { offense: 'RB', defense: 'LB' }, height: 169, weight: 67 },
