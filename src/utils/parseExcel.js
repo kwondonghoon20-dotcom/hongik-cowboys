@@ -317,7 +317,7 @@ function gain(play) {
 }
 
 // 선수 번호 정규화: '09' → '9', 9 → '9' (앞자리 0 제거 + 타입 통일)
-const normalizeNum = (n) => String(parseInt(n || 0, 10))
+export const normalizeNum = (n) => String(parseInt(n || 0, 10))
 
 function isOffensePlay(play) {
   return isRun(play) || isPassAttempt(play) || isSackPlay(play)

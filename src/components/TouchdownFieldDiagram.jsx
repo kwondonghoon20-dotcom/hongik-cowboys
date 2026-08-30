@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { players } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
-import { getTouchdownClip } from '../data/touchdownClips'
-import { OUR_TEAM, normalizeTeamName } from '../utils/parseExcel'
+import { getTouchdownClip, getTDPlayOverride } from '../data/touchdownClips'
+import { OUR_TEAM, normalizeTeamName, normalizeNum } from '../utils/parseExcel'
 
 // ── 유틸 ──────────────────────────────────────────────────────
 
@@ -221,23 +221,32 @@ function LegacyRouteSvg({ routeData }) {
 export default function TouchdownFieldDiagram({ play, game }) {
   const [tab, setTab] = useState('video')
 
-  const pt = String(play.PlayType ?? '').trim().toUpperCase()
+  // 엑셀 오기록 보정 (PlayType, CAR2Num 등)
+  const override = game.gameKey ? getTDPlayOverride(game.gameKey, play.ClipKey) : null
+  const effectivePlay = override ? { ...play, ...override } : play
+
+  const pt = String(effectivePlay.PlayType ?? '').trim().toUpperCase()
   const isPass = pt === 'PASS'
   const isRun = pt === 'RUN'
-  const isOurTD = normalizeTeamName(play.OffenseTeam) === OUR_TEAM
+  const isOurTD = normalizeTeamName(effectivePlay.OffenseTeam) === OUR_TEAM
 
-  const scorerNum = play.CARNum ? String(play.CARNum) : null
-  const qbNum = play.CAR2Num ? String(play.CAR2Num) : null
-  const yards = play.GainYard ?? play.Gain ?? 0
-  const quarter = play.Quarter ? `Q${play.Quarter}` : '-'
+  const scorerNum = effectivePlay.CARNum ? String(effectivePlay.CARNum) : null
+  const qbNum = effectivePlay.CAR2Num ? String(effectivePlay.CAR2Num) : null
+  const yards = effectivePlay.GainYard ?? effectivePlay.Gain ?? 0
+  const quarter = effectivePlay.Quarter ? `Q${effectivePlay.Quarter}` : '-'
 
   const scorerPlayer = isOurTD && scorerNum ? findRosterPlayer(scorerNum) : null
   const qbPlayer = isOurTD && qbNum ? findRosterPlayer(qbNum) : null
   const scorerName = scorerPlayer ? scorerPlayer.name : scorerNum ? `#${scorerNum}` : '-'
   const qbName = qbPlayer ? qbPlayer.name : qbNum ? `#${qbNum}` : null
 
-  const teamLabel = isOurTD ? 'HIcowboys' : (play.OffenseTeam ?? '?')
+  const teamLabel = isOurTD ? 'HIcowboys' : (effectivePlay.OffenseTeam ?? '?')
   const tdTypeLabel = isPass ? 'PASS TD' : isRun ? 'RUN TD' : 'TD'
+
+  // 상대팀 특정 선수 강조색: YonseiEagles #44 → 파란색
+  const opponentAccentColor = !isOurTD && normalizeNum(effectivePlay.CARNum) === '44'
+    ? '#0066CC'
+    : '#888'
 
   const routeData = game.gameKey ? getTouchdownRoute(game.gameKey, play.ClipKey) : null
   const clipUrl = game.gameKey ? getTouchdownClip(game.gameKey, play.OffenseTeam) : null
@@ -253,9 +262,15 @@ export default function TouchdownFieldDiagram({ play, game }) {
   return (
     <div className="td-card">
       <div className="td-card-header">
-        <span className={`td-team-label ${isOurTD ? 'ours' : 'opponent'}`}>{teamLabel}</span>
+        <span
+          className={`td-team-label ${isOurTD ? 'ours' : 'opponent'}`}
+          style={!isOurTD ? { color: opponentAccentColor } : undefined}
+        >{teamLabel}</span>
         <span className="td-quarter">{quarter}</span>
-        <span className={`td-badge ${isPass ? 'pass' : 'run'}`}>{tdTypeLabel}</span>
+        <span
+          className={`td-badge ${isPass ? 'pass' : 'run'}`}
+          style={!isOurTD ? { background: opponentAccentColor } : undefined}
+        >{tdTypeLabel}</span>
         <span className="td-yards">{yards}야드</span>
       </div>
 
