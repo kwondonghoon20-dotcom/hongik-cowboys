@@ -39,7 +39,9 @@
       "Bash(git -C /c/Users/doon2/Desktop/hongik-cowboys config user.name)",
       "Bash(git -C /c/Users/doon2/Desktop/hongik-cowboys config user.email)",
       "Bash(cd /c/Users/doon2/Desktop && ls -la setup_data.sh 2>&1; ls -la open 2>&1 | head -20)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git rm *)",
+      "Bash(node -e ' *)"
     ]
   }
 }
