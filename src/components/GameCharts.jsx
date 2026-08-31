@@ -34,6 +34,9 @@ const TEAM_ABBR_MAP = {
   kmrazorbacks: 'KMU',
   yonseieagles: 'YSU',
   uoscityhawks: 'UOS',
+  krtigers: 'KR',
+  sngreenterrors: 'SN',
+  kkragingbulls: 'KK',
 }
 
 const TEAM_COLORS = {
@@ -44,6 +47,9 @@ const TEAM_COLORS = {
   samsungbluestorm: '#CC0000',
   gunwipheonix: '#888888',
   uoscityhawks: '#004B9E',
+  krtigers: '#8B0000',
+  sngreenterrors: '#006400',
+  kkragingbulls: '#8B4513',
 }
 
 function getTeamColor(teamName) {

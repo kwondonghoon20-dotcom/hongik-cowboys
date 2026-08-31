@@ -18,8 +18,14 @@ const KOREAN_TEAM_MAP = {
   '홍익': OUR_TEAM,
   '국민대': 'KMrazorbacks',
   '국민': 'KMrazorbacks',
-  '건국대': 'Konkuk',
-  '건국': 'Konkuk',
+  '건국대': 'KKragingbulls',
+  '건국대학교': 'KKragingbulls',
+  '건국': 'KKragingbulls',
+  '고려대': 'KRtigers',
+  '고려대학교': 'KRtigers',
+  '고려': 'KRtigers',
+  '서울대': 'SNgreenterrors',
+  '서울대학교': 'SNgreenterrors',
   '한국외대': 'HufsBlackKnights',
   '외대': 'HufsBlackKnights',
   '한국외국어대': 'HufsBlackKnights',
@@ -40,10 +46,12 @@ export function normalizeTeamName(name) {
   // 한글 키워드 포함 여부로 재시도 (Unicode 변형 대비)
   if (lower.includes('홍익')) return OUR_TEAM
   if (lower.includes('국민')) return 'KMrazorbacks'
-  if (lower.includes('건국')) return 'Konkuk'
+  if (lower.includes('건국') || lower.includes('konkuk') || lower.includes('kk')) return 'KKragingbulls'
   if (lower.includes('외대') || lower.includes('hufs')) return 'HufsBlackKnights'
   if (lower.includes('연세') || lower.includes('yonsei')) return 'YonseiEagles'
   if (lower.includes('시립') || lower.includes('uos')) return 'UOScityhawks'
+  if (lower.includes('고려') || lower.includes('korea')) return 'KRtigers'
+  if (lower.includes('서울대') || lower.includes('snu')) return 'SNgreenterrors'
   const key = lower.replace(/[^a-z0-9]/g, '')
   return TEAM_NAME_MAP[key] ?? trimmed
 }
@@ -218,7 +226,7 @@ export async function parseAlternateGame(input, overrideMeta) {
   console.log('[parseAlternateGame] meta 팀명 변환:', { home: overrideMeta?.home, away: overrideMeta?.away })
 
   // 알려진 한글 팀명 패턴 (value-scan fallback용) — 'home'/'away'도 포함해 컬럼 못 찾을 때 대비
-  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', '외대', '연세', 'cowboys', 'kookmin', 'konkuk', 'hufs', 'yonsei', OUR_TEAM.toLowerCase(), 'home', 'away']
+  const KNOWN_TEAM_PATTERNS = ['홍익', '국민', '건국', '고려', '서울대', '외대', '연세', '시립', 'cowboys', 'kookmin', 'konkuk', 'kkraging', 'krtigers', 'sngreenterrors', 'hufs', 'yonsei', 'korea', 'snu', OUR_TEAM.toLowerCase(), 'home', 'away']
 
   const plays = dataRows
     .map((row) => {

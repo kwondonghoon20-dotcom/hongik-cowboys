@@ -18,6 +18,9 @@ const TEAM_COLORS = {
   HufsBlackKnights: '#222222',
   KMrazorbacks: '#888888',
   UOScityhawks: '#004B9E',
+  KRtigers: '#8B0000',
+  SNgreenterrors: '#006400',
+  KKragingbulls: '#8B4513',
 }
 
 function getTeamColor(teamId) {
