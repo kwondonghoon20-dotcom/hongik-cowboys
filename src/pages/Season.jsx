@@ -15,6 +15,7 @@ const OPPONENT_LABELS = {
   KMrazorbacks: '국민대',
   YonseiEagles: '연세대',
   HufsBlackKnights: '한국외대',
+  UOScityhawks: '서울시립대',
 }
 
 const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32']

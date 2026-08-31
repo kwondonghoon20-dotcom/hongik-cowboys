@@ -25,9 +25,9 @@ const KOREAN_TEAM_MAP = {
   '한국외국어대': 'HufsBlackKnights',
   '연세대': 'YonseiEagles',
   '연세': 'YonseiEagles',
-  '서울시립대': 'UOSSeoultech',
-  '서울시립대학교': 'UOSSeoultech',
-  '시립대': 'UOSSeoultech',
+  '서울시립대': 'UOScityhawks',
+  '서울시립대학교': 'UOScityhawks',
+  '시립대': 'UOScityhawks',
 }
 
 export function normalizeTeamName(name) {
@@ -43,7 +43,7 @@ export function normalizeTeamName(name) {
   if (lower.includes('건국')) return 'Konkuk'
   if (lower.includes('외대') || lower.includes('hufs')) return 'HufsBlackKnights'
   if (lower.includes('연세') || lower.includes('yonsei')) return 'YonseiEagles'
-  if (lower.includes('시립') || lower.includes('uos')) return 'UOSSeoultech'
+  if (lower.includes('시립') || lower.includes('uos')) return 'UOScityhawks'
   const key = lower.replace(/[^a-z0-9]/g, '')
   return TEAM_NAME_MAP[key] ?? trimmed
 }

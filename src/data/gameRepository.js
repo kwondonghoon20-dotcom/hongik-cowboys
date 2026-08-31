@@ -62,10 +62,10 @@ function buildFromUpload(record) {
 // 플레이 데이터 없이 메타+스탯만 하드코딩된 경기 목록
 const GAMES_WITHOUT_PLAYS = [
   {
-    gameKey: 'UOSSeoultech_20250928_vs_HIcowboys',
+    gameKey: 'UOScityhawks_20250928_vs_HIcowboys',
     date: '2025-09-28',
     type: 'League',
-    home: 'UOSSeoultech',
+    home: 'UOScityhawks',
     away: OUR_TEAM,
     homeScore: 9,
     awayScore: 6,
