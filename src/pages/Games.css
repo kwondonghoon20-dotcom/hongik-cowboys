@@ -24,7 +24,7 @@
   display: flex;
   gap: 8px;
   margin-bottom: 28px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .season-tab {
@@ -33,18 +33,18 @@
   font-family: var(--font-impact);
   font-size: 18px;
   letter-spacing: 0.04em;
-  color: #999;
+  color: var(--color-text-secondary);
   padding: 10px 18px;
   border-bottom: 3px solid transparent;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .season-tab:hover {
-  color: var(--color-white);
+  color: var(--color-text);
 }
 
 .season-tab.active {
-  color: var(--color-white);
+  color: var(--color-text);
   border-bottom-color: var(--color-scarlet);
 }
 

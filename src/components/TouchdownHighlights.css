@@ -5,8 +5,8 @@
 }
 
 .td-card {
-  background: #242424;
-  border: 1px solid #333;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -18,8 +18,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: #1a1a1a;
-  border-bottom: 1px solid #2e2e2e;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .td-team-label {
@@ -34,13 +34,13 @@
 }
 
 .td-team-label.opponent {
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .td-quarter {
   font-family: var(--font-impact);
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .td-badge {
@@ -65,7 +65,7 @@
 .td-yards {
   font-family: var(--font-impact);
   font-size: 16px;
-  color: var(--color-white);
+  color: var(--color-text);
 }
 
 /* ── 득점자 ────────────────────────────────────────────── */
@@ -83,16 +83,16 @@
   font-family: var(--font-impact);
   font-size: 17px;
   letter-spacing: 0.04em;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .td-name.highlight {
-  color: var(--color-white);
+  color: var(--color-text);
   font-size: 19px;
 }
 
 .td-arrow {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 14px;
   margin: 0 4px;
 }
@@ -101,7 +101,7 @@
 
 .td-tabs {
   display: flex;
-  border-bottom: 1px solid #2e2e2e;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .td-tab {
@@ -109,7 +109,7 @@
   padding: 8px 0;
   background: none;
   border: none;
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 13px;
   cursor: pointer;
   transition: color 0.15s, border-bottom 0.15s;
@@ -117,11 +117,11 @@
 }
 
 .td-tab:hover {
-  color: #ccc;
+  color: var(--color-text);
 }
 
 .td-tab.active {
-  color: var(--color-white);
+  color: var(--color-text);
   border-bottom: 2px solid var(--color-scarlet);
 }
 
@@ -151,7 +151,7 @@
   height: auto;
   display: block;
   border-radius: 4px;
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--color-border);
 }
 
 .td-field-legend {
@@ -174,7 +174,7 @@
   align-items: center;
   gap: 8px;
   padding: 16px 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 

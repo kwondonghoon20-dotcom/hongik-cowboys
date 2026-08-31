@@ -13,7 +13,7 @@
 
 .home-hero h1 {
   font-size: 72px;
-  color: var(--color-white);
+  color: var(--color-text);
 }
 
 .home-hero h1 span {
@@ -22,7 +22,7 @@
 
 .home-hero p {
   margin-top: 16px;
-  color: #bbb;
+  color: var(--color-text-secondary);
   font-size: 18px;
 }
 
@@ -49,5 +49,5 @@
 
 .btn-outline {
   background: transparent;
-  color: var(--color-white);
+  color: var(--color-text);
 }

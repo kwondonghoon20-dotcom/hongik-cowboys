@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -13,9 +14,20 @@ export default function App() {
   const location = useLocation()
   const isLoginPage = location.pathname === '/login'
 
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('hicowboys_theme') === 'dark'
+  })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode)
+    localStorage.setItem('hicowboys_theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
+
+  const toggleDark = () => setDarkMode((v) => !v)
+
   return (
     <>
-      {!isLoginPage && <Navbar />}
+      {!isLoginPage && <Navbar darkMode={darkMode} toggleDark={toggleDark} />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route

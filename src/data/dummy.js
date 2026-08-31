@@ -10,7 +10,7 @@ export const players = [
   { id: 'p3', grade: 1, year: 26, number: null, name: '김민석', positions: { offense: 'RB', defense: 'LB' }, height: null, weight: null },
 
   // 2학년 25학번
-  { id: 'p4', grade: 2, year: 25, number: 23, name: '김세윤', positions: { offense: 'RB', defense: 'LB' }, height: 169, weight: 67 },
+  { id: 'p4', grade: 2, year: 25, number: 81, name: '김세윤', positions: { offense: 'RB', defense: 'LB' }, height: 169, weight: 67 },
   { id: 'p5', grade: 2, year: 25, number: 73, name: '김동현', positions: { offense: 'OL', defense: 'DL' }, height: 194, weight: 110 },
   { id: 'p6', grade: 2, year: 25, number: 12, name: '김주찬', positions: { offense: 'QB', defense: 'DL' }, height: 182, weight: 81 },
   { id: 'p7', grade: 2, year: 25, number: 4, name: '김민성', positions: { offense: 'WR', defense: 'DB' }, height: 175, weight: 71 },
@@ -77,5 +77,5 @@ export const managers = [
   { id: 'm4', name: '김예원', year: '25' },
   { id: 'm5', name: '홍다희', year: '25' },
   { id: 'm6', name: '김지민', year: '25' },
-  { id: 'm7', name: '이승아', year: '25' },
+  { id: 'm7', name: '이승아', year: '24' },
 ]

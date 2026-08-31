@@ -1,6 +1,6 @@
 .excel-uploader {
-  background: #242424;
-  border: 1px dashed #444;
+  background: var(--color-bg-card);
+  border: 1px dashed var(--color-border);
   border-radius: 6px;
   padding: 16px 20px;
   margin-bottom: 28px;
@@ -12,17 +12,17 @@
   gap: 12px;
   font-family: var(--font-impact);
   font-size: 14px;
-  color: #bbb;
+  color: var(--color-text-secondary);
   letter-spacing: 0.02em;
 }
 
 .excel-uploader-label input {
   font-family: var(--font-body);
-  color: #ccc;
+  color: var(--color-text);
 }
 
 .excel-uploader-status {
   margin: 10px 0 0;
   font-size: 13px;
-  color: #999;
+  color: var(--color-text-secondary);
 }

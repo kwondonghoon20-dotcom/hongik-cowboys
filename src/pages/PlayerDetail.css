@@ -75,8 +75,8 @@
 }
 
 .season-stat-box {
-  background: #242424;
-  border: 1px solid #333;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 18px;
   display: flex;
@@ -93,7 +93,7 @@
 
 .season-stat-name {
   margin-top: 6px;
-  color: #999;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 
@@ -106,14 +106,14 @@
   text-align: left;
   font-family: var(--font-impact);
   font-size: 13px;
-  color: #999;
+  color: var(--color-text-secondary);
   padding: 8px 12px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .gamelog-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid #2a2a2a;
+  border-bottom: 1px solid var(--color-border);
   font-size: 14px;
 }
 
@@ -126,6 +126,6 @@
 }
 
 .empty-note {
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }

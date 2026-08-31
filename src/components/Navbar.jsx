@@ -9,7 +9,7 @@ const links = [
   { to: '/roster', label: '로스터' },
 ]
 
-export default function Navbar() {
+export default function Navbar({ darkMode, toggleDark }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -18,13 +18,22 @@ export default function Navbar() {
         <NavLink to="/" className="navbar-logo" onClick={() => setOpen(false)}>
           HONGIK <span>COWBOYS</span>
         </NavLink>
-        <button
-          className={'navbar-hamburger' + (open ? ' open' : '')}
-          onClick={() => setOpen((v) => !v)}
-          aria-label="메뉴 열기"
-        >
-          <span /><span /><span />
-        </button>
+        <div className="navbar-right">
+          <button
+            className="theme-toggle"
+            onClick={toggleDark}
+            aria-label="테마 전환"
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+          <button
+            className={'navbar-hamburger' + (open ? ' open' : '')}
+            onClick={() => setOpen((v) => !v)}
+            aria-label="메뉴 열기"
+          >
+            <span /><span /><span />
+          </button>
+        </div>
         <nav className={'navbar-links' + (open ? ' open' : '')}>
           {links.map((link) => (
             <NavLink

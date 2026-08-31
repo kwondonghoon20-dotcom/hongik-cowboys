@@ -62,8 +62,8 @@
 /* ── Score chart card ─────────────────────────────────────── */
 
 .s-chart-card {
-  background: #1e1e1e;
-  border: 1px solid #333;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 20px 8px 8px;
 }
@@ -77,8 +77,8 @@
 }
 
 .season-stat-card {
-  background: #1e1e1e;
-  border: 1px solid #333;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 20px 16px;
   display: flex;
@@ -97,13 +97,13 @@
 
 .ssc-label {
   font-size: 13px;
-  color: #bbb;
+  color: var(--color-text-secondary);
   margin-top: 4px;
 }
 
 .ssc-sub {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* ── Player rankings grid ─────────────────────────────────── */
@@ -115,8 +115,8 @@
 }
 
 .rank-card {
-  background: #1e1e1e;
-  border: 1px solid #333;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 16px 20px;
 }
@@ -124,14 +124,14 @@
 .rank-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #ddd;
+  color: var(--color-text);
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .rank-empty {
-  color: #555;
+  color: var(--color-text-secondary);
   font-size: 13px;
   text-align: center;
   padding: 16px 0;
@@ -142,7 +142,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px 0;
-  border-bottom: 1px solid #2a2a2a;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .rank-row:last-child {
@@ -158,11 +158,11 @@
 .rank-name {
   flex: 1;
   font-size: 14px;
-  color: #ddd;
+  color: var(--color-text);
 }
 
 .rank-number {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 

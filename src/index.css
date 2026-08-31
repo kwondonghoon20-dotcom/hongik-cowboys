@@ -1,10 +1,30 @@
+/* ── 라이트 모드 (기본값) ───────────────────────────────── */
 :root {
+  /* 기존 변수 유지 */
   --color-scarlet: #cc0000;
   --color-scarlet-dark: #990000;
   --color-charcoal: #1a1a1a;
   --color-white: #ffffff;
   --font-impact: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
   --font-body: 'Noto Sans KR', sans-serif;
+
+  /* 테마 변수 (라이트 기본) */
+  --color-bg: #ffffff;
+  --color-bg-card: #f5f5f5;
+  --color-bg-secondary: #eeeeee;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-border: #dddddd;
+}
+
+/* ── 다크 모드 ──────────────────────────────────────────── */
+:root.dark {
+  --color-bg: #1a1a1a;
+  --color-bg-card: #242424;
+  --color-bg-secondary: #2a2a2a;
+  --color-text: #ffffff;
+  --color-text-secondary: #aaaaaa;
+  --color-border: #333333;
 }
 
 * {
@@ -15,11 +35,12 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--color-charcoal);
-  color: var(--color-white);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-body);
   overflow-x: hidden;
   width: 100%;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 #root {
