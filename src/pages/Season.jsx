@@ -24,6 +24,42 @@ const OPPONENT_LABELS = {
 const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32']
 const RANK_LABELS = ['1위', '2위', '3위']
 
+// 2025 추계 확정 누적 스탯 (국민대전 + 외대전 + 연세대전 합산)
+const SEASON_STATS_2025_FALL = {
+  rush: [
+    { number: 25, rushYds: 103 },
+    { number: 49, rushYds: 67  },
+    { number: 81, rushYds: 64  },
+    { number: 26, rushYds: 63  },
+    { number: 17, rushYds: 56  },
+    { number: 33, rushYds: 34  },
+    { number: 9,  rushYds: 21  },
+    { number: 2,  rushYds: 0   },
+  ],
+  pass: [
+    { number: 9,  passYds: 67 },
+    { number: 15, passYds: 0  },
+  ],
+  rec: [
+    { number: 2,  recYds: 37 },
+    { number: 17, recYds: 15 },
+    { number: 12, recYds: 9  },
+    { number: 4,  recYds: 2  },
+    { number: 26, recYds: -5 },
+    { number: 25, recYds: 0  },
+  ],
+  tackles: [
+    { number: 57, tackles: 10.0 },
+    { number: 9,  tackles: 6.0  },
+    { number: 14, tackles: 8.0  },
+    { number: 26, tackles: 8.0  },
+    { number: 49, tackles: 5.5  },
+    { number: 61, tackles: 5.0  },
+    { number: 19, tackles: 5.0  },
+    { number: 4,  tackles: 4.0  },
+  ],
+}
+
 function findPlayer(number) {
   return players.find((p) => p.number === number) ?? null
 }
@@ -134,6 +170,20 @@ export default function Season() {
   }, [semesterGames])
 
   const playerRankings = useMemo(() => {
+    const top3sorted = (arr, key, min = 1) =>
+      [...arr].filter((p) => p[key] >= min).sort((a, b) => b[key] - a[key]).slice(0, 3)
+
+    // 추계: 공식 보고서 확정값 사용
+    if (activeSemester === 'fall') {
+      return {
+        rush: top3sorted(SEASON_STATS_2025_FALL.rush, 'rushYds'),
+        pass: top3sorted(SEASON_STATS_2025_FALL.pass, 'passYds'),
+        rec:  top3sorted(SEASON_STATS_2025_FALL.rec,  'recYds'),
+        tackles: top3sorted(SEASON_STATS_2025_FALL.tackles, 'tackles', 0.5),
+      }
+    }
+
+    // 춘계: 동적 계산
     const playerNums = collectPlayerNums(semesterGames)
     const list = []
     for (const num of playerNums) {
@@ -150,10 +200,10 @@ export default function Season() {
     return {
       rush: top3('rushYds'),
       pass: top3('passYds'),
-      rec: top3('recYds'),
+      rec:  top3('recYds'),
       tackles: top3('tackles', 0.5),
     }
-  }, [semesterGames])
+  }, [activeSemester, semesterGames])
 
   const n = teamStats.games
   const avg = (v) => (n > 0 ? Math.round(v / n) : 0)
