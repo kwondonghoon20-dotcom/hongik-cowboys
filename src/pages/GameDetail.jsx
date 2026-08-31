@@ -126,7 +126,7 @@ export default function GameDetail() {
                     <div className="mvp-info">
                       <div className="mvp-name">{defPlayer ? defPlayer.name : `#${defMvp.number}`}</div>
                       <div className="mvp-meta">
-                        {[defMvp.position, `#${defMvp.number}`].filter(Boolean).join(' · ')}
+                        {[defPlayer?.positions?.defense ?? defMvp.position, `#${defMvp.number}`].filter(Boolean).join(' · ')}
                       </div>
                       <div className="mvp-divider" />
                       <div className="mvp-stats">

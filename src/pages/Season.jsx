@@ -94,7 +94,7 @@ export default function Season() {
   const globGames = useGlobGames()
 
   const realGames = useMemo(() => {
-    const sync = getAllGames().filter((g) => Array.isArray(g.plays) && g.plays.length > 0)
+    const sync = getAllGames()
     const globIds = new Set(globGames.map((g) => g.id))
     const deduped = sync.filter((g) => !globIds.has(g.id))
     return [...deduped, ...globGames]
