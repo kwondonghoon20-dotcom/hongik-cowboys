@@ -147,33 +147,37 @@ export default function GameDetail() {
           )
         })()}
 
-        <GameCharts game={game} />
-
-        <TouchdownHighlights game={game} />
-
-        <section className="section">
-          <h3 className="section-title">플레이 로그</h3>
-          <table className="playlog-table">
-            <thead>
-              <tr>
-                <th>쿼터</th>
-                <th>시간</th>
-                <th>팀</th>
-                <th>플레이</th>
-              </tr>
-            </thead>
-            <tbody>
-              {game.playLog.map((play, idx) => (
-                <tr key={idx}>
-                  <td>{play.quarter != null ? `Q${play.quarter}` : '-'}</td>
-                  <td>{play.time}</td>
-                  <td>{play.team}</td>
-                  <td>{play.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+        {Array.isArray(game.plays) && game.plays.length > 0 ? (
+          <>
+            <GameCharts game={game} />
+            <TouchdownHighlights game={game} />
+            <section className="section">
+              <h3 className="section-title">플레이 로그</h3>
+              <table className="playlog-table">
+                <thead>
+                  <tr>
+                    <th>쿼터</th>
+                    <th>시간</th>
+                    <th>팀</th>
+                    <th>플레이</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {game.playLog.map((play, idx) => (
+                    <tr key={idx}>
+                      <td>{play.quarter != null ? `Q${play.quarter}` : '-'}</td>
+                      <td>{play.time}</td>
+                      <td>{play.team}</td>
+                      <td>{play.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          </>
+        ) : (
+          <p className="no-plays-notice">플레이별 데이터가 없습니다.</p>
+        )}
       </div>
     </div>
   )

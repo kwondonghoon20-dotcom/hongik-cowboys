@@ -17,6 +17,7 @@ const TEAM_COLORS = {
   YonseiEagles: '#0066CC',
   HufsBlackKnights: '#222222',
   KMrazorbacks: '#888888',
+  UOSSeoultech: '#004B9E',
 }
 
 function getTeamColor(teamId) {

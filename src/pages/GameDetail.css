@@ -220,6 +220,13 @@
   font-size: 14px;
 }
 
+.no-plays-notice {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  padding: 24px 0;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .scoreboard-main {
     grid-template-columns: 1fr;

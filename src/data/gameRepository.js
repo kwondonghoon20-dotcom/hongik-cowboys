@@ -59,6 +59,75 @@ function buildFromUpload(record) {
   }
 }
 
+// 플레이 데이터 없이 메타+스탯만 하드코딩된 경기 목록
+const GAMES_WITHOUT_PLAYS = [
+  {
+    gameKey: 'UOSSeoultech_20250928_vs_HIcowboys',
+    date: '2025-09-28',
+    type: 'League',
+    home: 'UOSSeoultech',
+    away: OUR_TEAM,
+    homeScore: 9,
+    awayScore: 6,
+    location: '서울대학교 대운동장',
+    overrideStats: {
+      home: {
+        totalYards: 36,
+        rushYards: 10,
+        rushAttempts: 11,
+        passYards: 26,
+        passAttempts: 10,
+        completions: 4,
+        firstDowns: 2,
+        penalties: 7,
+        penaltyYards: 60,
+        turnovers: 0,
+      },
+      away: {
+        totalYards: 121,
+        rushYards: 125,
+        rushAttempts: 16,
+        passYards: -4,
+        passAttempts: 3,
+        completions: 2,
+        firstDowns: 4,
+        penalties: 3,
+        penaltyYards: 35,
+        turnovers: 0,
+      },
+    },
+  },
+]
+
+function buildFromMeta(entry) {
+  const homeTeam = entry.home
+  const awayTeam = entry.away
+  const isHome = homeTeam === OUR_TEAM
+  return {
+    id: entry.gameKey,
+    gameKey: entry.gameKey,
+    source: 'meta',
+    season: Number(entry.date.slice(0, 4)),
+    week: null,
+    date: entry.date,
+    gameType: entry.type ?? 'League',
+    venue: entry.location ?? '',
+    homeTeam,
+    awayTeam,
+    isHome,
+    homeScore: entry.homeScore ?? 0,
+    awayScore: entry.awayScore ?? 0,
+    teamStats: {
+      home: entry.overrideStats?.home ?? {},
+      away: entry.overrideStats?.away ?? {},
+    },
+    overrideStats: entry.overrideStats ?? null,
+    mvp: null,
+    playLog: [],
+    plays: [],
+  }
+}
+
 // 빌드 시 src/data/games/*.xlsm — 표준 형식 (Index 시트 포함)
 const _xlsmUrls = import.meta.glob('./games/*.xlsm', { query: '?url', import: 'default', eager: true })
 
@@ -189,7 +258,8 @@ export function useGlobGames() {
 
 export function getAllGames() {
   const uploaded = getUploadedGames().map(buildFromUpload)
-  return [...dummyGames, ...uploaded]
+  const metaGames = GAMES_WITHOUT_PLAYS.map(buildFromMeta)
+  return [...dummyGames, ...uploaded, ...metaGames]
 }
 
 export function getGameById(id) {

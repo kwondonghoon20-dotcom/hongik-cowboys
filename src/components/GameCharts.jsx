@@ -33,6 +33,7 @@ const TEAM_ABBR_MAP = {
   hufsblackknights: 'HUF',
   kmrazorbacks: 'KMU',
   yonseieagles: 'YSU',
+  uosseoultech: 'UOS',
 }
 
 const TEAM_COLORS = {
@@ -42,6 +43,7 @@ const TEAM_COLORS = {
   kmrazorbacks: '#888888',
   samsungbluestorm: '#CC0000',
   gunwipheonix: '#888888',
+  uosseoultech: '#004B9E',
 }
 
 function getTeamColor(teamName) {
