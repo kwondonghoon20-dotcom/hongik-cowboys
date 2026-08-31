@@ -16,18 +16,21 @@ export default function Games() {
   }, [uploadedGames, globGames])
 
   const tabs = useMemo(() => {
-    const hicSeasons = [
-      ...new Set(
-        games
-          .filter((g) => g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM)
-          .map((g) => g.season)
-      ),
-    ].sort((a, b) => b - a)
-    const hasSocial = games.some(
-      (g) => g.homeTeam !== OUR_TEAM && g.awayTeam !== OUR_TEAM
-    )
+    const hicGames = games.filter((g) => g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM)
+    const tabKeySet = new Set(hicGames.map((g) => `${g.season}-${g.semester ?? 'fall'}`))
+    const sortedKeys = [...tabKeySet].sort((a, b) => {
+      const [ay, as] = a.split('-')
+      const [by, bs] = b.split('-')
+      if (ay !== by) return Number(by) - Number(ay)
+      // 같은 연도: 춘계(spring) 먼저
+      return as === 'spring' ? -1 : 1
+    })
+    const hasSocial = games.some((g) => g.homeTeam !== OUR_TEAM && g.awayTeam !== OUR_TEAM)
     return [
-      ...hicSeasons.map((s) => ({ key: s, label: `${s} 추계` })),
+      ...sortedKeys.map((k) => {
+        const [year, sem] = k.split('-')
+        return { key: k, label: `${year} ${sem === 'spring' ? '춘계' : '추계'}` }
+      }),
       ...(hasSocial ? [{ key: 'social', label: '사회인' }] : []),
     ]
   }, [games])
@@ -41,10 +44,12 @@ export default function Games() {
         .filter((g) => g.homeTeam !== OUR_TEAM && g.awayTeam !== OUR_TEAM)
         .sort((a, b) => new Date(a.date) - new Date(b.date))
     }
+    const [tabYear, tabSem] = currentTab ? currentTab.split('-') : ['', '']
     return games
       .filter(
         (g) =>
-          g.season === currentTab &&
+          String(g.season) === tabYear &&
+          (g.semester ?? 'fall') === tabSem &&
           (g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM)
       )
       .sort((a, b) => new Date(a.date) - new Date(b.date))

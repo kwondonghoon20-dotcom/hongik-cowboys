@@ -17,6 +17,35 @@
   margin-bottom: 16px;
 }
 
+.season-sem-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.season-sem-tab {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--font-impact);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  padding: 6px 20px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.season-sem-tab:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.season-sem-tab.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-scarlet);
+  border-color: transparent;
+}
+
 .season-record-row {
   display: flex;
   align-items: center;

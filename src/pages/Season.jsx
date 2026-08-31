@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, LabelList,
@@ -96,6 +96,7 @@ function RankCard({ title, players: list, statKey, unit }) {
 
 export default function Season() {
   const globGames = useGlobGames()
+  const [activeSemester, setActiveSemester] = useState('spring')
 
   const realGames = useMemo(() => {
     const sync = getAllGames()
@@ -106,9 +107,18 @@ export default function Season() {
       .sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [globGames])
 
+  const semesterGames = useMemo(
+    () => realGames.filter((g) =>
+      activeSemester === 'spring'
+        ? g.semester === 'spring'
+        : (g.semester === 'fall' || !g.semester)
+    ),
+    [realGames, activeSemester]
+  )
+
   const { wins, losses, ties, totalFor, totalAgainst, chartData } = useMemo(() => {
     let w = 0, l = 0, t = 0, tf = 0, ta = 0
-    const data = realGames.map((game) => {
+    const data = semesterGames.map((game) => {
       const isHome = game.homeTeam === OUR_TEAM
       const ours = isHome ? game.homeScore : game.awayScore
       const theirs = isHome ? game.awayScore : game.homeScore
@@ -124,11 +134,11 @@ export default function Season() {
       }
     })
     return { wins: w, losses: l, ties: t, totalFor: tf, totalAgainst: ta, chartData: data }
-  }, [realGames])
+  }, [semesterGames])
 
   const teamStats = useMemo(() => {
     const totals = { totalYards: 0, rushYards: 0, passYards: 0, turnovers: 0 }
-    for (const game of realGames) {
+    for (const game of semesterGames) {
       const side = game.homeTeam === OUR_TEAM ? 'home' : 'away'
       const s = game.teamStats?.[side] ?? {}
       totals.totalYards += s.totalYards ?? 0
@@ -136,12 +146,12 @@ export default function Season() {
       totals.passYards += s.passYards ?? 0
       totals.turnovers += s.turnovers ?? 0
     }
-    return { ...totals, games: realGames.length }
-  }, [realGames])
+    return { ...totals, games: semesterGames.length }
+  }, [semesterGames])
 
   const playerRankings = useMemo(() => {
     const agg = {}
-    for (const game of realGames) {
+    for (const game of semesterGames) {
       for (const ps of getGamePlayerStats(game)) {
         if (isNaN(ps.number) || ps.number <= 0) continue
         if (!agg[ps.number]) {
@@ -162,7 +172,7 @@ export default function Season() {
       rec: top3('recYds'),
       tackles: top3('tackles', 0.5),
     }
-  }, [realGames])
+  }, [semesterGames])
 
   const n = teamStats.games
   const avg = (v) => (n > 0 ? Math.round(v / n) : 0)
@@ -172,6 +182,20 @@ export default function Season() {
       <div className="season-page-hero">
         <div className="container">
           <h1>2025 시즌</h1>
+          <div className="season-sem-tabs">
+            <button
+              className={'season-sem-tab' + (activeSemester === 'spring' ? ' active' : '')}
+              onClick={() => setActiveSemester('spring')}
+            >
+              춘계
+            </button>
+            <button
+              className={'season-sem-tab' + (activeSemester === 'fall' ? ' active' : '')}
+              onClick={() => setActiveSemester('fall')}
+            >
+              추계
+            </button>
+          </div>
           <div className="season-record-row">
             <div className="season-record-badge">
               <span className="record-w">{wins}승</span>

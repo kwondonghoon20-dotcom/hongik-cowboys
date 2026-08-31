@@ -3,6 +3,12 @@ import { games as dummyGames, players } from './dummy'
 import { calcTeamStats, toPlayLogEntries, pickRushMvp, parseGame, parseAlternateGame, OUR_TEAM } from '../utils/parseExcel'
 import { getUploadedGames } from './uploadedGames'
 
+function getSemester(dateStr) {
+  if (!dateStr) return 'fall'
+  const month = new Date(dateStr).getMonth() + 1
+  return month >= 3 && month <= 7 ? 'spring' : 'fall'
+}
+
 function resolveMvp(plays, teamName) {
   const rushMvp = pickRushMvp(plays, teamName)
   if (!rushMvp) return null
@@ -39,6 +45,7 @@ function buildFromUpload(record) {
     gameKey: meta.gameKey ?? record.id,
     source: 'upload',
     season: meta.date ? Number(meta.date.slice(0, 4)) : new Date().getFullYear(),
+    semester: getSemester(meta.date ?? meta.dateRaw),
     week: null,
     date: meta.date ?? meta.dateRaw ?? '',
     gameType: meta.type ?? 'League',
@@ -61,6 +68,38 @@ function buildFromUpload(record) {
 
 // 플레이 데이터 없이 메타+스탯만 하드코딩된 경기 목록
 const GAMES_WITHOUT_PLAYS = [
+  // ── 춘계 ──────────────────────────────────────────────────
+  {
+    gameKey: 'HIcowboys_20250518_vs_KRtigers',
+    date: '2025-05-18',
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'KRtigers',
+    homeScore: 28,
+    awayScore: 9,
+    location: '목동 해마루 축구장',
+  },
+  {
+    gameKey: 'SNgreenterrors_20250525_vs_HIcowboys',
+    date: '2025-05-25',
+    type: 'League',
+    home: 'SNgreenterrors',
+    away: OUR_TEAM,
+    homeScore: 37,
+    awayScore: 21,
+    location: '관악구민 운동장',
+  },
+  {
+    gameKey: 'HIcowboys_20250601_vs_KKragingbulls',
+    date: '2025-06-01',
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'KKragingbulls',
+    homeScore: 54,
+    awayScore: 20,
+    location: '목동 해마루 축구장',
+  },
+  // ── 추계 ──────────────────────────────────────────────────
   {
     gameKey: 'UOScityhawks_20250928_vs_HIcowboys',
     date: '2025-09-28',
@@ -108,6 +147,7 @@ function buildFromMeta(entry) {
     gameKey: entry.gameKey,
     source: 'meta',
     season: Number(entry.date.slice(0, 4)),
+    semester: getSemester(entry.date),
     week: null,
     date: entry.date,
     gameType: entry.type ?? 'League',
