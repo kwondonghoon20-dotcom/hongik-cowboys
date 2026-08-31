@@ -101,6 +101,16 @@ const GAMES_WITHOUT_PLAYS = [
   },
   // ── 추계 ──────────────────────────────────────────────────
   {
+    gameKey: 'HIcowboys_20251011_vs_KRtigers',
+    date: '2025-10-11',
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'KRtigers',
+    homeScore: 12,
+    awayScore: 22,
+    location: '해마루 축구장',
+  },
+  {
     gameKey: 'UOScityhawks_20250928_vs_HIcowboys',
     date: '2025-09-28',
     type: 'League',
