@@ -579,6 +579,55 @@ export function getPlayerStats(plays, playerNum, teamName) {
   return { offense, defense }
 }
 
+// 두 페이지(Season, PlayerDetail)가 공유하는 선수별 시즌 스탯 집계
+// 반환: [{ game, opponent, offense, defense }] — 경기별 로우 배열
+export function getSeasonPlayerStats(games, playerNumber, ourTeam) {
+  const ZERO_OFF = {
+    rushAttempts: 0, rushYards: 0, rushTD: 0,
+    recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
+    passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
+  }
+  const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
+
+  const rows = []
+  for (const game of games) {
+    if (game.homeTeam !== ourTeam && game.awayTeam !== ourTeam) continue
+    const isHome = game.homeTeam === ourTeam
+    const side = isHome ? 'home' : 'away'
+    const opponent = isHome ? game.awayTeam : game.homeTeam
+
+    const overridePS = game.overrideStats?.[side]?.playerStats?.[playerNumber]
+    const overrideTackles = game.overrideStats?.[side]?.tackles?.[playerNumber]
+
+    if (overridePS !== undefined) {
+      rows.push({
+        game,
+        opponent,
+        offense: {
+          rushAttempts: overridePS.rushAtt ?? 0,
+          rushYards:    overridePS.rushYds ?? 0,
+          rushTD:       overridePS.rushTD  ?? 0,
+          recTargets:   overridePS.recAtt  ?? 0,
+          receptions:   overridePS.recAtt  ?? 0,
+          recYards:     overridePS.recYds  ?? 0,
+          recTD:        overridePS.recTD   ?? 0,
+          passAttempts: overridePS.passAtt  ?? 0,
+          completions:  overridePS.passComp ?? 0,
+          passYards:    overridePS.passYds  ?? 0,
+          passTD:       overridePS.passTD   ?? 0,
+          passINT:      overridePS.passINT  ?? 0,
+        },
+        defense: { ...ZERO_DEF, tackles: overrideTackles ?? 0 },
+      })
+    } else if (Array.isArray(game.plays) && game.plays.length > 0) {
+      const stats = getPlayerStats(game.plays, playerNumber, ourTeam)
+      rows.push({ game, opponent, offense: stats.offense, defense: stats.defense })
+    }
+    // else: meta-only 경기에 해당 선수 overrideStats 없음 → 스킵
+  }
+  return rows
+}
+
 export function pickOffenseMvp(plays, teamName) {
   const stats = new Map()
   const posCounts = new Map()

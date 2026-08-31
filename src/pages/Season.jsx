@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { players } from '../data/dummy'
-import { getPlayerTotalYards, OUR_TEAM } from '../utils/parseExcel'
+import { getPlayerTotalYards, getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import './Season.css'
 
 const SCARLET = '#CC0000'
@@ -28,36 +28,20 @@ function findPlayer(number) {
   return players.find((p) => p.number === number) ?? null
 }
 
-function getGamePlayerStats(game) {
-  const side = game.homeTeam === OUR_TEAM ? 'home' : 'away'
-  const overridePS = game.overrideStats?.[side]?.playerStats
-  const overrideTackles = game.overrideStats?.[side]?.tackles
-
-  if (overridePS) {
-    return Object.entries(overridePS).map(([numStr, ps]) => {
-      const num = parseInt(numStr, 10)
-      return {
-        number: num,
-        rushYds: ps.rushYds ?? 0,
-        passYds: ps.passYds ?? 0,
-        recYds: ps.recYds ?? 0,
-        tackles: overrideTackles?.[num] ?? 0,
-      }
-    })
+// 경기 목록에서 OUR_TEAM 소속 선수 등번호 전체 수집
+function collectPlayerNums(games) {
+  const nums = new Set()
+  for (const game of games) {
+    if (game.homeTeam !== OUR_TEAM && game.awayTeam !== OUR_TEAM) continue
+    const side = game.homeTeam === OUR_TEAM ? 'home' : 'away'
+    const overridePS = game.overrideStats?.[side]?.playerStats
+    if (overridePS) Object.keys(overridePS).forEach((k) => nums.add(Number(k)))
+    if (Array.isArray(game.plays) && game.plays.length > 0) {
+      const raw = getPlayerTotalYards(game.plays, game.homeTeam, game.awayTeam, 50)
+      raw.filter((p) => p.team === OUR_TEAM).forEach((p) => nums.add(Number(p.number)))
+    }
   }
-
-  if (!Array.isArray(game.plays) || !game.plays.length) return []
-
-  const raw = getPlayerTotalYards(game.plays, game.homeTeam, game.awayTeam, 50)
-  return raw
-    .filter((p) => p.team === OUR_TEAM)
-    .map((p) => ({
-      number: parseInt(p.number, 10),
-      rushYds: p.rushYards ?? 0,
-      passYds: p.passYards ?? 0,
-      recYds: p.recYards ?? 0,
-      tackles: 0,
-    }))
+  return nums
 }
 
 function RankCard({ title, players: list, statKey, unit }) {
@@ -150,20 +134,17 @@ export default function Season() {
   }, [semesterGames])
 
   const playerRankings = useMemo(() => {
-    const agg = {}
-    for (const game of semesterGames) {
-      for (const ps of getGamePlayerStats(game)) {
-        if (isNaN(ps.number) || ps.number <= 0) continue
-        if (!agg[ps.number]) {
-          agg[ps.number] = { number: ps.number, rushYds: 0, passYds: 0, recYds: 0, tackles: 0 }
-        }
-        agg[ps.number].rushYds += ps.rushYds
-        agg[ps.number].passYds += ps.passYds
-        agg[ps.number].recYds += ps.recYds
-        agg[ps.number].tackles += ps.tackles
-      }
+    const playerNums = collectPlayerNums(semesterGames)
+    const list = []
+    for (const num of playerNums) {
+      if (!num || isNaN(num)) continue
+      const rows = getSeasonPlayerStats(semesterGames, num, OUR_TEAM)
+      const rushYds = rows.reduce((s, r) => s + r.offense.rushYards, 0)
+      const passYds = rows.reduce((s, r) => s + r.offense.passYards, 0)
+      const recYds  = rows.reduce((s, r) => s + r.offense.recYards, 0)
+      const tackles = rows.reduce((s, r) => s + r.defense.tackles, 0)
+      list.push({ number: num, rushYds, passYds, recYds, tackles })
     }
-    const list = Object.values(agg)
     const top3 = (key, min = 1) =>
       list.filter((p) => p[key] >= min).sort((a, b) => b[key] - a[key]).slice(0, 3)
     return {
