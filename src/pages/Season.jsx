@@ -98,7 +98,7 @@ export default function Season() {
     const globIds = new Set(globGames.map((g) => g.id))
     const deduped = sync.filter((g) => !globIds.has(g.id))
     return [...deduped, ...globGames]
-      .filter((g) => g.season === 2025)
+      .filter((g) => g.season === 2025 && (g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM))
       .sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [globGames])
 
