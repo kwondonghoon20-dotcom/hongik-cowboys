@@ -12,6 +12,17 @@ function findRosterPlayer(number) {
   return players.find((p) => p.number === n) ?? null
 }
 
+const TEAM_COLORS = {
+  HIcowboys: '#CC0000',
+  YonseiEagles: '#0066CC',
+  HufsBlackKnights: '#222222',
+  KMrazorbacks: '#888888',
+}
+
+function getTeamColor(teamId) {
+  return TEAM_COLORS[teamId] ?? '#888888'
+}
+
 function catmullRomPath(pts) {
   // pts: [{x, y}]
   if (pts.length < 2) return ''
@@ -243,10 +254,7 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const teamLabel = isOurTD ? 'HIcowboys' : (effectivePlay.OffenseTeam ?? '?')
   const tdTypeLabel = isPass ? 'PASS TD' : isRun ? 'RUN TD' : 'TD'
 
-  // 상대팀 특정 선수 강조색: YonseiEagles #44 → 파란색
-  const opponentAccentColor = !isOurTD && normalizeNum(effectivePlay.CARNum) === '44'
-    ? '#0066CC'
-    : '#888'
+  const teamColor = getTeamColor(normalizeTeamName(effectivePlay.OffenseTeam))
 
   const routeData = game.gameKey ? getTouchdownRoute(game.gameKey, play.ClipKey) : null
   const clipUrl = game.gameKey ? getTouchdownClip(game.gameKey, play.OffenseTeam) : null
@@ -260,16 +268,16 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const showRoute = hasRoute && (!clipUrl || tab === 'route')
 
   return (
-    <div className="td-card">
+    <div className="td-card" style={{ borderLeft: `4px solid ${teamColor}` }}>
       <div className="td-card-header">
         <span
           className={`td-team-label ${isOurTD ? 'ours' : 'opponent'}`}
-          style={!isOurTD ? { color: opponentAccentColor } : undefined}
+          style={{ color: teamColor }}
         >{teamLabel}</span>
         <span className="td-quarter">{quarter}</span>
         <span
           className={`td-badge ${isPass ? 'pass' : 'run'}`}
-          style={!isOurTD ? { background: opponentAccentColor } : undefined}
+          style={{ background: teamColor }}
         >{tdTypeLabel}</span>
         <span className="td-yards">{yards}야드</span>
       </div>

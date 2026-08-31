@@ -35,6 +35,20 @@ const TEAM_ABBR_MAP = {
   yonseieagles: 'YSU',
 }
 
+const TEAM_COLORS = {
+  hicowboys: '#CC0000',
+  yonseieagles: '#0066CC',
+  hufsblackknights: '#1a1a1a',
+  kmrazorbacks: '#888888',
+  samsungbluestorm: '#CC0000',
+  gunwipheonix: '#888888',
+}
+
+function getTeamColor(teamName) {
+  const key = String(teamName ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  return TEAM_COLORS[key] ?? '#888888'
+}
+
 function teamAbbr(teamName) {
   const key = String(teamName ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
   return TEAM_ABBR_MAP[key] ?? String(teamName ?? '').replace(/[^a-zA-Z가-힣]/g, '').slice(0, 3).toUpperCase()
@@ -67,7 +81,7 @@ function PlayerTooltip({ active, payload, topPlayers }) {
       background: '#1a1a1a', border: '1px solid #333', borderRadius: 6,
       padding: 12, fontSize: 13, color: '#ddd', minWidth: 240,
     }}>
-      <div style={{ color: SCARLET, fontWeight: 700, fontSize: 16 }}>
+      <div style={{ color: getTeamColor(p.team), fontWeight: 700, fontSize: 16 }}>
         {displayName ?? `#${number}`}
       </div>
       <div style={{ color: '#888', fontSize: 12, marginBottom: 6 }}>
@@ -97,7 +111,7 @@ function PlayerTooltip({ active, payload, topPlayers }) {
         </tbody>
       </table>
       <div style={divider} />
-      <span style={{ color: SCARLET, fontWeight: 600 }}>Scrimmage</span>
+      <span style={{ color: getTeamColor(p.team), fontWeight: 600 }}>Scrimmage</span>
       &nbsp;&nbsp;{scrimmageYards} yds
     </div>
   )
@@ -159,6 +173,8 @@ function driveResultText(d) {
 
 function DriveMomentumChart({ game }) {
   const opponent = game.homeTeam === OUR_TEAM ? game.awayTeam : game.homeTeam
+  const ourColor = getTeamColor(OUR_TEAM)
+  const opponentColor = getTeamColor(opponent)
   const { points: chartData, quarterBoundaries } = getDriveMomentum(
     game.plays, game.homeTeam, game.awayTeam,
   )
@@ -170,8 +186,8 @@ function DriveMomentumChart({ game }) {
     <div className="flow-chart-wrapper chart-card">
       <h4 className="chart-title">드라이브 전진 거리</h4>
       <div className="momentum-legend">
-        <span style={{ color: SCARLET }}>■</span> {OUR_TEAM}&nbsp;&nbsp;
-        <span style={{ color: '#555' }}>■</span> {opponent}&nbsp;&nbsp;
+        <span style={{ color: ourColor }}>■</span> {OUR_TEAM}&nbsp;&nbsp;
+        <span style={{ color: opponentColor }}>■</span> {opponent}&nbsp;&nbsp;
         <span style={{ color: '#FFD700' }}>●</span> TD&nbsp;
         <span style={{ color: '#00BFFF' }}>●</span> FG&nbsp;
         <span style={{ color: '#FF6B00' }}>✕</span> 턴오버&nbsp;
@@ -181,12 +197,12 @@ function DriveMomentumChart({ game }) {
         <AreaChart data={chartData} margin={{ top: 30, right: 10, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="homeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={SCARLET} stopOpacity={0.7} />
-              <stop offset="95%" stopColor={SCARLET} stopOpacity={0.05} />
+              <stop offset="5%" stopColor={ourColor} stopOpacity={0.7} />
+              <stop offset="95%" stopColor={ourColor} stopOpacity={0.05} />
             </linearGradient>
             <linearGradient id="awayGrad" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="5%" stopColor="#555" stopOpacity={0.7} />
-              <stop offset="95%" stopColor="#555" stopOpacity={0.05} />
+              <stop offset="5%" stopColor={opponentColor} stopOpacity={0.7} />
+              <stop offset="95%" stopColor={opponentColor} stopOpacity={0.05} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
@@ -206,7 +222,7 @@ function DriveMomentumChart({ game }) {
               if (d.home == null && d.away == null) return null
               const isOurs = d.home != null
               const team = isOurs ? OUR_TEAM : opponent
-              const teamColor = isOurs ? SCARLET : '#aaa'
+              const teamColor = isOurs ? ourColor : opponentColor
               const eventColors = {
                 TD: '#FFD700', FG: '#00BFFF',
                 INTERCEPT: SCARLET, FUMBLE: SCARLET, TURNOVER: SCARLET,
@@ -257,7 +273,7 @@ function DriveMomentumChart({ game }) {
           <Area
             type="monotone"
             dataKey="home"
-            stroke={SCARLET}
+            stroke={ourColor}
             strokeWidth={1.5}
             fill="url(#homeGrad)"
             connectNulls={false}
@@ -268,7 +284,7 @@ function DriveMomentumChart({ game }) {
           <Area
             type="monotone"
             dataKey="away"
-            stroke="#666"
+            stroke={opponentColor}
             strokeWidth={1.5}
             fill="url(#awayGrad)"
             connectNulls={false}
@@ -287,6 +303,8 @@ function DriveMomentumChart({ game }) {
 function KeyStatsPanel({ game }) {
   const stats = getKeyStats(game.plays, game.homeTeam, game.awayTeam)
   const { possession, touchdowns, redZone, thirdDown, turnovers } = stats
+  const homeColor = getTeamColor(game.homeTeam)
+  const awayColor = getTeamColor(game.awayTeam)
 
   const rows = [
     { label: 'TD', home: touchdowns.home, away: touchdowns.away },
@@ -301,17 +319,17 @@ function KeyStatsPanel({ game }) {
       {/* 포제션 바 */}
       <div className="possession-section">
         <div className="possession-label-row">
-          <span style={{ color: SCARLET }}>{game.homeTeam}</span>
-          <span style={{ color: '#aaa' }}>{game.awayTeam}</span>
+          <span style={{ color: homeColor }}>{game.homeTeam}</span>
+          <span style={{ color: awayColor }}>{game.awayTeam}</span>
         </div>
         <div className="possession-bar">
-          <div className="possession-fill home" style={{ width: `${possession.home}%` }} />
-          <div className="possession-fill away" style={{ width: `${possession.away}%` }} />
+          <div className="possession-fill home" style={{ width: `${possession.home}%`, background: homeColor }} />
+          <div className="possession-fill away" style={{ width: `${possession.away}%`, background: awayColor }} />
         </div>
         <div className="possession-pct-row">
-          <span style={{ color: SCARLET }}>{possession.home}%</span>
+          <span style={{ color: homeColor }}>{possession.home}%</span>
           <span style={{ color: '#aaa', fontSize: 11 }}>오펜스 플레이 점유</span>
-          <span style={{ color: '#aaa' }}>{possession.away}%</span>
+          <span style={{ color: awayColor }}>{possession.away}%</span>
         </div>
       </div>
       {/* 스탯 행 */}
@@ -375,7 +393,7 @@ export default function GameCharts({ game }) {
               ? `#${r.number} · ${r.position} (${abbr})`
               : `#${r.number} (${abbr})`
           }
-          return { ...r, label, fill: r.isHome ? SCARLET : CHARCOAL_GRAY }
+          return { ...r, label, fill: getTeamColor(r.team) }
         })
       })()
     : []
@@ -395,8 +413,8 @@ export default function GameCharts({ game }) {
               <YAxis tick={TICK_STYLE} allowDecimals={false} />
               <Tooltip {...TOOLTIP_STYLE} formatter={(value, name) => [value, teamNameOf(name)]} />
               <Legend wrapperStyle={{ color: '#ccc' }} formatter={teamNameOf} />
-              <Bar dataKey="home" name="home" fill={SCARLET} />
-              <Bar dataKey="away" name="away" fill={CHARCOAL_GRAY} />
+              <Bar dataKey="home" name="home" fill={getTeamColor(game.homeTeam)} />
+              <Bar dataKey="away" name="away" fill={getTeamColor(game.awayTeam)} />
             </BarChart>
           </ResponsiveContainer>
         </div>
