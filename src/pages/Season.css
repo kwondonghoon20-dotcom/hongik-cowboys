@@ -1,0 +1,200 @@
+.page-season {
+  flex: 1;
+  padding-bottom: 60px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+
+.season-page-hero {
+  background: linear-gradient(135deg, var(--color-scarlet-dark), var(--color-scarlet));
+  padding: 48px 0;
+  margin-bottom: 36px;
+}
+
+.season-page-hero h1 {
+  font-size: 48px;
+  color: var(--color-white);
+  margin-bottom: 16px;
+}
+
+.season-record-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.season-record-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.record-w  { color: #fff; }
+.record-l  { color: rgba(255,255,255,0.65); }
+.record-t  { color: rgba(255,255,255,0.55); }
+.record-sep { color: rgba(255,255,255,0.4); }
+
+.season-score-totals {
+  font-size: 18px;
+  color: rgba(255,255,255,0.85);
+}
+
+.score-for     { color: #fff; font-weight: 600; }
+.score-sep     { color: rgba(255,255,255,0.5); margin: 0 4px; }
+.score-against { color: rgba(255,255,255,0.65); }
+
+/* ── Sections ─────────────────────────────────────────────── */
+
+.s-section {
+  margin-bottom: 48px;
+}
+
+.s-section-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+  border-left: 4px solid var(--color-scarlet);
+  padding-left: 12px;
+}
+
+/* ── Score chart card ─────────────────────────────────────── */
+
+.s-chart-card {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 20px 8px 8px;
+}
+
+/* ── Team stats grid ──────────────────────────────────────── */
+
+.season-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.season-stat-card {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.ssc-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-scarlet);
+  line-height: 1;
+}
+
+.ssc-label {
+  font-size: 13px;
+  color: #bbb;
+  margin-top: 4px;
+}
+
+.ssc-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+/* ── Player rankings grid ─────────────────────────────────── */
+
+.rankings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.rank-card {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.rank-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ddd;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
+}
+
+.rank-empty {
+  color: #555;
+  font-size: 13px;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.rank-row:last-child {
+  border-bottom: none;
+}
+
+.rank-badge {
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 28px;
+}
+
+.rank-name {
+  flex: 1;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.rank-number {
+  color: #666;
+  font-size: 12px;
+}
+
+.rank-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-scarlet);
+  text-align: right;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .season-page-hero h1 {
+    font-size: 36px;
+  }
+
+  .season-record-badge {
+    font-size: 26px;
+  }
+
+  .season-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rankings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .season-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

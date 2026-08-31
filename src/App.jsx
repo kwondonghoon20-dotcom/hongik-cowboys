@@ -7,6 +7,7 @@ import Games from './pages/Games'
 import GameDetail from './pages/GameDetail'
 import Roster from './pages/Roster'
 import PlayerDetail from './pages/PlayerDetail'
+import Season from './pages/Season'
 
 export default function App() {
   const location = useLocation()
@@ -38,6 +39,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <GameDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/season"
+          element={
+            <ProtectedRoute>
+              <Season />
             </ProtectedRoute>
           }
         />
