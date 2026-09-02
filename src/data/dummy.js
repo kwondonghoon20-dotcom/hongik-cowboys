@@ -44,6 +44,7 @@ export const players = [
 
   // 4학년 23학번
   { id: 'p25', grade: 4, year: 23, number: 9, name: '권용욱', positions: { offense: 'QB', defense: 'LB' }, height: 174, weight: 76 },
+  { id: 'p32', grade: 4, year: 23, number: 15, name: '김대웅', positions: { offense: 'QB', defense: 'DB', special: 'K' }, height: 177, weight: 72 },
 
   // 4학년 22학번
   { id: 'p26', grade: 4, year: 22, number: 17, name: '김찬용', positions: { offense: 'WR', defense: 'LB' }, height: 177, weight: 73 },

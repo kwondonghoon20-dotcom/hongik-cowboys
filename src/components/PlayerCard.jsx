@@ -14,6 +14,9 @@ export default function PlayerCard({ player }) {
       <div className="player-card-positions">
         <span className="position-badge offense">{player.positions.offense}</span>
         <span className="position-badge defense">{player.positions.defense}</span>
+        {player.positions?.special && (
+          <span className="position-badge special">{player.positions.special}</span>
+        )}
       </div>
       <div className="player-card-meta">
         <span>

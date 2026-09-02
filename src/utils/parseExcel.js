@@ -515,6 +515,19 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
   return result.slice(0, limit)
 }
 
+// 킥오프/펀트 거리 기록 여부를 경기 단위로 판단한다.
+// 외대전·연세전처럼 GainYard가 전부 0으로 채워진 경기는 "거리 미기록"으로 보고
+// 거리 합계/평균 집계에서 제외한다(값이 0인 것과 구분 불가하므로 경기 전체를 기준으로 판단).
+function hasKickingDistanceData(plays, teamName) {
+  const kickPlays = plays.filter((p) => {
+    if (p.OffenseTeam !== teamName) return false
+    const pt = playType(p)
+    return pt === 'KICKOFF' || pt === 'PUNT'
+  })
+  if (kickPlays.length === 0) return true
+  return kickPlays.some((p) => gain(p) !== 0)
+}
+
 export function getPlayerStats(plays, playerNum, teamName) {
   const numStr = normalizeNum(playerNum)
   const offense = {
@@ -523,6 +536,14 @@ export function getPlayerStats(plays, playerNum, teamName) {
     passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
   }
   const defense = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
+  const kicking = {
+    kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
+    punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
+    patMade: 0, patAtt: 0, fgMade: 0, fgAtt: 0,
+    returns: 0, returnYards: 0,
+    points: 0,
+  }
+  const distanceValid = hasKickingDistanceData(plays, teamName)
 
   function ok(raw) {
     return raw != null && raw !== '' && String(raw).trim() !== '' && Number(raw) !== 0
@@ -533,6 +554,36 @@ export function getPlayerStats(plays, playerNum, teamName) {
     const tags = significantPlayTags(play)
 
     if (play.OffenseTeam === teamName) {
+      // 킥커/펀터/리터너는 전부 CARNum에 기록된다(CAR2Num 아님). CARPos·SpecialTeam 컬럼은
+      // 신뢰할 수 없으므로(오기재 사례 확인됨) PlayType으로만 판별한다.
+      if (pt === 'KICKOFF' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
+        kicking.kickoffs += 1
+        if (distanceValid) {
+          kicking.kickoffYards += gain(play)
+          kicking.kickoffYardsCounted += 1
+        }
+      }
+      if (pt === 'PUNT' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
+        kicking.punts += 1
+        if (distanceValid) {
+          kicking.puntYards += gain(play)
+          kicking.puntYardsCounted += 1
+          kicking.puntLong = Math.max(kicking.puntLong, gain(play))
+        }
+      }
+      if (pt === 'PAT' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
+        kicking.patAtt += 1
+        if (tags.includes('PATGOOD')) kicking.patMade += 1
+      }
+      if (pt === 'FG' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
+        kicking.fgAtt += 1
+        if (tags.includes('FIELDGOALGOOD')) kicking.fgMade += 1
+      }
+      if (pt === 'RETURN' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
+        kicking.returns += 1
+        kicking.returnYards += gain(play)
+      }
+
       if (pt === 'RUN' && ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
         offense.rushAttempts += 1
         offense.rushYards += gain(play)
@@ -576,7 +627,9 @@ export function getPlayerStats(plays, playerNum, teamName) {
     }
   }
 
-  return { offense, defense }
+  kicking.points = kicking.patMade * 1 + kicking.fgMade * 3
+
+  return { offense, defense, kicking }
 }
 
 // 두 페이지(Season, PlayerDetail)가 공유하는 선수별 시즌 스탯 집계
@@ -588,6 +641,13 @@ export function getSeasonPlayerStats(games, playerNumber, ourTeam) {
     passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
   }
   const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
+  const ZERO_KICK = {
+    kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
+    punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
+    patMade: 0, patAtt: 0, fgMade: 0, fgAtt: 0,
+    returns: 0, returnYards: 0,
+    points: 0,
+  }
 
   const rows = []
   for (const game of games) {
@@ -598,6 +658,11 @@ export function getSeasonPlayerStats(games, playerNumber, ourTeam) {
 
     const overridePS = game.overrideStats?.[side]?.playerStats?.[playerNumber]
     const overrideTackles = game.overrideStats?.[side]?.tackles?.[playerNumber]
+    const hasPlays = Array.isArray(game.plays) && game.plays.length > 0
+    // 킥/펀트/리턴은 종이 스탯 시트(overrideStats)에 기록되지 않으므로,
+    // 오펜스/디펜스가 어느 소스에서 오든 킥 스탯은 항상 플레이 로그에서 집계한다.
+    const stats = hasPlays ? getPlayerStats(game.plays, playerNumber, ourTeam) : null
+    const kicking = stats ? stats.kicking : { ...ZERO_KICK }
 
     if (overridePS !== undefined) {
       rows.push({
@@ -618,10 +683,10 @@ export function getSeasonPlayerStats(games, playerNumber, ourTeam) {
           passINT:      overridePS.passINT  ?? 0,
         },
         defense: { ...ZERO_DEF, tackles: overrideTackles ?? 0 },
+        kicking,
       })
-    } else if (Array.isArray(game.plays) && game.plays.length > 0) {
-      const stats = getPlayerStats(game.plays, playerNumber, ourTeam)
-      rows.push({ game, opponent, offense: stats.offense, defense: stats.defense })
+    } else if (stats) {
+      rows.push({ game, opponent, offense: stats.offense, defense: stats.defense, kicking: stats.kicking })
     }
     // else: meta-only 경기에 해당 선수 overrideStats 없음 → 스킵
   }
@@ -778,8 +843,9 @@ function penaltyYards(play) {
   return Math.abs(end - start)
 }
 
-// 패널티는 OffenseTeam이 아니라 SignificantPlay 태그("PENALTY.HOME"/"PENALTY.AWAY")로
+// 패널티는 OffenseTeam이 아니라 SignificantPlay 태그("PENALTY.<한글 팀명>")로
 // 어느 팀이 범했는지 직접 표시되므로 OffenseTeam 매칭과 무관하게 태그만으로 집계한다.
+// 태그의 팀명은 "PENALTY.홍익대"처럼 한글이라 normalizeTeamName으로 변환해 비교해야 한다.
 export function getPenaltyStats(plays, homeTeam, awayTeam) {
   const stats = {
     home: { team: homeTeam, count: 0, yards: 0 },
@@ -788,17 +854,16 @@ export function getPenaltyStats(plays, homeTeam, awayTeam) {
 
   for (const play of plays) {
     const tags = significantPlayTags(play)
-    const isHomePenalty = tags.includes('PENALTY.HOME')
-    const isAwayPenalty = tags.includes('PENALTY.AWAY')
-    if (!isHomePenalty && !isAwayPenalty) continue
+    const penaltyTag = tags.find((t) => t.startsWith('PENALTY.'))
+    if (!penaltyTag) continue
 
+    const penalizedTeam = normalizeTeamName(penaltyTag.slice('PENALTY.'.length))
     const yards = penaltyYards(play)
 
-    if (isHomePenalty) {
+    if (penalizedTeam === homeTeam) {
       stats.home.count += 1
       stats.home.yards += yards
-    }
-    if (isAwayPenalty) {
+    } else if (penalizedTeam === awayTeam) {
       stats.away.count += 1
       stats.away.yards += yards
     }

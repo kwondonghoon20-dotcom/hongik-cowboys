@@ -68,6 +68,12 @@
   color: var(--color-text);
 }
 
+.position-badge.special {
+  background: transparent;
+  border: 1px solid var(--color-text-secondary);
+  color: var(--color-text-secondary);
+}
+
 .player-card-meta {
   display: flex;
   flex-direction: column;

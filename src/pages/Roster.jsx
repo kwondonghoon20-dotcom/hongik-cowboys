@@ -5,7 +5,7 @@ import CoachCard from '../components/CoachCard'
 import ManagerCard from '../components/ManagerCard'
 import './Roster.css'
 
-const POSITIONS = ['OL', 'DL', 'RB', 'LB', 'WR', 'DB', 'QB', 'TE']
+const POSITIONS = ['OL', 'DL', 'RB', 'LB', 'WR', 'DB', 'QB', 'TE', 'K']
 const TABS = [
   { key: 'players', label: '선수단' },
   { key: 'coaches', label: '코치진' },
@@ -22,7 +22,10 @@ export default function Roster() {
   const filteredPlayers = players
     .filter((p) => {
       const matchesPosition =
-        positionFilter === '전체' || p.positions.offense === positionFilter || p.positions.defense === positionFilter
+        positionFilter === '전체' ||
+        p.positions.offense === positionFilter ||
+        p.positions.defense === positionFilter ||
+        p.positions.special === positionFilter
       const matchesYear = yearFilter === '전체' || p.year === yearFilter
       return matchesPosition && matchesYear
     })
