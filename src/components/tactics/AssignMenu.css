@@ -1,4 +1,4 @@
-.route-menu {
+.assign-menu {
   background: var(--color-bg-card);
   border-radius: 8px;
   padding: 12px;
@@ -6,7 +6,7 @@
   margin-top: 12px;
 }
 
-.route-menu-header {
+.assign-menu-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -17,19 +17,19 @@
   color: var(--color-text);
 }
 
-.route-menu-number {
+.assign-menu-number {
   font-family: var(--font-impact);
   font-size: 18px;
   color: var(--color-scarlet);
 }
 
-.route-group-tabs {
+.assign-group-tabs {
   display: flex;
   gap: 4px;
   margin-bottom: 8px;
 }
 
-.route-group-tab {
+.assign-group-tab {
   flex: 1;
   padding: 5px 0;
   background: var(--color-bg-secondary);
@@ -42,25 +42,25 @@
   transition: color 0.12s, background 0.12s;
 }
 
-.route-group-tab:hover {
+.assign-group-tab:hover {
   color: var(--color-text);
 }
 
-.route-group-tab.active {
+.assign-group-tab.active {
   background: var(--color-scarlet);
   border-color: var(--color-scarlet);
   color: #fff;
   font-weight: 700;
 }
 
-.route-btns {
+.assign-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 8px;
 }
 
-.route-btn {
+.assign-btn {
   padding: 5px 10px;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
@@ -72,19 +72,19 @@
   transition: color 0.12s, background 0.12s, border-color 0.12s;
 }
 
-.route-btn:hover {
+.assign-btn:hover {
   color: var(--color-text);
   border-color: var(--color-text-secondary);
 }
 
-.route-btn.active {
+.assign-btn.active {
   background: var(--color-scarlet);
   border-color: var(--color-scarlet);
   color: #fff;
   font-weight: 700;
 }
 
-.route-actions {
+.assign-actions {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;

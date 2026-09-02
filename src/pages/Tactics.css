@@ -91,6 +91,16 @@
   font-weight: 700;
 }
 
+.tactics-formation-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tactics-formation-btn:disabled:hover {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
 .tactics-shownames-toggle {
   display: flex;
   align-items: center;

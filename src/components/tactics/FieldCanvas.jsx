@@ -1,15 +1,17 @@
 import { useRef, useCallback } from 'react'
-import { CENTER, TOP_D, toSvgY, toDepth, polylinePath } from '../../utils/fieldGeometry'
+import { CENTER, FIELD_W, HASH_L, HASH_R, toSvgY, toDepth, polylinePath } from '../../utils/fieldGeometry'
 import { ROUTES } from '../../data/routes'
+import { COVERAGES } from '../../data/coverages'
 import './FieldCanvas.css'
 
 const CHALK = '#EDF2EA'
 const SCARLET = '#CC0000'
+const ZONE_COLOR = '#8FA8C4'
+const MAN_COLOR = '#FF8FA3'
+const BLITZ_COLOR = '#E0AC3E'
 
 // Field constants
-const FIELD_DISPLAY_W = 53.33
-const HASH_L = 20.0
-const HASH_R = 33.33
+const FIELD_DISPLAY_W = FIELD_W
 
 // Marker geometry
 const OL_SIDE = 2.12
@@ -18,11 +20,21 @@ const CIRCLE_R = 1.15
 const DIAMOND_SIDE = 1.93
 const DIAMOND_R = (DIAMOND_SIDE * Math.SQRT2) / 2 // corner distance (pointed top/bottom)
 
-function getRouteSvgPoints(player, routeKey, flip) {
-  const route = ROUTES[routeKey]
-  if (!route) return []
+function labelRadiusOf(p) {
+  const isOL = p.side === 'offense' && p.pos === 'OL'
+  const isOffense = p.side === 'offense'
+  if (isOL) return OL_R
+  if (!isOffense) return DIAMOND_R
+  return CIRCLE_R
+}
+
+// 라우트/커버리지 공용: 선수 위치 기준 상대 오프셋(dx,dy)을 필드 좌표로 변환한다.
+// 선수가 필드 왼쪽(x < CENTER)에 있으면 dx를 반전하고, 배치별 flip 토글도 추가로 반전한다.
+function getAssignmentSvgPoints(player, presetId, flip, presets) {
+  const preset = presets[presetId]
+  if (!preset) return []
   const mirrorLeft = player.x < CENTER
-  return route.pts.map(([dx, dy]) => {
+  return preset.pts.map(([dx, dy]) => {
     let finalDx = dx
     if (mirrorLeft) finalDx = -finalDx
     if (flip) finalDx = -finalDx
@@ -33,62 +45,126 @@ function getRouteSvgPoints(player, routeKey, flip) {
   })
 }
 
+function arrowHead(pts, color) {
+  const last = pts[pts.length - 1]
+  const prev = pts[pts.length - 2]
+  const dx = last.x - prev.x
+  const dy = last.y - prev.y
+  const len = Math.sqrt(dx * dx + dy * dy) || 1
+  const ux = dx / len
+  const uy = dy / len
+  const nx = -uy
+  const ny = ux
+  const aLen = 0.8
+  const aW = 0.35
+  const tip = last
+  const b1x = tip.x - ux * aLen + nx * aW
+  const b1y = tip.y - uy * aLen + ny * aW
+  const b2x = tip.x - ux * aLen - nx * aW
+  const b2y = tip.y - uy * aLen - ny * aW
+  return (
+    <polygon
+      points={`${tip.x.toFixed(2)},${tip.y.toFixed(2)} ${b1x.toFixed(2)},${b1y.toFixed(2)} ${b2x.toFixed(2)},${b2y.toFixed(2)}`}
+      fill={color}
+    />
+  )
+}
+
+function barCap(pts, color) {
+  const last = pts[pts.length - 1]
+  const prev = pts[pts.length - 2]
+  const dx = last.x - prev.x
+  const dy = last.y - prev.y
+  const len = Math.sqrt(dx * dx + dy * dy) || 1
+  const nx = -dy / len
+  const ny = dx / len
+  const barLen = 0.4
+  const x1 = last.x + nx * barLen
+  const y1 = last.y + ny * barLen
+  const x2 = last.x - nx * barLen
+  const y2 = last.y - ny * barLen
+  return (
+    <line
+      x1={x1.toFixed(2)} y1={y1.toFixed(2)}
+      x2={x2.toFixed(2)} y2={y2.toFixed(2)}
+      stroke={color} strokeWidth={0.32} strokeLinecap="round"
+    />
+  )
+}
+
+// 오펜스 라우트 화살표: 초크색(선택 시 스칼렛), 진행방향 화살표 또는 블로킹 바.
 function RouteArrow({ pts, isSelected, cap }) {
   if (!pts || pts.length < 2) return null
   const d = polylinePath(pts)
   const color = isSelected ? SCARLET : CHALK
-  const last = pts[pts.length - 1]
-  const prev = pts[pts.length - 2]
-
-  let capEl = null
-  if (cap === 'bar') {
-    // T-bar: perpendicular to direction at end
-    const dx = last.x - prev.x
-    const dy = last.y - prev.y
-    const len = Math.sqrt(dx * dx + dy * dy) || 1
-    const nx = -dy / len
-    const ny = dx / len
-    const barLen = 0.4
-    const x1 = last.x + nx * barLen
-    const y1 = last.y + ny * barLen
-    const x2 = last.x - nx * barLen
-    const y2 = last.y - ny * barLen
-    capEl = (
-      <line
-        x1={x1.toFixed(2)} y1={y1.toFixed(2)}
-        x2={x2.toFixed(2)} y2={y2.toFixed(2)}
-        stroke={color} strokeWidth={0.32} strokeLinecap="round"
-      />
-    )
-  } else {
-    // Arrow triangle
-    const dx = last.x - prev.x
-    const dy = last.y - prev.y
-    const len = Math.sqrt(dx * dx + dy * dy) || 1
-    const ux = dx / len
-    const uy = dy / len
-    const nx = -uy
-    const ny = ux
-    const aLen = 0.8
-    const aW = 0.35
-    const tip = last
-    const b1x = tip.x - ux * aLen + nx * aW
-    const b1y = tip.y - uy * aLen + ny * aW
-    const b2x = tip.x - ux * aLen - nx * aW
-    const b2y = tip.y - uy * aLen - ny * aW
-    capEl = (
-      <polygon
-        points={`${tip.x.toFixed(2)},${tip.y.toFixed(2)} ${b1x.toFixed(2)},${b1y.toFixed(2)} ${b2x.toFixed(2)},${b2y.toFixed(2)}`}
-        fill={color}
-      />
-    )
-  }
 
   return (
     <g>
       <path d={d} fill="none" stroke={color} strokeWidth={0.32} strokeLinecap="round" strokeLinejoin="round" />
-      {capEl}
+      {cap === 'bar' ? barCap(pts, color) : arrowHead(pts, color)}
     </g>
+  )
+}
+
+// 디펜스 커버리지 화살표: group에 따라 존(점선+랜드마크 원)/맨(실선 코럴)/블리츠(굵은 실선 앰버).
+function CoverageArrow({ pts, group, label, showLabel }) {
+  if (!pts || pts.length < 2) return null
+  const d = polylinePath(pts)
+  const last = pts[pts.length - 1]
+
+  if (group === 'zone') {
+    return (
+      <g>
+        <path
+          d={d} fill="none" stroke={ZONE_COLOR} strokeWidth={0.32}
+          strokeDasharray=".5,.4" strokeLinecap="round" strokeLinejoin="round"
+        />
+        <circle
+          cx={last.x.toFixed(2)} cy={last.y.toFixed(2)} r={1}
+          fill={CHALK} fillOpacity="0.1" stroke={CHALK} strokeOpacity="0.35" strokeWidth="0.15"
+        />
+        {showLabel && (
+          <text
+            x={last.x.toFixed(2)} y={(last.y - 1.3).toFixed(2)}
+            textAnchor="middle" fontSize="1.4" fill={ZONE_COLOR}
+            style={{ pointerEvents: 'none', fontFamily: 'var(--font-body)', fontWeight: 600 }}
+          >
+            {label}
+          </text>
+        )}
+      </g>
+    )
+  }
+
+  const color = group === 'blitz' ? BLITZ_COLOR : MAN_COLOR
+  const width = group === 'blitz' ? 0.26 : 0.32
+  return (
+    <g>
+      <path d={d} fill="none" stroke={color} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />
+      {arrowHead(pts, color)}
+    </g>
+  )
+}
+
+// 맨/블리츠 배정 시 배치(마커) 바로 아래에 뜨는 짧은 표식(M / ⚡). 커버리지 라벨 토글로 제어.
+function AssignmentBadge({ p, group }) {
+  if (group !== 'man' && group !== 'blitz') return null
+  const svgY = toSvgY(p.d)
+  const r = labelRadiusOf(p)
+  const text = group === 'man' ? 'M' : '⚡'
+  const color = group === 'man' ? MAN_COLOR : BLITZ_COLOR
+  return (
+    <text
+      x={p.x.toFixed(2)}
+      y={(svgY + r + 0.9).toFixed(2)}
+      textAnchor="middle"
+      fontSize="1.5"
+      fill={color}
+      fontWeight="700"
+      style={{ pointerEvents: 'none', fontFamily: 'var(--font-impact)' }}
+    >
+      {text}
+    </text>
   )
 }
 
@@ -100,10 +176,7 @@ function PlayerMarker({ p, rp, isSelected, showName, onPointerDown, onRemove }) 
   const nameLabel = rp ? rp.name : ''
 
   const strokeWidth = isSelected ? 0.32 : 0.15
-
-  let labelR = CIRCLE_R
-  if (isOL) labelR = OL_R
-  else if (!isOffense) labelR = DIAMOND_R
+  const labelR = labelRadiusOf(p)
 
   const shouldShowName = showName || isSelected
 
@@ -225,6 +298,7 @@ export default function FieldCanvas({
   onRemovePlayer,
   rosterPlayers,
   showNames,
+  showCovLabels,
 }) {
   const svgRef = useRef(null)
   const dragRef = useRef(null)
@@ -300,18 +374,18 @@ export default function FieldCanvas({
   // depth 0 => y=25, depth 5 => y=20, etc.
   // We show depths -15 to +25 => y = 0 to 40
   const yardLineDepths = [-15, -10, -5, 0, 5, 10, 15, 20, 25]
-  const bandDepths = [[0,5],[10,15],[20,25],[-10,-5]]
+  const bandDepths = [[0, 5], [10, 15], [20, 25], [-10, -5]]
 
   const depthLabels = [
     { d: -15, label: '-15' },
     { d: -10, label: '-10' },
-    { d: -5,  label: '-5' },
-    { d: 0,   label: 'LOS', isLos: true },
-    { d: 5,   label: '+5' },
-    { d: 10,  label: '+10' },
-    { d: 15,  label: '+15' },
-    { d: 20,  label: '+20' },
-    { d: 25,  label: '+25' },
+    { d: -5, label: '-5' },
+    { d: 0, label: 'LOS', isLos: true },
+    { d: 5, label: '+5' },
+    { d: 10, label: '+10' },
+    { d: 15, label: '+15' },
+    { d: 20, label: '+20' },
+    { d: 25, label: '+25' },
   ]
 
   return (
@@ -396,19 +470,33 @@ export default function FieldCanvas({
           stroke={CHALK} strokeWidth="0.34" opacity="0.85"
         />
 
-        {/* Routes */}
+        {/* Routes / coverages (아래 레이어 — 마커보다 먼저 그린다) */}
         {players.map((p) => {
           const asgn = assignments[p.key]
-          if (!asgn || !asgn.route) return null
-          const pts = getRouteSvgPoints(p, asgn.route, asgn.flip ?? false)
-          const route = ROUTES[asgn.route]
+          if (!asgn) return null
+
+          if (asgn.kind === 'route') {
+            const pts = getAssignmentSvgPoints(p, asgn.id, asgn.flip ?? false, ROUTES)
+            const route = ROUTES[asgn.id]
+            return (
+              <RouteArrow
+                key={`asgn-${p.key}`}
+                pts={pts}
+                isSelected={p.key === selectedKey}
+                cap={route?.cap}
+              />
+            )
+          }
+
+          // coverage
+          const pts = getAssignmentSvgPoints(p, asgn.id, asgn.flip ?? false, COVERAGES)
+          const preset = COVERAGES[asgn.id]
+          if (!preset) return null
           return (
-            <RouteArrow
-              key={`route-${p.key}`}
-              pts={pts}
-              isSelected={p.key === selectedKey}
-              cap={route?.cap}
-            />
+            <g key={`asgn-${p.key}`}>
+              <CoverageArrow pts={pts} group={preset.group} label={preset.label} showLabel={showCovLabels} />
+              {showCovLabels && <AssignmentBadge p={p} group={preset.group} />}
+            </g>
           )
         })}
 
