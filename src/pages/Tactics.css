@@ -1,0 +1,252 @@
+.page-tactics {
+  flex: 1;
+  padding-bottom: 60px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+
+.tactics-hero {
+  background: linear-gradient(135deg, var(--color-scarlet-dark), var(--color-scarlet));
+  padding: 48px 0 32px;
+  margin-bottom: 28px;
+}
+
+.tactics-hero h1 {
+  font-family: var(--font-impact);
+  font-size: 48px;
+  color: #fff;
+  margin: 0 0 12px 0;
+  letter-spacing: 0.04em;
+}
+
+.play-name-input {
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 0;
+  color: #fff;
+  font-family: var(--font-impact);
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  padding: 4px 0;
+  outline: none;
+  width: 360px;
+  max-width: 100%;
+}
+
+.play-name-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.play-name-input:focus {
+  border-bottom-color: #fff;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────── */
+
+.tactics-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.tactics-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-family: var(--font-impact);
+  font-size: 15px;
+  color: var(--color-scarlet);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tactics-formation-btn {
+  padding: 5px 12px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+
+.tactics-formation-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-secondary);
+}
+
+.tactics-formation-btn.active {
+  background: var(--color-scarlet);
+  border-color: var(--color-scarlet);
+  color: #fff;
+  font-weight: 700;
+}
+
+.tactics-toolbar-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.tactics-action-btn {
+  padding: 5px 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  transition: color 0.12s, background 0.12s;
+}
+
+.tactics-action-btn:hover {
+  color: var(--color-text);
+  background: var(--color-bg-card);
+}
+
+/* ── Main grid ────────────────────────────────────────────── */
+
+.tactics-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 20px;
+  align-items: start;
+}
+
+.tactics-field-col {
+  min-width: 0;
+}
+
+.tactics-rail-col {
+  min-width: 0;
+}
+
+/* ── Playbook ─────────────────────────────────────────────── */
+
+.tactics-playbook {
+  margin-top: 32px;
+}
+
+.s-section-title {
+  font-family: var(--font-impact);
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  margin: 0 0 12px 0;
+}
+
+.playbook-save-row {
+  margin-bottom: 12px;
+}
+
+.btn-save-play {
+  padding: 8px 20px;
+  background: var(--color-scarlet);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-impact);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-save-play:hover {
+  background: var(--color-scarlet-dark);
+}
+
+.empty-note {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-family: var(--font-body);
+}
+
+.playbook-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.playbook-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.playbook-name {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 100px;
+}
+
+.playbook-badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.playbook-badge.committed {
+  background: var(--color-scarlet);
+  color: #fff;
+}
+
+.playbook-badge.temp {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.playbook-btn {
+  padding: 4px 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+
+.playbook-btn:hover {
+  color: var(--color-text);
+  background: var(--color-bg-card);
+}
+
+.playbook-btn.danger:hover {
+  background: var(--color-scarlet);
+  border-color: var(--color-scarlet);
+  color: #fff;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 940px) {
+  .tactics-main {
+    grid-template-columns: 1fr;
+  }
+}

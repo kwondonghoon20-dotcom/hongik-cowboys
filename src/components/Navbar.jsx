@@ -6,6 +6,7 @@ const links = [
   { to: '/', label: '홈' },
   { to: '/games', label: '경기' },
   { to: '/season', label: '시즌' },
+  { to: '/tactics', label: '전술판' },
   { to: '/roster', label: '로스터' },
 ]
 

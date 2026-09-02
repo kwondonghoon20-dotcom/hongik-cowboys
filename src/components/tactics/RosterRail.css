@@ -1,0 +1,115 @@
+.roster-rail {
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.roster-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.roster-tab {
+  flex: 1;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.15s, background 0.15s;
+}
+
+.roster-tab:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.roster-tab.active {
+  color: var(--color-scarlet);
+  border-bottom: 2px solid var(--color-scarlet);
+}
+
+.roster-count {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-body);
+}
+
+.roster-count.over {
+  color: var(--color-scarlet);
+  font-weight: 700;
+}
+
+.roster-player-list {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.roster-group-label {
+  padding: 6px 12px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  background: var(--color-bg-secondary);
+  font-family: var(--font-body);
+}
+
+.roster-player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 0;
+  cursor: pointer;
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.roster-player-row:hover {
+  background: var(--color-bg-secondary);
+}
+
+.roster-player-row.placed {
+  background: rgba(204, 0, 0, 0.06);
+}
+
+.roster-player-indicator {
+  width: 3px;
+  min-width: 3px;
+  height: 32px;
+  background: transparent;
+  border-radius: 0 2px 2px 0;
+  transition: background 0.15s;
+}
+
+.roster-player-indicator.placed {
+  background: var(--color-scarlet);
+}
+
+.roster-player-number {
+  font-family: var(--font-impact);
+  font-size: 15px;
+  color: var(--color-text);
+  min-width: 32px;
+}
+
+.roster-player-name {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.roster-player-meta {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}

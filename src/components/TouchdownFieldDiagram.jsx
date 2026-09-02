@@ -3,6 +3,7 @@ import { players } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
 import { getTouchdownClip, getTDPlayOverride } from '../data/touchdownClips'
 import { OUR_TEAM, normalizeTeamName, normalizeNum } from '../utils/parseExcel'
+import { catmullRomPath } from '../utils/fieldGeometry'
 
 // ── 유틸 ──────────────────────────────────────────────────────
 
@@ -25,25 +26,6 @@ const TEAM_COLORS = {
 
 function getTeamColor(teamId) {
   return TEAM_COLORS[teamId] ?? '#888888'
-}
-
-function catmullRomPath(pts) {
-  // pts: [{x, y}]
-  if (pts.length < 2) return ''
-  const p = pts.map((pt) => [pt.x, pt.y])
-  let d = `M ${p[0][0].toFixed(2)} ${p[0][1].toFixed(2)}`
-  for (let i = 0; i < p.length - 1; i++) {
-    const p0 = p[Math.max(0, i - 1)]
-    const p1 = p[i]
-    const p2 = p[i + 1]
-    const p3 = p[Math.min(p.length - 1, i + 2)]
-    const cp1x = p1[0] + (p2[0] - p0[0]) / 6
-    const cp1y = p1[1] + (p2[1] - p0[1]) / 6
-    const cp2x = p2[0] - (p3[0] - p1[0]) / 6
-    const cp2y = p2[1] - (p3[1] - p1[1]) / 6
-    d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)},${cp2x.toFixed(2)} ${cp2y.toFixed(2)},${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`
-  }
-  return d
 }
 
 function sampleRoute(route, step = 5) {
