@@ -2,6 +2,7 @@ import {
   BarChart, Bar, Cell, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ReferenceLine,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts'
 import {
   getPenaltyStats, getPlayerTotalYards,
@@ -354,6 +355,94 @@ function KeyStatsPanel({ game }) {
   )
 }
 
+// ── 팀 성향 레이더 차트 ────────────────────────────────────────────────────
+
+function parseRatio(str) {
+  const parts = String(str ?? '').split('/')
+  if (parts.length < 2) return 0
+  const num = parseFloat(parts[0])
+  const den = parseFloat(parts[1])
+  return den > 0 ? Math.round((num / den) * 100) : 0
+}
+
+function TeamRadarChart({ game }) {
+  const hasRawPlays = Array.isArray(game.plays) && game.plays.length > 0
+  if (!hasRawPlays) return null
+
+  const keyStats = getKeyStats(game.plays, game.homeTeam, game.awayTeam)
+  const { possession, redZone, thirdDown } = keyStats
+
+  const sides = ['home', 'away']
+  const teamOf = { home: game.homeTeam, away: game.awayTeam }
+
+  function metrics(side) {
+    const override = game.overrideStats?.[side]
+    const ts = game.teamStats?.[side] ?? {}
+    const rushAtt = override?.rushAttempts ?? ts.rushAttempts ?? 0
+    const passAtt = override?.passAttempts ?? ts.passAttempts ?? 0
+    const comp    = override?.completions  ?? ts.completions  ?? 0
+    const total   = rushAtt + passAtt
+    return {
+      rushRatio: total > 0 ? Math.round((rushAtt / total) * 100) : 0,
+      passComp:  passAtt > 0 ? Math.round((comp / passAtt) * 100) : 0,
+      thirdDown: parseRatio(thirdDown[side]),
+      redZone:   parseRatio(redZone[side]),
+      possession: possession[side] ?? 0,
+    }
+  }
+
+  const h = metrics('home')
+  const a = metrics('away')
+
+  const radarData = [
+    { axis: '러시 비율',    home: h.rushRatio,  away: a.rushRatio },
+    { axis: '패스 성공률',  home: h.passComp,   away: a.passComp },
+    { axis: '3rd Down',     home: h.thirdDown,  away: a.thirdDown },
+    { axis: '레드존 전환율', home: h.redZone,    away: a.redZone },
+    { axis: '볼 점유율',    home: h.possession, away: a.possession },
+  ]
+
+  const homeColor = getTeamColor(game.homeTeam)
+  const awayColor = getTeamColor(game.awayTeam)
+
+  return (
+    <section className="section">
+      <h3 className="section-title">팀 성향 분석</h3>
+      <div className="chart-card" style={{ padding: '16px 8px' }}>
+        <ResponsiveContainer width="100%" height={340}>
+          <RadarChart data={radarData} margin={{ top: 16, right: 32, bottom: 16, left: 32 }}>
+            <PolarGrid stroke="#333" />
+            <PolarAngleAxis dataKey="axis" tick={{ fill: '#ccc', fontSize: 12 }} />
+            <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+            <Radar
+              name={game.homeTeam}
+              dataKey="home"
+              stroke={homeColor}
+              fill={homeColor}
+              fillOpacity={0.3}
+              strokeWidth={2}
+            />
+            <Radar
+              name={game.awayTeam}
+              dataKey="away"
+              stroke={awayColor}
+              fill={awayColor}
+              fillOpacity={0.3}
+              strokeWidth={2}
+            />
+            <Legend wrapperStyle={{ color: '#ccc' }} />
+            <Tooltip
+              contentStyle={{ background: '#242424', border: '1px solid #444', color: '#fff' }}
+              labelStyle={{ color: '#fff' }}
+              formatter={(value) => `${value}%`}
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
+  )
+}
+
 // ── 경기 흐름 섹션 ─────────────────────────────────────────────────────────
 
 function GameFlowSection({ game }) {
@@ -409,6 +498,7 @@ export default function GameCharts({ game }) {
   return (
     <>
     <GameFlowSection game={game} />
+    <TeamRadarChart game={game} />
     <section className="section">
       <h3 className="section-title">경기 분석</h3>
       <div className="charts-grid">
