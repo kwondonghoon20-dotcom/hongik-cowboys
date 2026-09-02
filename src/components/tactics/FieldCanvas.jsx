@@ -11,6 +11,13 @@ const FIELD_DISPLAY_W = 53.33
 const HASH_L = 20.0
 const HASH_R = 33.33
 
+// Marker geometry
+const OL_SIDE = 2.12
+const OL_R = OL_SIDE / 2 // label-offset radius approximation
+const CIRCLE_R = 1.15
+const DIAMOND_SIDE = 1.93
+const DIAMOND_R = (DIAMOND_SIDE * Math.SQRT2) / 2 // corner distance (pointed top/bottom)
+
 function getRouteSvgPoints(player, routeKey, flip) {
   const route = ROUTES[routeKey]
   if (!route) return []
@@ -85,15 +92,20 @@ function RouteArrow({ pts, isSelected, cap }) {
   )
 }
 
-function PlayerMarker({ p, rp, isSelected, onPointerDown, onRemove }) {
+function PlayerMarker({ p, rp, isSelected, showName, onPointerDown, onRemove }) {
   const svgY = toSvgY(p.d)
   const isOL = p.side === 'offense' && p.pos === 'OL'
   const isOffense = p.side === 'offense'
   const numLabel = rp && rp.number != null ? String(rp.number) : '–'
   const nameLabel = rp ? rp.name : ''
 
-  const strokeColor = isOffense ? SCARLET : CHALK
-  const strokeWidth = isSelected ? 0.38 : 0.18
+  const strokeWidth = isSelected ? 0.32 : 0.15
+
+  let labelR = CIRCLE_R
+  if (isOL) labelR = OL_R
+  else if (!isOffense) labelR = DIAMOND_R
+
+  const shouldShowName = showName || isSelected
 
   return (
     <g
@@ -103,12 +115,12 @@ function PlayerMarker({ p, rp, isSelected, onPointerDown, onRemove }) {
       {/* Role label above */}
       <text
         x={p.x.toFixed(2)}
-        y={(svgY - 2.2).toFixed(2)}
+        y={(svgY - (labelR + 0.55)).toFixed(2)}
         textAnchor="middle"
-        fontSize="1.5"
-        opacity="0.62"
+        fontSize="1.4"
+        opacity="0.6"
         fill={CHALK}
-        style={{ pointerEvents: 'none', fontFamily: 'var(--font-body)' }}
+        style={{ pointerEvents: 'none', fontFamily: 'var(--font-impact)' }}
       >
         {p.role}
       </text>
@@ -116,34 +128,34 @@ function PlayerMarker({ p, rp, isSelected, onPointerDown, onRemove }) {
       {/* Marker shape */}
       {isOL ? (
         <rect
-          x={(p.x - 1.565).toFixed(2)}
-          y={(svgY - 1.565).toFixed(2)}
-          width="3.13"
-          height="3.13"
-          rx="0.5"
-          ry="0.5"
+          x={(p.x - OL_SIDE / 2).toFixed(2)}
+          y={(svgY - OL_SIDE / 2).toFixed(2)}
+          width={OL_SIDE}
+          height={OL_SIDE}
+          rx="0.3"
+          ry="0.3"
           fill="var(--color-scarlet)"
-          stroke={isSelected ? '#fff' : strokeColor}
+          stroke="#fff"
           strokeWidth={strokeWidth}
         />
       ) : isOffense ? (
         <circle
           cx={p.x.toFixed(2)}
           cy={svgY.toFixed(2)}
-          r="1.7"
+          r={CIRCLE_R}
           fill="var(--color-scarlet)"
-          stroke={isSelected ? '#fff' : strokeColor}
+          stroke="#fff"
           strokeWidth={strokeWidth}
         />
       ) : (
         // Diamond for defense
         <rect
-          x={(p.x - 1.7).toFixed(2)}
-          y={(svgY - 1.7).toFixed(2)}
-          width="3.4"
-          height="3.4"
+          x={(p.x - DIAMOND_SIDE / 2).toFixed(2)}
+          y={(svgY - DIAMOND_SIDE / 2).toFixed(2)}
+          width={DIAMOND_SIDE}
+          height={DIAMOND_SIDE}
           fill="#15191C"
-          stroke={isSelected ? '#fff' : CHALK}
+          stroke={CHALK}
           strokeWidth={strokeWidth}
           transform={`rotate(45 ${p.x.toFixed(2)} ${svgY.toFixed(2)})`}
         />
@@ -152,26 +164,29 @@ function PlayerMarker({ p, rp, isSelected, onPointerDown, onRemove }) {
       {/* Number inside */}
       <text
         x={p.x.toFixed(2)}
-        y={(svgY + 0.75).toFixed(2)}
+        y={(svgY + 0.48).toFixed(2)}
         textAnchor="middle"
-        fontSize="2.1"
+        fontSize="1.4"
         fill="#fff"
         style={{ pointerEvents: 'none', fontFamily: 'var(--font-impact)', userSelect: 'none' }}
       >
         {numLabel}
       </text>
 
-      {/* Name below */}
-      <text
-        x={p.x.toFixed(2)}
-        y={(svgY + 2.8).toFixed(2)}
-        textAnchor="middle"
-        fontSize="1.45"
-        fill={CHALK}
-        style={{ pointerEvents: 'none', fontFamily: 'var(--font-body)' }}
-      >
-        {nameLabel}
-      </text>
+      {/* Name below (conditional) */}
+      {shouldShowName && (
+        <text
+          x={p.x.toFixed(2)}
+          y={(svgY + (labelR + 1.75)).toFixed(2)}
+          textAnchor="middle"
+          fontSize="1.4"
+          fontWeight="500"
+          fill={CHALK}
+          style={{ pointerEvents: 'none', fontFamily: 'var(--font-body)' }}
+        >
+          {nameLabel}
+        </text>
+      )}
 
       {/* Remove X button when selected */}
       {isSelected && (
@@ -180,14 +195,14 @@ function PlayerMarker({ p, rp, isSelected, onPointerDown, onRemove }) {
           style={{ cursor: 'pointer' }}
         >
           <circle
-            cx={(p.x + 1.8).toFixed(2)}
-            cy={(svgY - 1.8).toFixed(2)}
+            cx={(p.x + labelR + 0.5).toFixed(2)}
+            cy={(svgY - labelR - 0.5).toFixed(2)}
             r="1.1"
             fill={SCARLET}
           />
           <text
-            x={(p.x + 1.8).toFixed(2)}
-            y={(svgY - 1.8 + 0.55).toFixed(2)}
+            x={(p.x + labelR + 0.5).toFixed(2)}
+            y={(svgY - labelR - 0.5 + 0.55).toFixed(2)}
             textAnchor="middle"
             fontSize="1.6"
             fill="#fff"
@@ -204,14 +219,17 @@ function PlayerMarker({ p, rp, isSelected, onPointerDown, onRemove }) {
 export default function FieldCanvas({
   players,
   assignments,
-  selectedId,
+  selectedKey,
   onSelectPlayer,
   onMovePlayer,
+  onRemovePlayer,
   rosterPlayers,
+  showNames,
 }) {
   const svgRef = useRef(null)
   const dragRef = useRef(null)
   const hasDraggedRef = useRef(false)
+  const justInteractedRef = useRef(false)
 
   const getSvgCoords = useCallback((clientX, clientY) => {
     const svg = svgRef.current
@@ -227,17 +245,18 @@ export default function FieldCanvas({
 
   const snap = (v) => Math.round(v * 2) / 2
 
-  const handlePointerDown = useCallback((e, playerId) => {
+  const handlePointerDown = useCallback((e, key) => {
     e.stopPropagation()
+    justInteractedRef.current = true
     e.currentTarget.setPointerCapture(e.pointerId)
     const start = getSvgCoords(e.clientX, e.clientY)
-    dragRef.current = { playerId, startX: start.x, startY: start.y, moved: false }
+    dragRef.current = { key, startX: start.x, startY: start.y, moved: false }
     hasDraggedRef.current = false
   }, [getSvgCoords])
 
   const handlePointerMove = useCallback((e) => {
     if (!dragRef.current) return
-    const { playerId, startX, startY } = dragRef.current
+    const { key, startX, startY } = dragRef.current
     const cur = getSvgCoords(e.clientX, e.clientY)
     const dist = Math.sqrt((cur.x - startX) ** 2 + (cur.y - startY) ** 2)
     if (dist > 0.3) {
@@ -251,21 +270,27 @@ export default function FieldCanvas({
     const clampedX = Math.max(0.8, Math.min(52.53, rawX))
     const clampedD = Math.max(-14.2, Math.min(24.2, rawD))
 
-    onMovePlayer(playerId, clampedX, clampedD)
+    onMovePlayer(key, clampedX, clampedD)
   }, [getSvgCoords, onMovePlayer])
 
   const handlePointerUp = useCallback((e) => {
     if (!dragRef.current) return
-    const { playerId, moved } = dragRef.current
+    const { key, moved } = dragRef.current
     if (!moved) {
-      onSelectPlayer(selectedId === playerId ? null : playerId)
+      onSelectPlayer(selectedKey === key ? null : key)
     }
     dragRef.current = null
-  }, [onSelectPlayer, selectedId])
+  }, [onSelectPlayer, selectedKey])
 
   const handleSvgClick = useCallback((e) => {
     if (hasDraggedRef.current) {
       hasDraggedRef.current = false
+      return
+    }
+    if (justInteractedRef.current) {
+      // A marker's own pointerdown/pointerup just handled selection —
+      // don't let the resulting bubbled click event immediately deselect it.
+      justInteractedRef.current = false
       return
     }
     onSelectPlayer(null)
@@ -373,15 +398,15 @@ export default function FieldCanvas({
 
         {/* Routes */}
         {players.map((p) => {
-          const asgn = assignments[p.playerId]
+          const asgn = assignments[p.key]
           if (!asgn || !asgn.route) return null
           const pts = getRouteSvgPoints(p, asgn.route, asgn.flip ?? false)
           const route = ROUTES[asgn.route]
           return (
             <RouteArrow
-              key={`route-${p.playerId}`}
+              key={`route-${p.key}`}
               pts={pts}
-              isSelected={p.playerId === selectedId}
+              isSelected={p.key === selectedKey}
               cap={route?.cap}
             />
           )
@@ -392,12 +417,13 @@ export default function FieldCanvas({
           const rp = rosterPlayers ? rosterPlayers.find((r) => r.id === p.playerId) : null
           return (
             <PlayerMarker
-              key={p.playerId}
+              key={p.key}
               p={p}
               rp={rp}
-              isSelected={p.playerId === selectedId}
-              onPointerDown={(e) => handlePointerDown(e, p.playerId)}
-              onRemove={() => onSelectPlayer(null)}
+              isSelected={p.key === selectedKey}
+              showName={showNames}
+              onPointerDown={(e) => handlePointerDown(e, p.key)}
+              onRemove={() => onRemovePlayer(p.key)}
             />
           )
         })}

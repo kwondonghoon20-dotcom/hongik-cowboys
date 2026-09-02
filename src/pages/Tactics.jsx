@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { players } from '../data/dummy'
 import { FORMATIONS } from '../data/formations'
 import { PLAYBOOK } from '../data/playbook'
 import { getSavedPlays, savePlay, removeSavedPlay } from '../data/savedPlays'
-import { CENTER } from '../utils/fieldGeometry'
 import FieldCanvas from '../components/tactics/FieldCanvas'
 import RosterRail from '../components/tactics/RosterRail'
 import RouteMenu from '../components/tactics/RouteMenu'
 import './Tactics.css'
 
+const SHOWNAMES_KEY = 'hicowboys_tactics_shownames'
+
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
+}
+
+function keyOf(side, playerId) {
+  return side + ':' + playerId
 }
 
 function exportCode(play) {
@@ -29,30 +34,40 @@ export default function Tactics() {
   const [defFormation, setDefFormation] = useState('d43')
   const [placedPlayers, setPlacedPlayers] = useState([])
   const [assignments, setAssignments] = useState({})
-  const [selectedId, setSelectedId] = useState(null)
+  const [selectedKey, setSelectedKey] = useState(null)
   const [railSide, setRailSide] = useState('offense')
   const [savedPlays, setSavedPlays] = useState([])
+  const [showNames, setShowNames] = useState(() => {
+    try {
+      return localStorage.getItem(SHOWNAMES_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
 
-  const applyFormation = (formationKey, side) => {
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHOWNAMES_KEY, String(showNames))
+    } catch {
+      // ignore
+    }
+  }, [showNames])
+
+  const applyFormation = useCallback((formationKey, side) => {
     const formation = FORMATIONS[formationKey]
     if (!formation) return
 
-    const posKey = side // 'offense' or 'defense'
-
     setPlacedPlayers((prev) => {
-      // Remove existing players of this side
+      // Only clear the given side; the other side's placements stay untouched.
       const kept = prev.filter((p) => p.side !== side)
-      const alreadyUsed = new Set(kept.map((p) => p.playerId))
+      const alreadyUsed = new Set() // playerIds used within THIS side only
 
       const newPlacements = []
       formation.slots.forEach((slot) => {
-        // Find a matching player: positions[side] matches slot.pos, not yet used
         const posMatch = players
-          .filter((p) => p.positions[posKey] === slot.pos && !alreadyUsed.has(p.id))
+          .filter((p) => p.positions[side] === slot.pos && !alreadyUsed.has(p.id))
           .sort((a, b) => {
-            // Grade higher first
             if (b.grade !== a.grade) return b.grade - a.grade
-            // Number lower first (null goes to end)
             const na = a.number ?? Infinity
             const nb = b.number ?? Infinity
             return na - nb
@@ -60,14 +75,13 @@ export default function Tactics() {
 
         let chosen = posMatch[0] ?? null
         if (!chosen) {
-          // Fall back to any unused player
-          const fallback = players.find((p) => !alreadyUsed.has(p.id))
-          chosen = fallback ?? null
+          chosen = players.find((p) => !alreadyUsed.has(p.id)) ?? null
         }
 
         if (chosen) {
           alreadyUsed.add(chosen.id)
           newPlacements.push({
+            key: keyOf(side, chosen.id),
             playerId: chosen.id,
             side,
             x: slot.x,
@@ -80,7 +94,16 @@ export default function Tactics() {
 
       return [...kept, ...newPlacements]
     })
-  }
+
+    // Drop dangling route assignments left over from the cleared side.
+    setAssignments((prev) => {
+      const next = {}
+      Object.entries(prev).forEach(([k, v]) => {
+        if (!k.startsWith(side + ':')) next[k] = v
+      })
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     applyFormation('iform', 'offense')
@@ -93,16 +116,36 @@ export default function Tactics() {
     if (side === 'offense') setOffFormation(formationKey)
     else setDefFormation(formationKey)
     applyFormation(formationKey, side)
+    setSelectedKey(null)
   }
+
+  const removePlacement = useCallback((key) => {
+    setPlacedPlayers((prev) => prev.filter((p) => p.key !== key))
+    setAssignments((prev) => {
+      if (!(key in prev)) return prev
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+    setSelectedKey((prev) => (prev === key ? null : prev))
+  }, [])
 
   const clearSide = (side) => {
     setPlacedPlayers((prev) => prev.filter((p) => p.side !== side))
+    setAssignments((prev) => {
+      const next = {}
+      Object.entries(prev).forEach(([k, v]) => {
+        if (!k.startsWith(side + ':')) next[k] = v
+      })
+      return next
+    })
+    setSelectedKey((prev) => (prev && prev.startsWith(side + ':') ? null : prev))
   }
 
   const resetAll = () => {
     setPlacedPlayers([])
     setAssignments({})
-    setSelectedId(null)
+    setSelectedKey(null)
     setOffFormation('iform')
     setDefFormation('d43')
     applyFormation('iform', 'offense')
@@ -110,40 +153,75 @@ export default function Tactics() {
   }
 
   const togglePlayer = (player) => {
-    setPlacedPlayers((prev) => {
-      const existing = prev.find((p) => p.playerId === player.id)
-      if (existing) {
-        return prev.filter((p) => p.playerId !== player.id)
+    const side = railSide
+    const key = keyOf(side, player.id)
+    const existing = placedPlayers.find((p) => p.key === key)
+    if (existing) {
+      removePlacement(key)
+      return
+    }
+
+    const sideEntries = placedPlayers.filter((p) => p.side === side)
+    const formationKey = side === 'offense' ? offFormation : defFormation
+    const formation = FORMATIONS[formationKey]
+    const occupied = new Set(sideEntries.map((p) => `${p.x}|${p.d}`))
+
+    let slot = null
+    if (formation) {
+      const wantedPos = player.positions[side]
+      slot = formation.slots.find((s) => s.pos === wantedPos && !occupied.has(`${s.x}|${s.d}`))
+      if (!slot) {
+        slot = formation.slots.find((s) => !occupied.has(`${s.x}|${s.d}`))
       }
-      // Add to sideline position
-      const side = railSide
-      const sideCount = prev.filter((p) => p.side === side).length
-      const d = side === 'offense' ? -13.5 : 22.5
-      const x = 4 + sideCount * 9
-      return [...prev, {
-        playerId: player.id,
-        side,
-        x: Math.min(x, 48),
-        d,
-        role: player.positions[side] ?? '?',
-        pos: player.positions[side] ?? '?',
-      }]
-    })
+    }
+
+    let x, d, role, pos
+    if (slot) {
+      x = slot.x
+      d = slot.d
+      role = slot.role
+      pos = slot.pos
+    } else {
+      const sideCount = sideEntries.length
+      d = side === 'offense' ? -13.5 : 22.5
+      x = Math.min(4 + sideCount * 9, 48)
+      role = player.positions[side] ?? '?'
+      pos = player.positions[side] ?? '?'
+    }
+
+    setPlacedPlayers((prev) => [...prev, { key, playerId: player.id, side, x, d, role, pos }])
   }
 
-  const handleMovePlayer = (playerId, newX, newD) => {
+  const handleMovePlayer = useCallback((key, newX, newD) => {
     setPlacedPlayers((prev) =>
-      prev.map((p) => p.playerId === playerId ? { ...p, x: newX, d: newD } : p)
+      prev.map((p) => (p.key === key ? { ...p, x: newX, d: newD } : p))
     )
-  }
+  }, [])
+
+  // Delete/Backspace removes the selected marker, Escape deselects.
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const active = document.activeElement
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return
+      if (!selectedKey) return
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault()
+        removePlacement(selectedKey)
+      } else if (e.key === 'Escape') {
+        setSelectedKey(null)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selectedKey, removePlacement])
 
   const handleSave = () => {
     const play = {
       id: generateId(),
       name: playName,
-      offFormation,
-      defFormation,
+      formation: { offense: offFormation, defense: defFormation },
       players: placedPlayers.map((p) => ({
+        key: p.key,
         playerId: p.playerId,
         side: p.side,
         x: p.x,
@@ -152,6 +230,8 @@ export default function Tactics() {
         pos: p.pos,
       })),
       assignments: { ...assignments },
+      notes: '',
+      updatedAt: new Date().toISOString().slice(0, 10),
     }
     savePlay(play)
     setSavedPlays(getSavedPlays())
@@ -159,11 +239,29 @@ export default function Tactics() {
 
   const loadPlay = (play) => {
     setPlayName(play.name)
-    if (play.offFormation) setOffFormation(play.offFormation)
-    if (play.defFormation) setDefFormation(play.defFormation)
-    setPlacedPlayers(play.players || [])
-    setAssignments(play.assignments || {})
-    setSelectedId(null)
+    if (play.formation?.offense) setOffFormation(play.formation.offense)
+    if (play.formation?.defense) setDefFormation(play.formation.defense)
+
+    const rawPlayers = play.players || []
+    const seen = new Set()
+    const rebuilt = []
+    rawPlayers.forEach((p) => {
+      const key = keyOf(p.side, p.playerId) // recompute — source of truth per spec
+      if (seen.has(key)) return // guard against dangling/duplicate data
+      seen.add(key)
+      rebuilt.push({ ...p, key })
+    })
+
+    const validKeys = new Set(rebuilt.map((p) => p.key))
+    const rawAssignments = play.assignments || {}
+    const rebuiltAssignments = {}
+    Object.entries(rawAssignments).forEach(([k, v]) => {
+      if (validKeys.has(k)) rebuiltAssignments[k] = v
+    })
+
+    setPlacedPlayers(rebuilt)
+    setAssignments(rebuiltAssignments)
+    setSelectedKey(null)
   }
 
   const deletePlay = (id) => {
@@ -174,7 +272,6 @@ export default function Tactics() {
   const copyCode = (play) => {
     const code = exportCode(play)
     navigator.clipboard.writeText(code).catch(() => {
-      // Fallback: alert with code
       window.alert('클립보드 복사 실패.\n\n' + code)
     })
   }
@@ -193,7 +290,12 @@ export default function Tactics() {
   const offFormations = Object.entries(FORMATIONS).filter(([, f]) => f.side === 'offense')
   const defFormations = Object.entries(FORMATIONS).filter(([, f]) => f.side === 'defense')
 
-  const selectedPlayer = selectedId ? players.find((p) => p.id === selectedId) : null
+  const selectedPlacement = selectedKey ? placedPlayers.find((p) => p.key === selectedKey) : null
+  const selectedPlayer = selectedPlacement ? players.find((p) => p.id === selectedPlacement.playerId) : null
+
+  const offenseIds = new Set(placedPlayers.filter((p) => p.side === 'offense').map((p) => p.playerId))
+  const defenseIds = new Set(placedPlayers.filter((p) => p.side === 'defense').map((p) => p.playerId))
+  const dualCount = [...offenseIds].filter((id) => defenseIds.has(id)).length
 
   return (
     <div className="page-tactics">
@@ -234,6 +336,14 @@ export default function Tactics() {
               </button>
             ))}
           </div>
+          <label className="tactics-shownames-toggle">
+            <input
+              type="checkbox"
+              checked={showNames}
+              onChange={(e) => setShowNames(e.target.checked)}
+            />
+            이름 표시
+          </label>
           <div className="tactics-toolbar-actions">
             <button className="tactics-action-btn" onClick={() => clearSide('offense')}>오펜스 비우기</button>
             <button className="tactics-action-btn" onClick={() => clearSide('defense')}>디펜스 비우기</button>
@@ -246,43 +356,47 @@ export default function Tactics() {
             <FieldCanvas
               players={placedPlayers}
               assignments={assignments}
-              selectedId={selectedId}
-              onSelectPlayer={setSelectedId}
+              selectedKey={selectedKey}
+              onSelectPlayer={setSelectedKey}
               onMovePlayer={handleMovePlayer}
+              onRemovePlayer={removePlacement}
               rosterPlayers={players}
+              showNames={showNames}
             />
           </div>
           <div className="tactics-rail-col">
             <RosterRail
               side={railSide}
               onSideChange={setRailSide}
-              placedIds={new Set(placedPlayers.filter((p) => p.side === railSide).map((p) => p.playerId))}
+              placedOffenseIds={offenseIds}
+              placedDefenseIds={defenseIds}
               onTogglePlayer={togglePlayer}
               playerCount={placedPlayers.filter((p) => p.side === railSide).length}
+              dualCount={dualCount}
             />
-            {selectedId && selectedPlayer && (
+            {selectedKey && selectedPlayer && (
               <RouteMenu
                 player={selectedPlayer}
-                assignment={assignments[selectedId] ?? null}
+                assignment={assignments[selectedKey] ?? null}
                 onSetRoute={(r) =>
                   setAssignments((a) => ({
                     ...a,
-                    [selectedId]: { route: r, flip: assignments[selectedId]?.flip ?? false },
+                    [selectedKey]: { route: r, flip: a[selectedKey]?.flip ?? false },
                   }))
                 }
                 onClearRoute={() =>
                   setAssignments((a) => {
                     const n = { ...a }
-                    delete n[selectedId]
+                    delete n[selectedKey]
                     return n
                   })
                 }
                 onFlip={() =>
                   setAssignments((a) => ({
                     ...a,
-                    [selectedId]: {
-                      ...a[selectedId],
-                      flip: !(a[selectedId]?.flip ?? false),
+                    [selectedKey]: {
+                      ...a[selectedKey],
+                      flip: !(a[selectedKey]?.flip ?? false),
                     },
                   }))
                 }

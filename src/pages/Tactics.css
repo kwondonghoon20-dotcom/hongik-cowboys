@@ -91,6 +91,21 @@
   font-weight: 700;
 }
 
+.tactics-shownames-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tactics-shownames-toggle input[type='checkbox'] {
+  cursor: pointer;
+}
+
 .tactics-toolbar-actions {
   display: flex;
   gap: 6px;

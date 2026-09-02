@@ -1,18 +1,20 @@
 import { CENTER as C } from '../utils/fieldGeometry'
 
+// 오펜스 라인 5명 — 실제 스플릿은 1야드지만 마커가 겹쳐서 3야드로 벌려 그린다.
+// (마커 반지름 1.15야드 → 간격 3야드면 마커 사이에 0.7야드가 남는다)
 const OL5 = [
-  { role: 'LT', x: C - 8, d: -1, pos: 'OL' },
-  { role: 'LG', x: C - 4, d: -1, pos: 'OL' },
+  { role: 'LT', x: C - 6, d: -1, pos: 'OL' },
+  { role: 'LG', x: C - 3, d: -1, pos: 'OL' },
   { role: 'C',  x: C,     d: -1, pos: 'OL' },
-  { role: 'RG', x: C + 4, d: -1, pos: 'OL' },
-  { role: 'RT', x: C + 8, d: -1, pos: 'OL' },
+  { role: 'RG', x: C + 3, d: -1, pos: 'OL' },
+  { role: 'RT', x: C + 6, d: -1, pos: 'OL' },
 ]
 
 export const FORMATIONS = {
   iform: {
     label: 'I-Form', side: 'offense',
     slots: [...OL5,
-      { role: 'TE', x: C + 12, d: -1,    pos: 'TE' },
+      { role: 'TE', x: C + 9,  d: -1,    pos: 'TE' },
       { role: 'QB', x: C,      d: -3.4,  pos: 'QB' },
       { role: 'FB', x: C,      d: -6.6,  pos: 'RB' },
       { role: 'TB', x: C,      d: -10,   pos: 'RB' },
@@ -34,7 +36,7 @@ export const FORMATIONS = {
   trips: {
     label: 'Trips Rt', side: 'offense',
     slots: [...OL5,
-      { role: 'TE', x: C - 12,  d: -1,   pos: 'TE' },
+      { role: 'TE', x: C - 9,   d: -1,   pos: 'TE' },
       { role: 'QB', x: C,       d: -6.2, pos: 'QB' },
       { role: 'RB', x: C - 4.6, d: -6.2, pos: 'RB' },
       { role: 'Z',  x: 41,      d: -1,   pos: 'WR' },
