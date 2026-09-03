@@ -10,6 +10,7 @@ import Roster from './pages/Roster'
 import PlayerDetail from './pages/PlayerDetail'
 import Season from './pages/Season'
 import Tactics from './pages/Tactics'
+import Compare from './pages/Compare'
 
 export default function App() {
   const location = useLocation()
@@ -76,6 +77,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Roster />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/compare"
+          element={
+            <ProtectedRoute>
+              <Compare />
             </ProtectedRoute>
           }
         />

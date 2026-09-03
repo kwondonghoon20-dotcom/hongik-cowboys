@@ -3,47 +3,10 @@ import { useParams, Link } from 'react-router-dom'
 import { players } from '../data/dummy'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
+import {
+  ZERO_KICK, hasActivity, computeSeasonTotals, getStatFlags, buildSeasonBoxes,
+} from '../utils/seasonStats'
 import './PlayerDetail.css'
-
-const ZERO_OFF = {
-  rushAttempts: 0, rushYards: 0, rushTD: 0,
-  recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
-  passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
-}
-const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
-const ZERO_KICK = {
-  kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
-  punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
-  patMade: 0, patAtt: 0, fgMade: 0, fgAtt: 0,
-  returns: 0, returnYards: 0,
-  points: 0,
-}
-
-
-function addStats(a, b) {
-  const r = { ...a }
-  for (const k of Object.keys(b)) r[k] = (r[k] ?? 0) + (b[k] ?? 0)
-  return r
-}
-
-// puntLong은 누적 합이 아니라 시즌 최장 기록이어야 하므로 일반 합산과 분리한다.
-function addKicking(a, b) {
-  const r = { ...a }
-  for (const k of Object.keys(b)) {
-    r[k] = k === 'puntLong' ? Math.max(r[k] ?? 0, b[k] ?? 0) : (r[k] ?? 0) + (b[k] ?? 0)
-  }
-  return r
-}
-
-function hasActivity(offense, defense, kicking) {
-  return (
-    offense.rushAttempts > 0 || offense.recTargets > 0 || offense.passAttempts > 0 ||
-    defense.tackles > 0 || defense.assists > 0 || defense.sacks > 0 ||
-    defense.tfl > 0 || defense.interceptions > 0 || defense.fumbleRec > 0 ||
-    (kicking?.kickoffs > 0 || kicking?.punts > 0 || kicking?.patAtt > 0 ||
-      kicking?.fgAtt > 0 || kicking?.returns > 0)
-  )
-}
 
 export default function PlayerDetail() {
   const { id } = useParams()
@@ -73,73 +36,15 @@ export default function PlayerDetail() {
   }
 
   // 시즌 누적
-  const sOff = gameRows.reduce((acc, r) => addStats(acc, r.offense), { ...ZERO_OFF })
-  const sDef = gameRows.reduce((acc, r) => addStats(acc, r.defense), { ...ZERO_DEF })
-  const sKick = gameRows.reduce((acc, r) => addKicking(acc, r.kicking ?? ZERO_KICK), { ...ZERO_KICK })
-
-  const hasRushing   = sOff.rushAttempts > 0
-  const hasReceiving = sOff.recTargets > 0
-  const hasPassing   = sOff.passAttempts > 0
-  const hasTackles   = sDef.tackles + sDef.assists > 0
-  const hasSacks     = sDef.sacks > 0
-  const hasTFL       = sDef.tfl > 0
-  const hasINT       = sDef.interceptions > 0
-  const hasFumbleRec = sDef.fumbleRec > 0
-  const hasFG        = sKick.fgAtt > 0
-  const hasPAT       = sKick.patAtt > 0
-  const hasKickoffs  = sKick.kickoffs > 0
-  const hasPunts     = sKick.punts > 0
-  const hasReturns   = sKick.returns > 0
-  const hasKicking   = hasFG || hasPAT || hasKickoffs || hasPunts || hasReturns
-  const hasAnyStats  = hasRushing || hasReceiving || hasPassing ||
-                       hasTackles || hasSacks || hasTFL || hasINT || hasFumbleRec ||
-                       hasKicking
+  const { sOff, sDef, sKick } = computeSeasonTotals(gameRows)
+  const flags = getStatFlags(sOff, sDef, sKick)
+  const {
+    hasRushing, hasReceiving, hasPassing, hasTackles, hasSacks, hasTFL, hasINT,
+    hasFumbleRec, hasKicking, hasAnyStats,
+  } = flags
 
   // 시즌 스탯 박스
-  const seasonBoxes = []
-  if (hasRushing) {
-    seasonBoxes.push({ name: 'Carries', value: sOff.rushAttempts })
-    seasonBoxes.push({ name: 'Rush Yds', value: sOff.rushYards })
-    seasonBoxes.push({ name: 'Rush TD', value: sOff.rushTD })
-  }
-  if (hasReceiving) {
-    seasonBoxes.push({ name: 'Receptions', value: sOff.receptions })
-    seasonBoxes.push({ name: 'Rec Yds', value: sOff.recYards })
-    seasonBoxes.push({ name: 'Rec TD', value: sOff.recTD })
-  }
-  if (hasPassing) {
-    const pct = sOff.passAttempts > 0
-      ? Math.round((sOff.completions / sOff.passAttempts) * 100)
-      : 0
-    seasonBoxes.push({ name: 'Comp/Att', value: `${sOff.completions}/${sOff.passAttempts}` })
-    seasonBoxes.push({ name: 'Comp %', value: `${pct}%` })
-    seasonBoxes.push({ name: 'Pass Yds', value: sOff.passYards })
-    seasonBoxes.push({ name: 'Pass TD', value: sOff.passTD })
-    seasonBoxes.push({ name: 'INT', value: sOff.passINT })
-  }
-  if (hasTackles) {
-    seasonBoxes.push({ name: 'Tackles', value: sDef.tackles })
-    seasonBoxes.push({ name: 'Assists', value: sDef.assists })
-  }
-  if (hasSacks)     seasonBoxes.push({ name: 'Sacks', value: sDef.sacks })
-  if (hasTFL)       seasonBoxes.push({ name: 'TFL', value: sDef.tfl })
-  if (hasINT)       seasonBoxes.push({ name: 'Interceptions', value: sDef.interceptions })
-  if (hasFumbleRec) seasonBoxes.push({ name: 'Fum Rec', value: sDef.fumbleRec })
-  if (hasFG) seasonBoxes.push({ name: 'FG', value: `${sKick.fgMade}/${sKick.fgAtt}` })
-  if (hasPAT) seasonBoxes.push({ name: 'PAT', value: `${sKick.patMade}/${sKick.patAtt}` })
-  if (hasKickoffs) seasonBoxes.push({ name: 'Kickoffs', value: sKick.kickoffs })
-  if (hasPunts) {
-    seasonBoxes.push({ name: 'Punts', value: sKick.punts })
-    seasonBoxes.push({
-      name: 'Punt Avg',
-      value: sKick.puntYardsCounted > 0 ? (sKick.puntYards / sKick.puntYardsCounted).toFixed(1) : '-',
-    })
-  }
-  if (hasReturns) {
-    seasonBoxes.push({ name: 'Returns', value: sKick.returns })
-    seasonBoxes.push({ name: 'Return Yds', value: sKick.returnYards })
-  }
-  if (hasFG || hasPAT) seasonBoxes.push({ name: 'Points', value: sKick.points })
+  const seasonBoxes = buildSeasonBoxes(sOff, sDef, sKick, flags)
 
   // 경기별 테이블 컬럼 정의
   const cols = []

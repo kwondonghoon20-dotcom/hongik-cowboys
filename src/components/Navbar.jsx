@@ -8,6 +8,7 @@ const links = [
   { to: '/season', label: '시즌' },
   { to: '/tactics', label: '전술판' },
   { to: '/roster', label: '로스터' },
+  { to: '/compare', label: '스탯 비교' },
 ]
 
 export default function Navbar({ darkMode, toggleDark }) {
