@@ -9,6 +9,7 @@ const PLAYER_STATUS = {
   p1: { status: 'injury' },
   p2: { status: 'injury' },
   p7: { status: 'military' },
+  p8: { status: 'military' },
   p18: { status: 'military' },
   p12: { status: 'military' },
   p15: { status: 'military' },
