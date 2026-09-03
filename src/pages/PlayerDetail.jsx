@@ -6,7 +6,10 @@ import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import {
   ZERO_KICK, hasActivity, computeSeasonTotals, getStatFlags, buildSeasonBoxes,
 } from '../utils/seasonStats'
+import { getPlayerStatus } from '../data/playerStatus'
 import './PlayerDetail.css'
+
+const STATUS_LABEL = { out: '결장', questionable: '출전불투명' }
 
 export default function PlayerDetail() {
   const { id } = useParams()
@@ -34,6 +37,8 @@ export default function PlayerDetail() {
       </div>
     )
   }
+
+  const playerStatus = getPlayerStatus(player.id)
 
   // 시즌 누적
   const { sOff, sDef, sKick } = computeSeasonTotals(gameRows)
@@ -95,7 +100,14 @@ export default function PlayerDetail() {
           <div>
             <Link to="/roster" className="back-link">← 로스터</Link>
             <div className="player-hero-number">{player.number ? `#${player.number}` : '#-'}</div>
-            <h1>{player.name}</h1>
+            <div className="player-hero-name-row">
+              <h1>{player.name}</h1>
+              {playerStatus.status !== 'healthy' && (
+                <span className={'player-status-badge large ' + playerStatus.status}>
+                  {STATUS_LABEL[playerStatus.status]}
+                </span>
+              )}
+            </div>
             <div className="player-hero-positions">
               <span className="position-badge offense">{player.positions.offense}</span>
               <span className="position-badge defense">{player.positions.defense}</span>
@@ -107,6 +119,9 @@ export default function PlayerDetail() {
               {player.grade}학년 · {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
               {player.weight ? `${player.weight}kg` : '-'}
             </p>
+            {playerStatus.status !== 'healthy' && playerStatus.note && (
+              <p className="player-status-note">{playerStatus.note}</p>
+            )}
           </div>
         </div>
       </div>
