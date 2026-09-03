@@ -106,36 +106,124 @@ function RouteArrow({ pts, isSelected, cap }) {
   )
 }
 
-// 디펜스 커버리지 화살표: group에 따라 존(점선+랜드마크 원)/맨(실선 코럴)/블리츠(굵은 실선 앰버).
-function CoverageArrow({ pts, group, label, showLabel }) {
+// 존 커버리지 프리셋의 기본 영역(shape)을 실제 필드 좌표(cx,cy 포함)로 변환한다.
+// assignments[key].shape가 있으면 이 함수는 쓰지 않고 override 값을 그대로 쓴다.
+function defaultShapeFor(preset, center) {
+  const s = preset?.shape
+  if (!s) return null
+  if (s.type === 'ellipse') return { cx: center.x, cy: center.y, rx: s.rx, ry: s.ry }
+  return { cx: center.x, cy: center.y, w: s.w, h: s.h }
+}
+
+function isEllipseShape(shape) {
+  return shape != null && 'rx' in shape
+}
+
+// 존 영역 도형(딥존=타원, 언더존=사각형). 점선 테두리 + 옅은 채움으로 실제 팀 플레이북 스타일.
+function ZoneShape({ shape }) {
+  if (isEllipseShape(shape)) {
+    return (
+      <ellipse
+        cx={shape.cx.toFixed(2)} cy={shape.cy.toFixed(2)} rx={shape.rx} ry={shape.ry}
+        fill={ZONE_COLOR} fillOpacity="0.12"
+        stroke={ZONE_COLOR} strokeOpacity="0.4" strokeWidth="0.15" strokeDasharray=".5,.4"
+      />
+    )
+  }
+  return (
+    <rect
+      x={(shape.cx - shape.w / 2).toFixed(2)} y={(shape.cy - shape.h / 2).toFixed(2)}
+      width={shape.w} height={shape.h} rx="0.4"
+      fill={ZONE_COLOR} fillOpacity="0.12"
+      stroke={ZONE_COLOR} strokeOpacity="0.4" strokeWidth="0.15" strokeDasharray=".5,.4"
+    />
+  )
+}
+
+// 도형 위쪽 가장자리 y좌표(라벨 배치용).
+function shapeTopY(shape) {
+  return isEllipseShape(shape) ? shape.cy - shape.ry : shape.cy - shape.h / 2
+}
+
+// 선택된 존 배정에만 뜨는 이동/리사이즈 핸들. 본체를 끌면 이동, 오른쪽 핸들은 가로(rx/w),
+// 아래쪽 핸들은 세로(ry/h) 크기를 조절한다.
+function ZoneShapeHandles({ shape, onBodyPointerDown, onXHandlePointerDown, onYHandlePointerDown }) {
+  const ellipse = isEllipseShape(shape)
+  const halfW = ellipse ? shape.rx : shape.w / 2
+  const halfH = ellipse ? shape.ry : shape.h / 2
+  const handleR = 0.55
+
+  return (
+    <g>
+      {ellipse ? (
+        <ellipse
+          cx={shape.cx.toFixed(2)} cy={shape.cy.toFixed(2)} rx={halfW} ry={halfH}
+          fill="transparent" stroke={SCARLET} strokeWidth="0.2" strokeDasharray=".4,.3"
+          style={{ cursor: 'move' }} onPointerDown={onBodyPointerDown}
+        />
+      ) : (
+        <rect
+          x={(shape.cx - halfW).toFixed(2)} y={(shape.cy - halfH).toFixed(2)}
+          width={halfW * 2} height={halfH * 2}
+          fill="transparent" stroke={SCARLET} strokeWidth="0.2" strokeDasharray=".4,.3"
+          style={{ cursor: 'move' }} onPointerDown={onBodyPointerDown}
+        />
+      )}
+      <circle
+        cx={(shape.cx + halfW).toFixed(2)} cy={shape.cy.toFixed(2)} r={handleR}
+        fill={SCARLET} stroke="#fff" strokeWidth="0.12"
+        style={{ cursor: 'ew-resize' }} onPointerDown={onXHandlePointerDown}
+      />
+      <circle
+        cx={shape.cx.toFixed(2)} cy={(shape.cy + halfH).toFixed(2)} r={handleR}
+        fill={SCARLET} stroke="#fff" strokeWidth="0.12"
+        style={{ cursor: 'ns-resize' }} onPointerDown={onYHandlePointerDown}
+      />
+    </g>
+  )
+}
+
+// 디펜스 커버리지 화살표: group에 따라 존(점선+영역 도형 또는 랜드마크 원)/맨(실선 코럴)/
+// 블리츠(굵은 실선 앰버). 존은 shape 프리셋이 있으면 실제 영역(타원/사각형)을, 없으면
+// (spy 등) 기존처럼 작은 랜드마크 원을 그린다.
+function CoverageArrow({ pts, group, preset, shapeOverride, showLabel }) {
   if (!pts || pts.length < 2) return null
-  const d = polylinePath(pts)
-  const last = pts[pts.length - 1]
+  const start = pts[0]
+  const defaultEnd = pts[pts.length - 1]
 
   if (group === 'zone') {
+    const shape = shapeOverride ?? defaultShapeFor(preset, defaultEnd)
+    const lineEnd = shape ? { x: shape.cx, y: shape.cy } : defaultEnd
+    const d = polylinePath([start, lineEnd])
     return (
       <g>
         <path
           d={d} fill="none" stroke={ZONE_COLOR} strokeWidth={0.32}
           strokeDasharray=".5,.4" strokeLinecap="round" strokeLinejoin="round"
         />
-        <circle
-          cx={last.x.toFixed(2)} cy={last.y.toFixed(2)} r={1}
-          fill={CHALK} fillOpacity="0.1" stroke={CHALK} strokeOpacity="0.35" strokeWidth="0.15"
-        />
+        {shape ? (
+          <ZoneShape shape={shape} />
+        ) : (
+          <circle
+            cx={defaultEnd.x.toFixed(2)} cy={defaultEnd.y.toFixed(2)} r={1}
+            fill={CHALK} fillOpacity="0.1" stroke={CHALK} strokeOpacity="0.35" strokeWidth="0.15"
+          />
+        )}
         {showLabel && (
           <text
-            x={last.x.toFixed(2)} y={(last.y - 1.3).toFixed(2)}
+            x={(shape ? shape.cx : defaultEnd.x).toFixed(2)}
+            y={(shape ? shapeTopY(shape) - 0.6 : defaultEnd.y - 1.3).toFixed(2)}
             textAnchor="middle" fontSize="1.4" fill={ZONE_COLOR}
             style={{ pointerEvents: 'none', fontFamily: 'var(--font-body)', fontWeight: 600 }}
           >
-            {label}
+            {preset.label}
           </text>
         )}
       </g>
     )
   }
 
+  const d = polylinePath(pts)
   const color = group === 'blitz' ? BLITZ_COLOR : MAN_COLOR
   const width = group === 'blitz' ? 0.26 : 0.32
   return (
@@ -296,6 +384,7 @@ export default function FieldCanvas({
   onSelectPlayer,
   onMovePlayer,
   onRemovePlayer,
+  onSetShape,
   rosterPlayers,
   showNames,
   showCovLabels,
@@ -324,13 +413,24 @@ export default function FieldCanvas({
     justInteractedRef.current = true
     e.currentTarget.setPointerCapture(e.pointerId)
     const start = getSvgCoords(e.clientX, e.clientY)
-    dragRef.current = { key, startX: start.x, startY: start.y, moved: false }
+    dragRef.current = { type: 'player', key, startX: start.x, startY: start.y, moved: false }
+    hasDraggedRef.current = false
+  }, [getSvgCoords])
+
+  // 존 도형 본체(이동) 또는 리사이즈 핸들(x축=rx/w, y축=ry/h) 드래그 시작.
+  // shape는 드래그 시작 시점의 유효 도형(override 또는 기본값)을 그대로 baseline으로 쓴다.
+  const handleShapePointerDown = useCallback((e, key, mode, shape) => {
+    e.stopPropagation()
+    justInteractedRef.current = true
+    e.currentTarget.setPointerCapture(e.pointerId)
+    const start = getSvgCoords(e.clientX, e.clientY)
+    dragRef.current = { type: mode, key, startX: start.x, startY: start.y, initial: shape, moved: false }
     hasDraggedRef.current = false
   }, [getSvgCoords])
 
   const handlePointerMove = useCallback((e) => {
     if (!dragRef.current) return
-    const { key, startX, startY } = dragRef.current
+    const { type, startX, startY } = dragRef.current
     const cur = getSvgCoords(e.clientX, e.clientY)
     const dist = Math.sqrt((cur.x - startX) ** 2 + (cur.y - startY) ** 2)
     if (dist > 0.3) {
@@ -339,18 +439,38 @@ export default function FieldCanvas({
     }
     if (!dragRef.current.moved) return
 
-    const rawX = snap(cur.x)
-    const rawD = snap(toDepth(cur.y))
-    const clampedX = Math.max(0.8, Math.min(52.53, rawX))
-    const clampedD = Math.max(-14.2, Math.min(24.2, rawD))
+    if (type === 'player') {
+      const { key } = dragRef.current
+      const rawX = snap(cur.x)
+      const rawD = snap(toDepth(cur.y))
+      const clampedX = Math.max(0.8, Math.min(52.53, rawX))
+      const clampedD = Math.max(-14.2, Math.min(24.2, rawD))
+      onMovePlayer(key, clampedX, clampedD)
+      return
+    }
 
-    onMovePlayer(key, clampedX, clampedD)
-  }, [getSvgCoords, onMovePlayer])
+    const { key, initial } = dragRef.current
+    if (type === 'shapeMove') {
+      const dx = snap(cur.x - startX)
+      const dy = snap(cur.y - startY)
+      onSetShape(key, { ...initial, cx: initial.cx + dx, cy: initial.cy + dy })
+      return
+    }
+
+    const ellipse = isEllipseShape(initial)
+    if (type === 'shapeResizeX') {
+      const half = Math.max(1.5, snap(Math.abs(cur.x - initial.cx)))
+      onSetShape(key, ellipse ? { ...initial, rx: half } : { ...initial, w: half * 2 })
+    } else if (type === 'shapeResizeY') {
+      const half = Math.max(1.5, snap(Math.abs(cur.y - initial.cy)))
+      onSetShape(key, ellipse ? { ...initial, ry: half } : { ...initial, h: half * 2 })
+    }
+  }, [getSvgCoords, onMovePlayer, onSetShape])
 
   const handlePointerUp = useCallback((e) => {
     if (!dragRef.current) return
-    const { key, moved } = dragRef.current
-    if (!moved) {
+    const { type, key, moved } = dragRef.current
+    if (!moved && type === 'player') {
       onSelectPlayer(selectedKey === key ? null : key)
     }
     dragRef.current = null
@@ -494,7 +614,13 @@ export default function FieldCanvas({
           if (!preset) return null
           return (
             <g key={`asgn-${p.key}`}>
-              <CoverageArrow pts={pts} group={preset.group} label={preset.label} showLabel={showCovLabels} />
+              <CoverageArrow
+                pts={pts}
+                group={preset.group}
+                preset={preset}
+                shapeOverride={asgn.shape ?? null}
+                showLabel={showCovLabels}
+              />
               {showCovLabels && <AssignmentBadge p={p} group={preset.group} />}
             </g>
           )
@@ -515,6 +641,28 @@ export default function FieldCanvas({
             />
           )
         })}
+
+        {/* 선택된 존 커버리지 배정에만 뜨는 이동/리사이즈 핸들 — 항상 최상단 레이어 */}
+        {selectedKey && (() => {
+          const p = players.find((pp) => pp.key === selectedKey)
+          const asgn = p ? assignments[selectedKey] : null
+          if (!p || !asgn || asgn.kind !== 'coverage') return null
+          const preset = COVERAGES[asgn.id]
+          if (!preset || preset.group !== 'zone' || !preset.shape) return null
+
+          const pts = getAssignmentSvgPoints(p, asgn.id, asgn.flip ?? false, COVERAGES)
+          const defaultEnd = pts[pts.length - 1]
+          const shape = asgn.shape ?? defaultShapeFor(preset, defaultEnd)
+
+          return (
+            <ZoneShapeHandles
+              shape={shape}
+              onBodyPointerDown={(e) => handleShapePointerDown(e, selectedKey, 'shapeMove', shape)}
+              onXHandlePointerDown={(e) => handleShapePointerDown(e, selectedKey, 'shapeResizeX', shape)}
+              onYHandlePointerDown={(e) => handleShapePointerDown(e, selectedKey, 'shapeResizeY', shape)}
+            />
+          )
+        })()}
       </svg>
     </div>
   )

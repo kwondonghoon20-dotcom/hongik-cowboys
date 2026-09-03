@@ -45,7 +45,7 @@ export const FORMATIONS = {
     ],
   },
   d44: {
-    label: '4-4', side: 'defense',
+    label: 'Cowboy (4-4)', side: 'defense',
     slots: [
       { role: 'LE',   x: C - 6, d: 1.6, pos: 'DL' },
       { role: 'DT1',  x: C - 2, d: 1.6, pos: 'DL' },
@@ -61,7 +61,7 @@ export const FORMATIONS = {
     ],
   },
   d43: {
-    label: '4-3', side: 'defense',
+    label: 'Rodeo (4-3)', side: 'defense',
     slots: [
       { role: 'LE',  x: C - 6,   d: 1.6,  pos: 'DL' },
       { role: 'DT',  x: C - 2,   d: 1.6,  pos: 'DL' },

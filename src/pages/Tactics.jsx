@@ -247,6 +247,18 @@ export default function Tactics() {
     )
   }, [])
 
+  const handleSetShape = useCallback((key, shape) => {
+    setAssignments((a) => (a[key] ? { ...a, [key]: { ...a[key], shape } } : a))
+  }, [])
+
+  const handleResetShape = useCallback(() => {
+    setAssignments((a) => {
+      if (!selectedKey || !a[selectedKey]?.shape) return a
+      const { shape, ...rest } = a[selectedKey]
+      return { ...a, [selectedKey]: rest }
+    })
+  }, [selectedKey])
+
   // Delete/Backspace removes the selected marker, Escape deselects.
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -435,6 +447,7 @@ export default function Tactics() {
               onSelectPlayer={setSelectedKey}
               onMovePlayer={handleMovePlayer}
               onRemovePlayer={removePlacement}
+              onSetShape={handleSetShape}
               rosterPlayers={players}
               showNames={showNames}
               showCovLabels={showCovLabels}
@@ -477,6 +490,7 @@ export default function Tactics() {
                     },
                   }))
                 }
+                onResetShape={handleResetShape}
               />
             )}
           </div>

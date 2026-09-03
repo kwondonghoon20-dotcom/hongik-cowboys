@@ -15,7 +15,7 @@ const DEFENSE_GROUPS = [
   { key: 'blitz', label: '블리츠' },
 ]
 
-export default function AssignMenu({ placement, player, assignment, onSetAssignment, onClearAssignment, onFlip }) {
+export default function AssignMenu({ placement, player, assignment, onSetAssignment, onClearAssignment, onFlip, onResetShape }) {
   const isOffense = placement?.side === 'offense'
   const presets = isOffense ? ROUTES : COVERAGES
   const groups = isOffense ? OFFENSE_GROUPS : DEFENSE_GROUPS
@@ -37,6 +37,8 @@ export default function AssignMenu({ placement, player, assignment, onSetAssignm
 
   const itemsInGroup = Object.entries(presets).filter(([, r]) => r.group === activeGroup)
   const currentId = assignment?.id ?? null
+  const currentPreset = currentId ? presets[currentId] : null
+  const canResetShape = !isOffense && currentPreset?.group === 'zone' && !!currentPreset?.shape
 
   return (
     <div className="assign-menu">
@@ -78,6 +80,11 @@ export default function AssignMenu({ placement, player, assignment, onSetAssignm
         <button className="assign-btn" onClick={onClearAssignment}>
           없음
         </button>
+        {canResetShape && (
+          <button className="assign-btn" onClick={onResetShape}>
+            존 크기 초기화
+          </button>
+        )}
       </div>
     </div>
   )

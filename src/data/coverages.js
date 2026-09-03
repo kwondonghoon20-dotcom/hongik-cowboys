@@ -2,13 +2,16 @@
 // 좌표계·미러링 규칙은 routes.js와 동일: 선수 x가 CENTER보다 작으면 dx 반전,
 // 배치별 flip 토글도 동일하게 적용된다.
 
+// shape: 딥존은 타원(ellipse), 언더존은 사각형(rect)으로 필드 위에 실제 "영역"을 그린다.
+// 도형 중심의 기본값은 pts[1](선수 기준 오프셋 끝점)이다. spy/man/blitz는 영역 개념이
+// 없는 매치업이라 shape를 붙이지 않는다(기존 점선+랜드마크 원 표시 유지).
 export const COVERAGES = {
-  deep3rd:     { label: '딥 3rd',  group: 'zone', pts: [[0, 0], [0, 10]] },
-  deepHalf:    { label: '딥 하프', group: 'zone', pts: [[0, 0], [0, 9]] },
-  deepQuarter: { label: '딥 쿼터', group: 'zone', pts: [[0, 0], [0, 10]] },
-  flat:        { label: '플랫',    group: 'zone', pts: [[0, 0], [5, 2]] },
-  hookCurl:    { label: '훅/커얼', group: 'zone', pts: [[0, 0], [0, 4]] },
-  under:       { label: '언더',    group: 'zone', pts: [[0, 0], [0, 3]] },
+  deep3rd:     { label: '딥 3rd',  group: 'zone', pts: [[0, 0], [0, 10]], shape: { type: 'ellipse', rx: 9, ry: 5 } },
+  deepHalf:    { label: '딥 하프', group: 'zone', pts: [[0, 0], [0, 9]],  shape: { type: 'ellipse', rx: 13, ry: 4.5 } },
+  deepQuarter: { label: '딥 쿼터', group: 'zone', pts: [[0, 0], [0, 10]], shape: { type: 'ellipse', rx: 7, ry: 5 } },
+  flat:        { label: '플랫',    group: 'zone', pts: [[0, 0], [5, 2]],  shape: { type: 'rect', w: 10, h: 8 } },
+  hookCurl:    { label: '훅/커얼', group: 'zone', pts: [[0, 0], [0, 4]],  shape: { type: 'rect', w: 10, h: 8 } },
+  under:       { label: '언더',    group: 'zone', pts: [[0, 0], [0, 3]],  shape: { type: 'rect', w: 10, h: 6 } },
   spy:         { label: '스파이',  group: 'zone', pts: [[0, 0], [0, 3]] },
   man:         { label: '맨',      group: 'man',  pts: [[0, 0], [3, 5]] },
   blitz:       { label: '블리츠',  group: 'blitz', pts: [[0, 0], [0, -2]] },
