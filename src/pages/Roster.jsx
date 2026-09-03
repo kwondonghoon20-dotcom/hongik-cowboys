@@ -5,7 +5,7 @@ import CoachCard from '../components/CoachCard'
 import ManagerCard from '../components/ManagerCard'
 import './Roster.css'
 
-const POSITIONS = ['OL', 'DL', 'RB', 'LB', 'WR', 'DB', 'QB', 'TE', 'K']
+export const POSITIONS = ['OL', 'DL', 'RB', 'LB', 'WR', 'DB', 'QB', 'TE', 'K']
 const TABS = [
   { key: 'players', label: '선수단' },
   { key: 'coaches', label: '코치진' },

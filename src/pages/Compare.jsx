@@ -1,21 +1,30 @@
 import { useMemo, useState } from 'react'
 import { players } from '../data/dummy'
+import { POSITIONS } from './Roster'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import { computeSeasonTotals, getStatFlags, buildSeasonBoxes, buildCompareRows } from '../utils/seasonStats'
 import './Compare.css'
 
-function PlayerPicker({ label, query, onQueryChange, selected, onSelect, onClear, excludeId }) {
-  const [open, setOpen] = useState(false)
+const CATEGORY_ALL = '전체'
 
-  const matches = useMemo(() => {
+function PlayerPicker({ label, selected, onSelect, onClear, excludeId }) {
+  const [category, setCategory] = useState(CATEGORY_ALL)
+  const [query, setQuery] = useState('')
+
+  const list = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return []
     return players
       .filter((p) => p.id !== excludeId)
-      .filter((p) => p.name.toLowerCase().includes(q) || (p.number != null && String(p.number).includes(q)))
-      .slice(0, 8)
-  }, [query, excludeId])
+      .filter((p) =>
+        category === CATEGORY_ALL ||
+        p.positions.offense === category ||
+        p.positions.defense === category ||
+        p.positions.special === category
+      )
+      .filter((p) => !q || p.name.toLowerCase().includes(q) || (p.number != null && String(p.number).includes(q)))
+      .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+  }, [category, query, excludeId])
 
   return (
     <div className="picker">
@@ -36,38 +45,48 @@ function PlayerPicker({ label, query, onQueryChange, selected, onSelect, onClear
           <button className="picker-clear-btn" onClick={onClear}>변경</button>
         </div>
       ) : (
-        <div className="picker-search">
+        <div className="picker-panel">
+          <div className="picker-chips">
+            <button
+              className={'picker-chip' + (category === CATEGORY_ALL ? ' active' : '')}
+              onClick={() => setCategory(CATEGORY_ALL)}
+            >
+              전체
+            </button>
+            {POSITIONS.map((pos) => (
+              <button
+                key={pos}
+                className={'picker-chip' + (category === pos ? ' active' : '')}
+                onClick={() => setCategory(pos)}
+              >
+                {pos}
+              </button>
+            ))}
+          </div>
           <input
             className="picker-input"
             type="text"
-            placeholder="이름 또는 등번호로 검색"
+            placeholder="이름/등번호로 좁히기"
             value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            onFocus={() => setOpen(true)}
-            onBlur={() => setTimeout(() => setOpen(false), 150)}
+            onChange={(e) => setQuery(e.target.value)}
           />
-          {open && matches.length > 0 && (
-            <ul className="picker-dropdown">
-              {matches.map((p) => (
-                <li key={p.id}>
-                  <button
-                    className="picker-dropdown-item"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => { onSelect(p); setOpen(false) }}
-                  >
-                    <span className="picker-dropdown-number">
-                      {p.number != null ? `#${p.number}` : '#-'}
-                    </span>
-                    <span className="picker-dropdown-name">{p.name}</span>
-                    <span className="picker-dropdown-pos">{p.positions.offense}/{p.positions.defense}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {open && query.trim() && matches.length === 0 && (
-            <div className="picker-dropdown-empty">일치하는 선수가 없습니다.</div>
-          )}
+          <ul className="picker-list">
+            {list.map((p) => (
+              <li key={p.id}>
+                <button className="picker-list-item" onClick={() => onSelect(p)}>
+                  <span className="picker-list-number">
+                    {p.number != null ? `#${p.number}` : '#-'}
+                  </span>
+                  <span className="picker-list-name">{p.name}</span>
+                  <span className="picker-list-pos">
+                    {p.positions.offense}/{p.positions.defense}
+                    {p.positions?.special ? `/${p.positions.special}` : ''}
+                  </span>
+                </button>
+              </li>
+            ))}
+            {list.length === 0 && <li className="picker-list-empty">일치하는 선수가 없습니다.</li>}
+          </ul>
         </div>
       )}
     </div>
@@ -103,8 +122,6 @@ function SoloSeasonStats({ player, data }) {
 
 export default function Compare() {
   const globGames = useGlobGames()
-  const [queryA, setQueryA] = useState('')
-  const [queryB, setQueryB] = useState('')
   const [playerAId, setPlayerAId] = useState(null)
   const [playerBId, setPlayerBId] = useState(null)
 
@@ -142,21 +159,17 @@ export default function Compare() {
         <div className="compare-pickers">
           <PlayerPicker
             label="선수 A"
-            query={queryA}
-            onQueryChange={setQueryA}
             selected={playerA}
             excludeId={playerBId}
-            onSelect={(p) => { setPlayerAId(p.id); setQueryA('') }}
+            onSelect={(p) => setPlayerAId(p.id)}
             onClear={() => setPlayerAId(null)}
           />
           <div className="compare-vs">VS</div>
           <PlayerPicker
             label="선수 B"
-            query={queryB}
-            onQueryChange={setQueryB}
             selected={playerB}
             excludeId={playerAId}
-            onSelect={(p) => { setPlayerBId(p.id); setQueryB('') }}
+            onSelect={(p) => setPlayerBId(p.id)}
             onClear={() => setPlayerBId(null)}
           />
         </div>
