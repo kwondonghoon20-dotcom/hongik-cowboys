@@ -24,13 +24,12 @@
   color: var(--color-white);
 }
 
-.player-status-badge.out {
+.player-status-badge.injury {
   background: var(--color-scarlet);
 }
 
-.player-status-badge.questionable {
-  background: #E0A800;
-  color: #1a1a1a;
+.player-status-badge.military {
+  background: #5C6B3C;
 }
 
 .player-card:hover {

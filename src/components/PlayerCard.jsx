@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { getPlayerStatus } from '../data/playerStatus'
 import './PlayerCard.css'
 
-const STATUS_LABEL = { out: '결장', questionable: '출전불투명' }
+const STATUS_LABEL = { injury: '부상', military: '군대' }
 
 export default function PlayerCard({ player }) {
   const { status } = getPlayerStatus(player.id)
