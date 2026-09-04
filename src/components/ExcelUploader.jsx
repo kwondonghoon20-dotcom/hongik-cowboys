@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { parseGame, calcTeamStats } from '../utils/parseExcel'
+import { validateGameData } from '../utils/validateUpload'
 import { addUploadedGame } from '../data/uploadedGames'
 import './ExcelUploader.css'
 
 export default function ExcelUploader({ onUploaded }) {
   const [status, setStatus] = useState('idle')
   const [fileName, setFileName] = useState(null)
+  const [warnings, setWarnings] = useState([])
 
   async function handleChange(e) {
     const file = e.target.files?.[0]
@@ -13,6 +15,7 @@ export default function ExcelUploader({ onUploaded }) {
 
     setFileName(file.name)
     setStatus('parsing')
+    setWarnings([])
 
     try {
       const { meta, plays } = await parseGame(file)
@@ -23,6 +26,12 @@ export default function ExcelUploader({ onUploaded }) {
       console.log('[엑셀 파싱] plays:', plays)
       console.log('[엑셀 파싱] home 팀 스탯:', homeStats)
       console.log('[엑셀 파싱] away 팀 스탯:', awayStats)
+
+      const gameWarnings = validateGameData({ meta, plays })
+      if (gameWarnings.length > 0) {
+        console.warn('[엑셀 파싱 경고]', gameWarnings)
+      }
+      setWarnings(gameWarnings)
 
       const id = meta.gameKey ?? `${file.name}-${Date.now()}`
       addUploadedGame({ id, filename: file.name, meta, plays })
@@ -50,6 +59,13 @@ export default function ExcelUploader({ onUploaded }) {
           {status === 'done' && '파싱 완료 · 경기 목록에 추가됨'}
           {status === 'error' && '파싱 실패 (콘솔 확인)'}
         </p>
+      )}
+      {status === 'done' && warnings.length > 0 && (
+        <ul className="excel-uploader-warnings">
+          {warnings.map((w) => (
+            <li key={w}>{w}</li>
+          ))}
+        </ul>
       )}
     </div>
   )

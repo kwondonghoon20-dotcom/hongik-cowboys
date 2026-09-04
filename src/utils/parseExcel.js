@@ -36,6 +36,12 @@ const KOREAN_TEAM_MAP = {
   '시립대': 'UOScityhawks',
 }
 
+// normalizeTeamName이 실제로 매핑할 수 있는 팀명 코드 전체(매핑 실패 시 원본 문자열을
+// 그대로 반환하는 폴백과 구분하기 위해 업로드 검증(validateUpload.js)에서 사용).
+export const KNOWN_TEAMS = [
+  ...new Set([...Object.values(KOREAN_TEAM_MAP), ...Object.values(TEAM_NAME_MAP), OUR_TEAM]),
+]
+
 export function normalizeTeamName(name) {
   if (!name) return name
   // NFC 정규화로 Excel NFD/NFC 인코딩 차이 흡수
