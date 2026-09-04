@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { players } from '../data/dummy'
-import { FORMATIONS } from '../data/formations'
+import { FORMATIONS, posGroupOf } from '../data/formations'
 import { SHELLS } from '../data/coverages'
 import { PLAYBOOK } from '../data/playbook'
 import { getSavedPlays, savePlay, removeSavedPlay } from '../data/savedPlays'
@@ -33,7 +33,7 @@ function computeSidePlacements(formationKey, side) {
 
   formation.slots.forEach((slot) => {
     const posMatch = players
-      .filter((p) => p.positions[side] === slot.pos && !alreadyUsed.has(p.id))
+      .filter((p) => p.positions[side] === posGroupOf(slot.pos) && !alreadyUsed.has(p.id))
       .sort((a, b) => {
         if (b.grade !== a.grade) return b.grade - a.grade
         const na = a.number ?? Infinity
@@ -218,7 +218,7 @@ export default function Tactics() {
     let slot = null
     if (formation) {
       const wantedPos = player.positions[side]
-      slot = formation.slots.find((s) => s.pos === wantedPos && !occupied.has(`${s.x}|${s.d}`))
+      slot = formation.slots.find((s) => posGroupOf(s.pos) === wantedPos && !occupied.has(`${s.x}|${s.d}`))
       if (!slot) {
         slot = formation.slots.find((s) => !occupied.has(`${s.x}|${s.d}`))
       }

@@ -20,10 +20,17 @@ const CIRCLE_R = 1.15
 const DIAMOND_SIDE = 1.93
 const DIAMOND_R = (DIAMOND_SIDE * Math.SQRT2) / 2 // corner distance (pointed top/bottom)
 
+// OL5 슬롯의 role 코드(LT/LG/C/RG/RT) — pos가 세부 포지션명으로 바뀌어도
+// 마커 모양(사각형)은 role로 판별한다.
+const OL_ROLES = new Set(['LT', 'LG', 'C', 'RG', 'RT'])
+
+function isOLPlayer(p) {
+  return p.side === 'offense' && (OL_ROLES.has(p.role) || p.pos === 'OL')
+}
+
 function labelRadiusOf(p) {
-  const isOL = p.side === 'offense' && p.pos === 'OL'
   const isOffense = p.side === 'offense'
-  if (isOL) return OL_R
+  if (isOLPlayer(p)) return OL_R
   if (!isOffense) return DIAMOND_R
   return CIRCLE_R
 }
@@ -269,7 +276,7 @@ function AssignmentBadge({ p, group }) {
 
 function PlayerMarker({ p, rp, isSelected, showName, onPointerDown, onRemove }) {
   const svgY = toSvgY(p.d)
-  const isOL = p.side === 'offense' && p.pos === 'OL'
+  const isOL = isOLPlayer(p)
   const isOffense = p.side === 'offense'
   const rp_number = rp && rp.number != null ? String(rp.number) : null
   const numLabel = rp_number ?? p.pos

@@ -11,37 +11,41 @@ export const PLAYBOOK = []
 // 이 role들이 실제로 이 작전에서 패스를 받을 수 있는 후보 리시버다.
 // coverageReads: { man/cover2/cover3/cover4: [정답 role, ...] } — 배열인 이유는
 // 정답이 여러 명일 수 있어서(그중 하나만 맞아도 정답 처리).
+//
+// Pistol의 role 매핑(포메이션 범례 재대조 후 정정): FB=SL/Slot Back(#3,F, 좌측 백필드),
+// TE=인라인 TE(6번째 라인 슬롯, 우측 태클 옆 타이트). Z(WB,#4)는 이번 10개 작전
+// 어디에서도 드러난 라우트가 없어(원본 다이어그램 미표기) 후보에서 제외했다.
 export const COVERAGE_QUIZ_PLAYS = [
   {
     id: 'pistol-x-dagger',
     name: 'Pistol X Dagger',
     formation: 'pistol',
-    routes: { SL: 'go', X: 'dig', FB: 'curl' },
-    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['FB'] },
+    routes: { FB: 'go', X: 'dig', TE: 'curl' },
+    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['FB'], cover4: ['TE'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-te-cnr',
     name: 'Pistol TE CNR',
     formation: 'pistol',
-    routes: { X: 'slant', SL: 'flat', FB: 'corner' },
-    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['SL'], cover4: ['X'] },
+    routes: { X: 'slant', FB: 'flat', TE: 'corner' },
+    coverageReads: { man: ['TE'], cover2: ['X'], cover3: ['FB'], cover4: ['X'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-sl-deep-out',
     name: 'Pistol SL Deep Out',
     formation: 'pistol',
-    routes: { X: 'slant', SL: 'out', FB: 'corner' },
-    coverageReads: { man: ['SL', 'FB'], cover2: ['SL'], cover3: ['X'], cover4: ['X'] },
+    routes: { X: 'slant', FB: 'out', TE: 'corner' },
+    coverageReads: { man: ['FB', 'TE'], cover2: ['FB'], cover3: ['X'], cover4: ['X'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-double-corner',
     name: 'Pistol Double Corner',
     formation: 'pistol',
-    routes: { SL: 'corner', FB: 'seam', X: 'go' },
-    coverageReads: { man: ['SL', 'FB'], cover2: ['FB'], cover3: ['X'], cover4: ['SL'] },
+    routes: { FB: 'corner', TE: 'seam', X: 'go' },
+    coverageReads: { man: ['FB', 'TE'], cover2: ['TE'], cover3: ['X'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
@@ -49,71 +53,68 @@ export const COVERAGE_QUIZ_PLAYS = [
     name: 'Pistol X Hook N Go',
     formation: 'pistol',
     // 훅앤고/훅앤아웃(더블무브)은 프리셋에 없어 첫 브레이크 없이 go/out으로 근사했다.
-    routes: { X: 'go', SL: 'out' },
-    coverageReads: { man: ['X'], cover2: ['X'], cover3: ['SL'], cover4: ['SL'] },
+    routes: { X: 'go', FB: 'out' },
+    coverageReads: { man: ['X'], cover2: ['X'], cover3: ['FB'], cover4: ['FB'] },
     cover4Estimated: true,
   },
-  {
-    id: 'tw-slant-te-hook',
-    name: 'TW x slant TE HOOK',
-    formation: 'twins',
-    routes: { X: 'slant', Y: 'slant', TE: 'curl' },
-    coverageReads: { man: ['X'], cover2: ['TE'], cover3: ['X'], cover4: ['X'] },
-    cover4Estimated: true,
-  },
-
-  // ── Pistol 나머지 5개 ──
   {
     id: 'pistol-124-f-in-out',
     name: 'Pistol 124 F In&Out',
     formation: 'pistol',
-    routes: { X: 'out', SL: 'out', FB: 'curl' },
-    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['FB'] },
+    routes: { X: 'out', FB: 'out', TE: 'curl' },
+    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['FB'], cover4: ['TE'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-f-out-te-drive',
     name: 'Pistol F Out TE Drive',
     formation: 'pistol',
-    routes: { X: 'go', SL: 'out', FB: 'seam' },
-    coverageReads: { man: ['X'], cover2: ['FB'], cover3: ['SL'], cover4: ['SL'] },
+    routes: { X: 'go', FB: 'out', TE: 'seam' },
+    coverageReads: { man: ['X'], cover2: ['TE'], cover3: ['FB'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-f-out-te-in',
     name: 'Pistol F Out TE In',
     formation: 'pistol',
-    // X는 원본에 명시된 루트가 없어 이 플레이북 전반의 클리어아웃 컨벤션(go)으로 근사
-    routes: { SL: 'out', FB: 'dig', X: 'go' },
-    coverageReads: { man: ['SL'], cover2: ['SL'], cover3: ['X'], cover4: ['SL'] },
+    routes: { FB: 'out', TE: 'dig', X: 'go' },
+    coverageReads: { man: ['FB'], cover2: ['FB'], cover3: ['X'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-126-f-dragon',
     name: 'Pistol 126 F Dragon',
     formation: 'pistol',
-    // SL: drag 루트 뛰다가 RT 위치에서 go로 전환하는 더블무브 — 프리셋에 없어 wheel로 근사
-    routes: { SL: 'wheel', FB: 'seam' },
-    coverageReads: { man: ['SL'], cover2: ['SL'], cover3: ['FB'], cover4: ['FB'] },
+    // FB: drag 루트 뛰다가 RT 위치에서 go로 전환하는 더블무브 — 프리셋에 없어 wheel로 근사
+    routes: { FB: 'wheel', TE: 'seam' },
+    coverageReads: { man: ['FB'], cover2: ['FB'], cover3: ['TE'], cover4: ['TE'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-double-post',
     name: 'Pistol Double Post',
     formation: 'pistol',
-    routes: { SL: 'post', FB: 'post' },
+    routes: { FB: 'post', TE: 'post' },
     // cover4는 두 루트 모두 딥이라 확신도 낮음 — 코치 검수 권장
-    coverageReads: { man: ['SL'], cover2: ['FB'], cover3: ['SL'], cover4: ['SL'] },
+    coverageReads: { man: ['FB'], cover2: ['TE'], cover3: ['FB'], cover4: ['FB'] },
     cover4Estimated: true,
   },
 
-  // ── Twins 나머지 2개 ──
+  // ── Twins ──
+  {
+    id: 'tw-x-slant-te-hook',
+    name: 'TW x slant TE HOOK',
+    formation: 'twins',
+    routes: { X: 'slant', Z: 'slant', TE: 'curl' },
+    coverageReads: { man: ['X'], cover2: ['TE'], cover3: ['X'] },
+    cover4Estimated: true,
+  },
   {
     id: 'tw-y-deep',
     name: 'TW Y Deep',
     formation: 'twins',
-    routes: { Y: 'go', TE: 'out' },
-    coverageReads: { man: ['Y'], cover2: ['TE'], cover3: ['TE'], cover4: ['TE'] },
+    routes: { Z: 'go', TE: 'out' },
+    coverageReads: { man: ['Z'], cover2: ['TE'], cover3: ['TE'], cover4: ['TE'] },
     cover4Estimated: true,
   },
   {
@@ -121,8 +122,8 @@ export const COVERAGE_QUIZ_PLAYS = [
     name: 'TW TE Wheel',
     formation: 'twins',
     // HB의 정확한 루트 형태는 원본에서 화살표가 겹쳐 불확실 — checkdown 성격으로 근사(flat)
-    routes: { TE: 'wheel', HB: 'flat', Y: 'curl' },
-    coverageReads: { man: ['TE'], cover2: ['HB'], cover3: ['Y'], cover4: ['HB'] },
+    routes: { TE: 'wheel', HB: 'flat', Z: 'curl' },
+    coverageReads: { man: ['TE'], cover2: ['HB'], cover3: ['Z'], cover4: ['HB'] },
     cover4Estimated: true,
   },
 
@@ -139,9 +140,8 @@ export const COVERAGE_QUIZ_PLAYS = [
     id: 'i-te-wheel',
     name: 'I TE Wheel',
     formation: 'iform',
-    // 원본 인쇄 키는 "COVER 2: HB"인데 iform 포메이션의 실제 role명은 TB이므로 매핑
-    routes: { TE: 'wheel', TB: 'seam', X: 'go' },
-    coverageReads: { man: ['TE'], cover2: ['TB'], cover3: ['X'], cover4: ['TB'] },
+    routes: { TE: 'wheel', HB: 'seam', X: 'go' },
+    coverageReads: { man: ['TE'], cover2: ['HB'], cover3: ['X'], cover4: ['HB'] },
     cover4Estimated: true,
   },
   {
