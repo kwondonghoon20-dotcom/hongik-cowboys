@@ -5,6 +5,15 @@ import GameCard from '../components/GameCard'
 import ExcelUploader from '../components/ExcelUploader'
 import './Games.css'
 
+// 날짜 미정(date: null) 경기는 new Date(null)이 1970년으로 취급돼 맨 앞으로 밀리므로
+// 항상 목록 맨 뒤로 보낸다.
+function byDate(a, b) {
+  if (!a.date && !b.date) return 0
+  if (!a.date) return 1
+  if (!b.date) return -1
+  return new Date(a.date) - new Date(b.date)
+}
+
 export default function Games() {
   const [uploadedGames, setUploadedGames] = useState(() => getAllGames())
   const globGames = useGlobGames()
@@ -42,7 +51,7 @@ export default function Games() {
     if (currentTab === 'social') {
       return games
         .filter((g) => g.homeTeam !== OUR_TEAM && g.awayTeam !== OUR_TEAM)
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .sort(byDate)
     }
     const [tabYear, tabSem] = currentTab ? currentTab.split('-') : ['', '']
     return games
@@ -52,7 +61,7 @@ export default function Games() {
           (g.semester ?? 'fall') === tabSem &&
           (g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM)
       )
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .sort(byDate)
   }, [games, currentTab])
 
   return (

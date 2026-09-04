@@ -65,3 +65,60 @@
   color: var(--color-text-secondary);
   font-size: 13px;
 }
+
+/* ── 예정 경기 카드 ───────────────────────────────────────── */
+
+.game-card-upcoming {
+  cursor: default;
+  border-left-color: var(--color-scarlet);
+  background: linear-gradient(135deg, rgba(204, 0, 0, 0.08), var(--color-bg-card));
+}
+
+.game-card-upcoming:hover {
+  transform: none;
+}
+
+.game-card-badge {
+  font-family: var(--font-impact);
+  font-size: 14px;
+  padding: 2px 10px;
+  border-radius: 3px;
+}
+
+.game-card-badge.upcoming {
+  background: var(--color-scarlet);
+  color: var(--color-white);
+}
+
+.game-card-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--color-text);
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+/* ── 결과 대기 카드(경기는 끝났지만 스코어 미입력) ───────────── */
+
+.game-card-pending {
+  cursor: default;
+  border-left-color: var(--color-border);
+  opacity: 0.75;
+}
+
+.game-card-pending:hover {
+  transform: none;
+  border-color: var(--color-border);
+}
+
+.game-card-badge.pending {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.game-card-pending-note {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin-bottom: 12px;
+}

@@ -146,6 +146,34 @@ const GAMES_WITHOUT_PLAYS = [
       },
     },
   },
+  // ── 예정 경기 (결과 미확정) ──────────────────────────────────
+  {
+    gameKey: 'HIcowboys_20260905_vs_DGTuskers',
+    date: '2026-09-05',
+    time: '16:00',
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'DGTuskers',
+    location: '양천구 해마루 축구장',
+  },
+  {
+    gameKey: 'HIcowboys_20260912_vs_CABluedragons',
+    date: '2026-09-12',
+    time: '16:00',
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'CABluedragons',
+    location: '양천구 해마루 축구장',
+  },
+  {
+    gameKey: 'HIcowboys_TBD_vs_SSCrussadors',
+    date: null,
+    time: null,
+    type: 'League',
+    home: OUR_TEAM,
+    away: 'SSCrussadors',
+    location: null,
+  },
 ]
 
 function buildFromMeta(entry) {
@@ -156,17 +184,20 @@ function buildFromMeta(entry) {
     id: entry.gameKey,
     gameKey: entry.gameKey,
     source: 'meta',
-    season: Number(entry.date.slice(0, 4)),
+    // 날짜 미정 경기(entry.date === null)는 아직 전부 2026년이라 안전하게 하드코딩한다.
+    season: entry.date ? Number(entry.date.slice(0, 4)) : 2026,
     semester: getSemester(entry.date),
     week: null,
     date: entry.date,
+    time: entry.time ?? null,
     gameType: entry.type ?? 'League',
     venue: entry.location ?? '',
     homeTeam,
     awayTeam,
     isHome,
-    homeScore: entry.homeScore ?? 0,
-    awayScore: entry.awayScore ?? 0,
+    // 점수 미확정과 실제 0-0 스코어를 구분하기 위해 기본값을 0이 아닌 null로 둔다.
+    homeScore: entry.homeScore ?? null,
+    awayScore: entry.awayScore ?? null,
     teamStats: {
       home: entry.overrideStats?.home ?? {},
       away: entry.overrideStats?.away ?? {},
