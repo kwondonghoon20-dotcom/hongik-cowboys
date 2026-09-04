@@ -274,11 +274,11 @@ function significantPlayTags(play) {
     .map((tag) => String(tag).toUpperCase())
 }
 
-function playType(play) {
+export function playType(play) {
   return String(play.PlayType ?? '').trim().toUpperCase()
 }
 
-function hasTag(play, tag) {
+export function hasTag(play, tag) {
   return significantPlayTags(play).includes(tag)
 }
 

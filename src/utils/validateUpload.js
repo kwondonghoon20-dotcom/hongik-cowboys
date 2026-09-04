@@ -1,9 +1,27 @@
-import { OUR_TEAM, KNOWN_TEAMS, normalizeNum } from './parseExcel'
+import { OUR_TEAM, KNOWN_TEAMS, normalizeNum, getTouchdownPlays, playType, hasTag } from './parseExcel'
 import { players } from '../data/dummy'
 
 // getPlayerStats()의 ok() 체크와 동일한 기준(0/빈 값 제외).
 function ok(raw) {
   return raw != null && raw !== '' && String(raw).trim() !== '' && Number(raw) !== 0
+}
+
+// 플레이 로그의 터치다운/PAT/FG/세이프티 태그로 팀 스코어를 역산한다(참고용 근사치).
+// 실제 3경기(국민/외대/연세)에는 TPT(2점 컨버전으로 추정) 행이 없어 계산식에서 제외했다 —
+// 태그 의미가 확인되면 나중에 추가할 것.
+function estimateScore(plays, teamName, opponentName) {
+  const touchdowns = getTouchdownPlays(plays).filter((p) => p.OffenseTeam === teamName).length
+  const patGood = plays.filter(
+    (p) => playType(p) === 'PAT' && p.OffenseTeam === teamName && hasTag(p, 'PATGOOD')
+  ).length
+  const fgGood = plays.filter(
+    (p) => playType(p) === 'FG' && p.OffenseTeam === teamName && hasTag(p, 'FIELDGOALGOOD')
+  ).length
+  // 세이프티는 수비 팀 득점이라 상대(오펜스) 플레이에 태그된다.
+  const safeties = plays.filter(
+    (p) => hasTag(p, 'SAFETY') && p.OffenseTeam === opponentName
+  ).length
+  return touchdowns * 6 + patGood + fgGood * 3 + safeties * 2
 }
 
 // 엑셀 업로드 시 흔한 실수 두 가지를 경고로 잡아낸다: (1) normalizeTeamName이 인식하지
@@ -49,6 +67,23 @@ export function validateGameData({ meta, plays }) {
 
     for (const [num, count] of unknownNums) {
       warnings.push(`로스터에 없는 등번호: #${num} (${count}건 플레이)`)
+    }
+  }
+
+  if (Array.isArray(plays) && meta?.home && meta?.away) {
+    const checks = [
+      { team: meta.home, opponent: meta.away, actual: meta.homeScore },
+      { team: meta.away, opponent: meta.home, actual: meta.awayScore },
+    ]
+    for (const { team, opponent, actual } of checks) {
+      if (actual == null) continue
+      const estimated = estimateScore(plays, team, opponent)
+      if (estimated !== actual) {
+        warnings.push(
+          `스코어 불일치 의심: ${team} 계산값 ${estimated} vs 엑셀 원본 ${actual} ` +
+          `(터치다운/PAT/FG 태그 확인 필요 — 2점 컨버전·온사이드킥 등 예외 상황은 근사치이므로 참고용)`
+        )
+      }
     }
   }
 
