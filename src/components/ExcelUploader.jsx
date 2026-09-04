@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { parseGame, calcTeamStats, getTouchdownPlays } from '../utils/parseExcel'
 import { validateGameData } from '../utils/validateUpload'
-import { addUploadedGame } from '../data/uploadedGames'
+import { addUploadedGame, getUploadedGames } from '../data/uploadedGames'
+import { getKnownGameKeys, useGlobGames } from '../data/gameRepository'
 import './ExcelUploader.css'
 
 const SUMMARY_ROWS = [
@@ -21,6 +22,7 @@ export default function ExcelUploader({ onUploaded }) {
   const [fileName, setFileName] = useState(null)
   const [warnings, setWarnings] = useState([])
   const [summary, setSummary] = useState(null)
+  const globGames = useGlobGames()
 
   async function handleChange(e) {
     const file = e.target.files?.[0]
@@ -44,7 +46,16 @@ export default function ExcelUploader({ onUploaded }) {
       console.log('[엑셀 파싱] home 팀 스탯:', homeStats)
       console.log('[엑셀 파싱] away 팀 스탯:', awayStats)
 
-      const gameWarnings = validateGameData({ meta, plays })
+      // 재업로드로 같은 경기를 갱신하는 경우 자기 자신(같은 id의 이전 업로드본)은
+      // 중복 gameKey 검증 대상에서 제외한다.
+      const id = meta.gameKey ?? `${file.name}-${Date.now()}`
+      const existingGameKeys = [
+        ...getKnownGameKeys(),
+        ...globGames.map((g) => g.gameKey ?? g.id),
+        ...getUploadedGames().filter((g) => g.id !== id).map((g) => g.meta?.gameKey).filter(Boolean),
+      ]
+
+      const gameWarnings = validateGameData({ meta, plays, existingGameKeys })
       if (gameWarnings.length > 0) {
         console.warn('[엑셀 파싱 경고]', gameWarnings)
       }
@@ -55,7 +66,6 @@ export default function ExcelUploader({ onUploaded }) {
         away: { ...awayStats, touchdowns: awayTouchdowns },
       })
 
-      const id = meta.gameKey ?? `${file.name}-${Date.now()}`
       addUploadedGame({ id, filename: file.name, meta, plays })
 
       setStatus('done')

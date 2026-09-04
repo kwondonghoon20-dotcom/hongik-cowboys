@@ -27,8 +27,17 @@ function estimateScore(plays, teamName, opponentName) {
 // 엑셀 업로드 시 흔한 실수 두 가지를 경고로 잡아낸다: (1) normalizeTeamName이 인식하지
 // 못해 원본 문자열이 그대로 팀명으로 남은 경우, (2) 우리 팀 등번호가 dummy.js 로스터에
 // 없는 경우(오타 또는 신규 선수 미등록). 둘 다 업로드 자체를 막지는 않는 참고용 경고다.
-export function validateGameData({ meta, plays }) {
+export function validateGameData({ meta, plays, existingGameKeys = [] }) {
   const warnings = []
+
+  if (!meta?.gameKey) {
+    warnings.push('GameKey가 비어 있습니다 (Index 시트의 GameKey 컬럼을 확인하세요)')
+  } else if (existingGameKeys.includes(meta.gameKey)) {
+    warnings.push(
+      `중복 gameKey 의심: '${meta.gameKey}' — 이미 등록된 경기와 같은 키입니다 ` +
+      `(오타이거나 이전 파일을 복사한 경우 Index 시트에서 GameKey를 수정하세요)`
+    )
+  }
 
   for (const team of [meta?.home, meta?.away]) {
     if (!team) continue

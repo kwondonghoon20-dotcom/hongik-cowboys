@@ -346,3 +346,13 @@ export function getAllGames() {
 export function getGameById(id) {
   return getAllGames().find((game) => game.id === id) ?? null
 }
+
+// gameKey는 자동 생성이 아니라 전부 수동 입력이라 복붙/오타로 중복될 수 있다.
+// 커밋된 두 소스(XLSX_META_MAP, GAMES_WITHOUT_PLAYS)의 gameKey를 모아
+// 업로드 시 중복 검증(validateUpload.js)에서 참고하도록 노출한다.
+export function getKnownGameKeys() {
+  return [
+    ...Object.values(XLSX_META_MAP).map((m) => m.gameKey),
+    ...GAMES_WITHOUT_PLAYS.map((g) => g.gameKey),
+  ].filter(Boolean)
+}
