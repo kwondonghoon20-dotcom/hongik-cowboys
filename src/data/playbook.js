@@ -12,40 +12,41 @@ export const PLAYBOOK = []
 // coverageReads: { man/cover2/cover3/cover4: [정답 role, ...] } — 배열인 이유는
 // 정답이 여러 명일 수 있어서(그중 하나만 맞아도 정답 처리).
 //
-// Pistol의 role 매핑(포메이션 범례 재대조 후 정정): FB=SL/Slot Back(#3,F, 좌측 백필드),
-// TE=인라인 TE(6번째 라인 슬롯, 우측 태클 옆 타이트). Z(WB,#4)는 이번 10개 작전
-// 어디에서도 드러난 라우트가 없어(원본 다이어그램 미표기) 후보에서 제외했다.
+// Pistol의 role 매핑: SL(좌측 백필드)과 FB(우측 라인 타이트)는 개별 패스 작전
+// 다이어그램(PISTOL SL DEEP OUT 등)에 그려진 포지션 서클 표기를 그대로 따른다.
+// Z(WB,#4)는 이번 10개 작전 어디에서도 드러난 라우트가 없어(원본 다이어그램 미표기)
+// 후보에서 제외했다.
 export const COVERAGE_QUIZ_PLAYS = [
   {
     id: 'pistol-x-dagger',
     name: 'Pistol X Dagger',
     formation: 'pistol',
-    routes: { FB: 'go', X: 'dig', TE: 'curl' },
-    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['FB'], cover4: ['TE'] },
+    routes: { SL: 'go', X: 'dig', FB: 'curl' },
+    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-te-cnr',
     name: 'Pistol TE CNR',
     formation: 'pistol',
-    routes: { X: 'slant', FB: 'flat', TE: 'corner' },
-    coverageReads: { man: ['TE'], cover2: ['X'], cover3: ['FB'], cover4: ['X'] },
+    routes: { X: 'slant', SL: 'flat', FB: 'corner' },
+    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['SL'], cover4: ['X'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-sl-deep-out',
     name: 'Pistol SL Deep Out',
     formation: 'pistol',
-    routes: { X: 'slant', FB: 'out', TE: 'corner' },
-    coverageReads: { man: ['FB', 'TE'], cover2: ['FB'], cover3: ['X'], cover4: ['X'] },
+    routes: { X: 'slant', SL: 'out', FB: 'corner' },
+    coverageReads: { man: ['SL', 'FB'], cover2: ['SL'], cover3: ['X'], cover4: ['X'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-double-corner',
     name: 'Pistol Double Corner',
     formation: 'pistol',
-    routes: { FB: 'corner', TE: 'seam', X: 'go' },
-    coverageReads: { man: ['FB', 'TE'], cover2: ['TE'], cover3: ['X'], cover4: ['FB'] },
+    routes: { SL: 'corner', FB: 'seam', X: 'go' },
+    coverageReads: { man: ['SL', 'FB'], cover2: ['FB'], cover3: ['X'], cover4: ['SL'] },
     cover4Estimated: true,
   },
   {
@@ -53,50 +54,51 @@ export const COVERAGE_QUIZ_PLAYS = [
     name: 'Pistol X Hook N Go',
     formation: 'pistol',
     // 훅앤고/훅앤아웃(더블무브)은 프리셋에 없어 첫 브레이크 없이 go/out으로 근사했다.
-    routes: { X: 'go', FB: 'out' },
-    coverageReads: { man: ['X'], cover2: ['X'], cover3: ['FB'], cover4: ['FB'] },
+    routes: { X: 'go', SL: 'out' },
+    coverageReads: { man: ['X'], cover2: ['X'], cover3: ['SL'], cover4: ['SL'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-124-f-in-out',
     name: 'Pistol 124 F In&Out',
     formation: 'pistol',
-    routes: { X: 'out', FB: 'out', TE: 'curl' },
-    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['FB'], cover4: ['TE'] },
+    routes: { X: 'out', SL: 'out', FB: 'curl' },
+    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-f-out-te-drive',
     name: 'Pistol F Out TE Drive',
     formation: 'pistol',
-    routes: { X: 'go', FB: 'out', TE: 'seam' },
-    coverageReads: { man: ['X'], cover2: ['TE'], cover3: ['FB'], cover4: ['FB'] },
+    routes: { X: 'go', SL: 'out', FB: 'seam' },
+    coverageReads: { man: ['X'], cover2: ['FB'], cover3: ['SL'], cover4: ['SL'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-f-out-te-in',
     name: 'Pistol F Out TE In',
     formation: 'pistol',
-    routes: { FB: 'out', TE: 'dig', X: 'go' },
-    coverageReads: { man: ['FB'], cover2: ['FB'], cover3: ['X'], cover4: ['FB'] },
+    // X는 원본에 명시된 루트가 없어 이 플레이북 전반의 클리어아웃 컨벤션(go)으로 근사
+    routes: { SL: 'out', FB: 'dig', X: 'go' },
+    coverageReads: { man: ['SL'], cover2: ['SL'], cover3: ['X'], cover4: ['SL'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-126-f-dragon',
     name: 'Pistol 126 F Dragon',
     formation: 'pistol',
-    // FB: drag 루트 뛰다가 RT 위치에서 go로 전환하는 더블무브 — 프리셋에 없어 wheel로 근사
-    routes: { FB: 'wheel', TE: 'seam' },
-    coverageReads: { man: ['FB'], cover2: ['FB'], cover3: ['TE'], cover4: ['TE'] },
+    // SL: drag 루트 뛰다가 RT 위치에서 go로 전환하는 더블무브 — 프리셋에 없어 wheel로 근사
+    routes: { SL: 'wheel', FB: 'seam' },
+    coverageReads: { man: ['SL'], cover2: ['SL'], cover3: ['FB'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-double-post',
     name: 'Pistol Double Post',
     formation: 'pistol',
-    routes: { FB: 'post', TE: 'post' },
+    routes: { SL: 'post', FB: 'post' },
     // cover4는 두 루트 모두 딥이라 확신도 낮음 — 코치 검수 권장
-    coverageReads: { man: ['FB'], cover2: ['TE'], cover3: ['FB'], cover4: ['FB'] },
+    coverageReads: { man: ['SL'], cover2: ['FB'], cover3: ['SL'], cover4: ['SL'] },
     cover4Estimated: true,
   },
 

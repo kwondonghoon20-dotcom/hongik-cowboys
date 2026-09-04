@@ -292,19 +292,6 @@ function PlayerMarker({ p, rp, isSelected, showName, onPointerDown, onRemove }) 
       onPointerDown={onPointerDown}
       style={{ cursor: 'grab' }}
     >
-      {/* Role label above */}
-      <text
-        x={p.x.toFixed(2)}
-        y={(svgY - (labelR + 0.55)).toFixed(2)}
-        textAnchor="middle"
-        fontSize="1.4"
-        opacity="0.6"
-        fill={CHALK}
-        style={{ pointerEvents: 'none', fontFamily: 'var(--font-impact)' }}
-      >
-        {p.role}
-      </text>
-
       {/* Marker shape */}
       {isOL ? (
         <rect

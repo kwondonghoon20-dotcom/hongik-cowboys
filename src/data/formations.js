@@ -8,7 +8,7 @@ import { CENTER as C } from '../utils/fieldGeometry'
 export const POS_GROUP = {
   LT: 'OL', LG: 'OL', C: 'OL', RG: 'OL', RT: 'OL',
   X: 'WR', Z: 'WR',
-  HB: 'RB', FB: 'RB',
+  HB: 'RB', FB: 'RB', SL: 'WR',
   DE: 'DL', DT: 'DL',
   OLB: 'LB', ILB: 'LB',
   CB: 'DB', FS: 'DB', SS: 'DB',
@@ -62,18 +62,19 @@ export const FORMATIONS = {
       { role: 'X',  x: 50,      d: -1,   pos: 'WR' },
     ],
   },
-  // 2026 오펜스 플레이북 "Formation" 범례(Pistol/Shotgun 페이지) 기준 11명 전원 반영.
-  // 범례 표기 → 코드 role 매핑: X(WR)=X, SL/Slot Back(#3,F)=FB(백필드 포지션이라 RB 계열로 통일),
-  // TE(6번째 OL 슬롯, 우측 태클 옆 타이트 인라인)=TE, QB(#1)=QB, A(딥백,#2)=HB(블로킹 노트의
-  // "HB"와 동일 인물), WB(#4,Y, 우측 X와 대칭되는 와이드 리시버)=Z(표준 WR 표기 통일).
+  // 2026 오펜스 플레이북 개별 패스 작전 다이어그램(PISTOL PUNT, PISTOL SL DEEP OUT 등) 기준.
+  // SL(좌측 백필드, Slot Back)과 FB(우측 라인 타이트)는 각 다이어그램에 그려진 포지션
+  // 서클 표기를 그대로 따른다. Z(WB, 우측 X와 대칭되는 와이드 리시버)는 Formation 범례
+  // 페이지 기준으로 추가된 11번째 선수 — 개별 패스 다이어그램엔 거의 그려지지 않지만
+  // 커버리지 리드 텍스트(예: "COVER 3: X")에서 존재가 확인된다.
   pistol: {
     label: 'Pistol', side: 'offense',
     slots: [...OL5,
       { role: 'QB', x: C,        d: -4.2, pos: 'QB' },
       { role: 'HB', x: C,        d: -7.5, pos: 'HB' },
-      { role: 'FB', x: 12.5,     d: -2.6, pos: 'FB' },
+      { role: 'SL', x: 12.5,     d: -2.6, pos: 'SL' },
       { role: 'X',  x: 5,        d: -1,   pos: 'X'  },
-      { role: 'TE', x: C + 8.5,  d: -1.6, pos: 'TE' },
+      { role: 'FB', x: C + 8.5,  d: -1.6, pos: 'FB' },
       { role: 'Z',  x: 48.33,    d: -1,   pos: 'Z'  },
     ],
   },
