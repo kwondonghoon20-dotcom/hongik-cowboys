@@ -117,7 +117,6 @@ export default function CoverageQuiz() {
               onSetShape={noop}
               rosterPlayers={[]}
               showNames={false}
-              showCovLabels
             />
           </div>
 

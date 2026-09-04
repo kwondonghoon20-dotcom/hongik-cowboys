@@ -1,6 +1,6 @@
 export const PLAYBOOK = []
 
-// 커버리지 판단 훈련(/coverage-quiz)용 패스 작전 6개.
+// 커버리지 판단 훈련(/coverage-quiz)용 패스 작전 16개.
 // 2026 오펜스 플레이북 슬라이드의 "MAN COVER / COVER 2 / COVER 3" 정답 표기를 그대로
 // 옮겼다(신뢰도 높음). Cover 4 정답은 원본 슬라이드에 표기가 없어 [이론 추정]이다 —
 // 언더니스가 가장 얇은 쿼터스 특성상 가장 짧고 빠른 라우트를 정답으로 뒀다(cover4Estimated).
@@ -16,34 +16,32 @@ export const COVERAGE_QUIZ_PLAYS = [
     id: 'pistol-x-dagger',
     name: 'Pistol X Dagger',
     formation: 'pistol',
-    routes: { SL: 'go', X: 'dig', TE: 'curl', HB: 'swing' },
-    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['HB'] },
+    routes: { SL: 'go', X: 'dig', FB: 'curl' },
+    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['FB'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-te-cnr',
     name: 'Pistol TE CNR',
     formation: 'pistol',
-    routes: { X: 'slant', SL: 'flat', TE: 'corner' },
-    coverageReads: { man: ['TE'], cover2: ['X'], cover3: ['SL'], cover4: ['X'] },
+    routes: { X: 'slant', SL: 'flat', FB: 'corner' },
+    coverageReads: { man: ['FB'], cover2: ['X'], cover3: ['SL'], cover4: ['X'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-sl-deep-out',
     name: 'Pistol SL Deep Out',
     formation: 'pistol',
-    routes: { X: 'slant', SL: 'out', TE: 'corner' },
-    coverageReads: { man: ['SL', 'TE'], cover2: ['SL'], cover3: ['X'], cover4: ['X'] },
+    routes: { X: 'slant', SL: 'out', FB: 'corner' },
+    coverageReads: { man: ['SL', 'FB'], cover2: ['SL'], cover3: ['X'], cover4: ['X'] },
     cover4Estimated: true,
   },
   {
     id: 'pistol-double-corner',
     name: 'Pistol Double Corner',
     formation: 'pistol',
-    // 원본엔 SL/TE/HB(원본 표기 FB) 루트만 명시돼 있으나 cover3 정답이 X라,
-    // 클리어아웃 성격의 go 루트를 X에 추가로 부여했다(원본 슬라이드 미표기, 추정).
-    routes: { X: 'go', SL: 'corner', TE: 'corner', HB: 'flat' },
-    coverageReads: { man: ['SL', 'TE'], cover2: ['HB'], cover3: ['X'], cover4: ['HB'] },
+    routes: { SL: 'corner', FB: 'seam', X: 'go' },
+    coverageReads: { man: ['SL', 'FB'], cover2: ['FB'], cover3: ['X'], cover4: ['SL'] },
     cover4Estimated: true,
   },
   {
@@ -61,6 +59,97 @@ export const COVERAGE_QUIZ_PLAYS = [
     formation: 'twins',
     routes: { X: 'slant', Y: 'slant', TE: 'curl' },
     coverageReads: { man: ['X'], cover2: ['TE'], cover3: ['X'], cover4: ['X'] },
+    cover4Estimated: true,
+  },
+
+  // ── Pistol 나머지 5개 ──
+  {
+    id: 'pistol-124-f-in-out',
+    name: 'Pistol 124 F In&Out',
+    formation: 'pistol',
+    routes: { X: 'out', SL: 'out', FB: 'curl' },
+    coverageReads: { man: ['SL'], cover2: ['X'], cover3: ['SL'], cover4: ['FB'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'pistol-f-out-te-drive',
+    name: 'Pistol F Out TE Drive',
+    formation: 'pistol',
+    routes: { X: 'go', SL: 'out', FB: 'seam' },
+    coverageReads: { man: ['X'], cover2: ['FB'], cover3: ['SL'], cover4: ['SL'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'pistol-f-out-te-in',
+    name: 'Pistol F Out TE In',
+    formation: 'pistol',
+    // X는 원본에 명시된 루트가 없어 이 플레이북 전반의 클리어아웃 컨벤션(go)으로 근사
+    routes: { SL: 'out', FB: 'dig', X: 'go' },
+    coverageReads: { man: ['SL'], cover2: ['SL'], cover3: ['X'], cover4: ['SL'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'pistol-126-f-dragon',
+    name: 'Pistol 126 F Dragon',
+    formation: 'pistol',
+    // SL: drag 루트 뛰다가 RT 위치에서 go로 전환하는 더블무브 — 프리셋에 없어 wheel로 근사
+    routes: { SL: 'wheel', FB: 'seam' },
+    coverageReads: { man: ['SL'], cover2: ['SL'], cover3: ['FB'], cover4: ['FB'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'pistol-double-post',
+    name: 'Pistol Double Post',
+    formation: 'pistol',
+    routes: { SL: 'post', FB: 'post' },
+    // cover4는 두 루트 모두 딥이라 확신도 낮음 — 코치 검수 권장
+    coverageReads: { man: ['SL'], cover2: ['FB'], cover3: ['SL'], cover4: ['SL'] },
+    cover4Estimated: true,
+  },
+
+  // ── Twins 나머지 2개 ──
+  {
+    id: 'tw-y-deep',
+    name: 'TW Y Deep',
+    formation: 'twins',
+    routes: { Y: 'go', TE: 'out' },
+    coverageReads: { man: ['Y'], cover2: ['TE'], cover3: ['TE'], cover4: ['TE'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'tw-te-wheel',
+    name: 'TW TE Wheel',
+    formation: 'twins',
+    // HB의 정확한 루트 형태는 원본에서 화살표가 겹쳐 불확실 — checkdown 성격으로 근사(flat)
+    routes: { TE: 'wheel', HB: 'flat', Y: 'curl' },
+    coverageReads: { man: ['TE'], cover2: ['HB'], cover3: ['Y'], cover4: ['HB'] },
+    cover4Estimated: true,
+  },
+
+  // ── I-Formation 3개 (신규 포메이션 사용, formations.js의 iform 그대로 재사용 — 코드 변경 불필요) ──
+  {
+    id: 'i-double-slnt',
+    name: 'I Double Slnt',
+    formation: 'iform',
+    routes: { TE: 'drag', X: 'slant', Z: 'slant' },
+    coverageReads: { man: ['TE'], cover2: ['Z'], cover3: ['TE'], cover4: ['X'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'i-te-wheel',
+    name: 'I TE Wheel',
+    formation: 'iform',
+    // 원본 인쇄 키는 "COVER 2: HB"인데 iform 포메이션의 실제 role명은 TB이므로 매핑
+    routes: { TE: 'wheel', TB: 'seam', X: 'go' },
+    coverageReads: { man: ['TE'], cover2: ['TB'], cover3: ['X'], cover4: ['TB'] },
+    cover4Estimated: true,
+  },
+  {
+    id: 'i-26-fake-te-leak',
+    name: 'I 26 Fake TE Leak',
+    formation: 'iform',
+    routes: { TE: 'seam', Z: 'out', X: 'dig' },
+    coverageReads: { man: ['TE'], cover2: ['Z'], cover3: ['X'], cover4: ['X'] },
     cover4Estimated: true,
   },
 ]

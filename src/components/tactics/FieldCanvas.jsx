@@ -119,6 +119,16 @@ function isEllipseShape(shape) {
   return shape != null && 'rx' in shape
 }
 
+// 존 도형이 필드 경계(x: 0~FIELD_DISPLAY_W, y: 0~40)를 벗어나지 않도록 렌더링 직전에 clamp한다.
+function clampShapeToField(shape) {
+  const ellipse = isEllipseShape(shape)
+  const halfW = ellipse ? shape.rx : shape.w / 2
+  const halfH = ellipse ? shape.ry : shape.h / 2
+  const cx = Math.min(Math.max(shape.cx, halfW), FIELD_DISPLAY_W - halfW)
+  const cy = Math.min(Math.max(shape.cy, halfH), 40 - halfH)
+  return { ...shape, cx, cy }
+}
+
 // 존 영역 도형(딥존=타원, 언더존=사각형). 점선 테두리 + 옅은 채움으로 실제 팀 플레이북 스타일.
 function ZoneShape({ shape }) {
   if (isEllipseShape(shape)) {
@@ -192,7 +202,8 @@ function CoverageArrow({ pts, group, preset, shapeOverride, showLabel }) {
   const defaultEnd = pts[pts.length - 1]
 
   if (group === 'zone') {
-    const shape = shapeOverride ?? defaultShapeFor(preset, defaultEnd)
+    const rawShape = shapeOverride ?? defaultShapeFor(preset, defaultEnd)
+    const shape = rawShape ? clampShapeToField(rawShape) : rawShape
     const lineEnd = shape ? { x: shape.cx, y: shape.cy } : defaultEnd
     const d = polylinePath([start, lineEnd])
     return (
@@ -260,7 +271,8 @@ function PlayerMarker({ p, rp, isSelected, showName, onPointerDown, onRemove }) 
   const svgY = toSvgY(p.d)
   const isOL = p.side === 'offense' && p.pos === 'OL'
   const isOffense = p.side === 'offense'
-  const numLabel = rp && rp.number != null ? String(rp.number) : '–'
+  const rp_number = rp && rp.number != null ? String(rp.number) : null
+  const numLabel = rp_number ?? p.pos
   const nameLabel = rp ? rp.name : ''
 
   const strokeWidth = isSelected ? 0.32 : 0.15
@@ -652,7 +664,7 @@ export default function FieldCanvas({
 
           const pts = getAssignmentSvgPoints(p, asgn.id, asgn.flip ?? false, COVERAGES)
           const defaultEnd = pts[pts.length - 1]
-          const shape = asgn.shape ?? defaultShapeFor(preset, defaultEnd)
+          const shape = clampShapeToField(asgn.shape ?? defaultShapeFor(preset, defaultEnd))
 
           return (
             <ZoneShapeHandles
