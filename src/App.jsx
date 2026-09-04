@@ -11,6 +11,7 @@ import PlayerDetail from './pages/PlayerDetail'
 import Season from './pages/Season'
 import Tactics from './pages/Tactics'
 import Compare from './pages/Compare'
+import CoverageQuiz from './pages/CoverageQuiz'
 
 export default function App() {
   const location = useLocation()
@@ -85,6 +86,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Compare />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coverage-quiz"
+          element={
+            <ProtectedRoute>
+              <CoverageQuiz />
             </ProtectedRoute>
           }
         />

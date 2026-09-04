@@ -7,6 +7,7 @@ const links = [
   { to: '/games', label: '경기' },
   { to: '/season', label: '시즌' },
   { to: '/tactics', label: '전술판' },
+  { to: '/coverage-quiz', label: '커버리지 훈련' },
   { to: '/roster', label: '로스터' },
   { to: '/compare', label: '스탯 비교' },
 ]

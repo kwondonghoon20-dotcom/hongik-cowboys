@@ -44,6 +44,31 @@ export const FORMATIONS = {
       { role: 'X',  x: 50,      d: -1,   pos: 'WR' },
     ],
   },
+  // 샷건보다 얕은 QB 위치 + 단일 백(HB). 커버리지 판단 훈련(/coverage-quiz)에서 쓰인다.
+  // 2026 오펜스 플레이북의 일부 슬라이드는 이 백을 "FB"로도 표기하지만, 여기서는
+  // 단일 백 슬롯 이름을 HB로 통일한다.
+  pistol: {
+    label: 'Pistol', side: 'offense',
+    slots: [...OL5,
+      { role: 'QB', x: C,      d: -4.2, pos: 'QB' },
+      { role: 'HB', x: C,      d: -7.5, pos: 'RB' },
+      { role: 'SL', x: 12.5,   d: -2.6, pos: 'WR' },
+      { role: 'X',  x: 5,      d: -1,   pos: 'WR' },
+      { role: 'TE', x: 41,     d: -2.6, pos: 'TE' },
+    ],
+  },
+  // 양쪽 스플릿 리시버(X/Y) + 인라인 TE + 투백(HB/FB) 샷건 세트.
+  twins: {
+    label: 'Twins', side: 'offense',
+    slots: [...OL5,
+      { role: 'TE', x: C - 9,   d: -1,   pos: 'TE' },
+      { role: 'QB', x: C,       d: -6.2, pos: 'QB' },
+      { role: 'HB', x: C + 4.6, d: -6.2, pos: 'RB' },
+      { role: 'FB', x: C - 4.6, d: -6.2, pos: 'RB' },
+      { role: 'X',  x: 5,       d: -1,   pos: 'WR' },
+      { role: 'Y',  x: 48,      d: -1,   pos: 'WR' },
+    ],
+  },
   d44: {
     label: 'Cowboy (4-4)', side: 'defense',
     slots: [
