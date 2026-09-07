@@ -22,21 +22,12 @@ export default function Roster() {
   const rosterYears = useMemo(() => getRosterYears(), [])
 
   // 시즌(연도) 필터 — URL 쿼리(?year=)와 연동된다. 초기값: URL에 year가 있으면 그 값,
-  // 없으면 최신 시즌. "전체 선수" 선택 시에만 명시적으로 null이 되고 URL 쿼리가 제거된다
-  // (URL 쿼리를 매 렌더 다시 읽어 기본값으로 되돌리면 "전체 선수" 클릭이 무효화되므로
-  // 별도 state로 관리하고 클릭 시에만 URL과 함께 갱신한다).
+  // 없으면 최신 시즌(rosterYears[0], 지금은 2026).
   const [seasonYear, setSeasonYear] = useState(() => {
     const fromUrl = searchParams.get('year')
     if (fromUrl != null) return Number(fromUrl)
-    return rosterYears[0] ?? null
+    return rosterYears[0]
   })
-
-  const selectAllSeasons = () => {
-    setSeasonYear(null)
-    const next = new URLSearchParams(searchParams)
-    next.delete('year')
-    setSearchParams(next)
-  }
 
   const selectSeason = (year) => {
     setSeasonYear(year)
@@ -47,17 +38,11 @@ export default function Roster() {
 
   const years = useMemo(() => [...new Set(players.map((p) => p.year))].sort((a, b) => b - a), [])
 
-  let seasonPlayers = players
-  let seasonNoDataMessage = null
-  if (seasonYear != null) {
-    const rosterForYear = getRosterForYear(seasonYear)
-    if (rosterForYear == null) {
-      seasonPlayers = []
-      seasonNoDataMessage = `아직 ${seasonYear}년 로스터 데이터가 입력되지 않았습니다.`
-    } else {
-      seasonPlayers = rosterForYear
-    }
-  }
+  const rosterForSeason = getRosterForYear(seasonYear)
+  const seasonPlayers = rosterForSeason ?? []
+  const seasonNoDataMessage = rosterForSeason == null
+    ? `아직 ${seasonYear}년 로스터 데이터가 입력되지 않았습니다.`
+    : null
 
   const filteredPlayers = seasonPlayers
     .filter((p) => {
@@ -77,9 +62,20 @@ export default function Roster() {
   return (
     <div className="page-roster">
       <div className="page-hero">
-        <div className="container">
-          <h1>선수 로스터</h1>
-          <p>홍익대학교 카우보이스</p>
+        <div className="container page-hero-inner">
+          <div>
+            <h1>선수 로스터</h1>
+            <p>홍익대학교 카우보이스</p>
+          </div>
+          <select
+            className="season-select"
+            value={seasonYear ?? ''}
+            onChange={(e) => selectSeason(Number(e.target.value))}
+          >
+            {rosterYears.map((year) => (
+              <option key={year} value={year}>{year}년</option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="container">
@@ -97,27 +93,6 @@ export default function Roster() {
 
         {activeTab === 'players' && (
           <>
-            <div className="filter-group">
-              <span className="filter-label">시즌</span>
-              <div className="filter-chips">
-                <button
-                  className={'filter-chip' + (seasonYear === null ? ' active' : '')}
-                  onClick={selectAllSeasons}
-                >
-                  전체 선수
-                </button>
-                {rosterYears.map((year) => (
-                  <button
-                    key={year}
-                    className={'filter-chip' + (seasonYear === year ? ' active' : '')}
-                    onClick={() => selectSeason(year)}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <div className="filter-group">
               <span className="filter-label">포지션</span>
               <div className="filter-chips">
