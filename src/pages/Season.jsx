@@ -132,7 +132,7 @@ export default function Season() {
   const realGames = useMemo(() => {
     const year = selectedYear ?? availableYears[0]
     return allGames
-      .filter((g) => g.season === year)
+      .filter((g) => g.season === year && g.homeScore != null && g.awayScore != null)
       .sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [allGames, selectedYear, availableYears])
 
