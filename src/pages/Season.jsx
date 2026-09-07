@@ -233,7 +233,7 @@ export default function Season() {
       const rushYds = rows.reduce((s, r) => s + r.offense.rushYards, 0)
       const passYds = rows.reduce((s, r) => s + r.offense.passYards, 0)
       const recYds  = rows.reduce((s, r) => s + r.offense.recYards, 0)
-      const tackles = rows.reduce((s, r) => s + r.defense.tackles + r.defense.assists, 0)
+      const tackles = rows.reduce((s, r) => s + r.defense.tackles + r.defense.assists * 0.5, 0)
       const returnYds = rows.reduce((s, r) => s + (r.kicking?.returnYards ?? 0), 0)
       const tflSack = rows.reduce((s, r) => s + r.defense.tfl + r.defense.sacks, 0)
       list.push({ number: num, rushYds, passYds, recYds, tackles, returnYds, tflSack })
