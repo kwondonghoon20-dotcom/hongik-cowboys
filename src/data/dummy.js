@@ -30,15 +30,15 @@ export const players = [
   // 3학년 23학번
   { id: 'p16', grade: 3, year: 23, number: 14, numbersBySeason: { 2025: 14 }, name: '박민수', positions: { offense: 'WR', defense: 'DB' }, height: 184, weight: 80 },
   { id: 'p17', grade: 3, year: 23, number: 61, numbersBySeason: { 2025: 61 }, name: '이우진', positions: { offense: 'OL', defense: 'DL' }, height: 180, weight: 105 },
-  { id: 'p18', grade: 3, year: 23, number: 54, numbersBySeason: { 2025: 54 }, name: '황종택', positions: { offense: 'OL', defense: 'DL' }, height: 185, weight: 87 },
+  { id: 'p18', grade: 3, year: 23, number: 54, numbersBySeason: { 2024: 99, 2025: 54 }, name: '황종택', positions: { offense: 'OL', defense: 'DL' }, height: 185, weight: 87 },
 
   // 3학년 22학번
-  { id: 'p19', grade: 3, year: 22, number: 20, numbersBySeason: { 2025: 57, 2026: 20 }, name: '권동훈', positions: { offense: 'RB', defense: 'LB' }, height: 171, weight: 75 },
+  { id: 'p19', grade: 3, year: 22, number: 20, numbersBySeason: { 2024: 57, 2025: 57, 2026: 20 }, name: '권동훈', positions: { offense: 'RB', defense: 'LB' }, height: 171, weight: 75 },
   { id: 'p20', grade: 3, year: 22, number: 77, numbersBySeason: { 2025: 77 }, name: '강민재', positions: { offense: 'OL', defense: 'DL' }, height: 175, weight: 92 },
   { id: 'p21', grade: 3, year: 22, number: 7, numbersBySeason: { 2025: 7 }, name: '양준환', positions: { offense: 'QB', defense: 'DB' }, height: null, weight: null },
 
   // 3학년 21학번
-  { id: 'p22', grade: 3, year: 21, number: 52, numbersBySeason: { 2025: 26, 2026: 52 }, name: '권순웅', positions: { offense: 'RB', defense: 'LB' }, positionsBySeason: { 2026: { offense: 'OL', defense: 'LB' } }, height: 170, weight: 77 },
+  { id: 'p22', grade: 3, year: 21, number: 52, numbersBySeason: { 2024: 26, 2025: 26, 2026: 52 }, name: '권순웅', positions: { offense: 'RB', defense: 'LB' }, positionsBySeason: { 2026: { offense: 'OL', defense: 'LB' } }, height: 170, weight: 77 },
   { id: 'p23', grade: 3, year: 21, number: 33, numbersBySeason: { 2025: 33 }, name: '김기웅', positions: { offense: 'WR', defense: 'DB' }, height: 178, weight: 74 },
   { id: 'p24', grade: 3, year: 21, number: 25, numbersBySeason: { 2025: 25 }, name: '김준호', positions: { offense: 'RB', defense: 'DL' }, height: 171, weight: 75 },
 
@@ -49,7 +49,7 @@ export const players = [
   // 4학년 22학번
   { id: 'p26', grade: 4, year: 22, number: 17, numbersBySeason: { 2025: 17 }, name: '김찬용', positions: { offense: 'TE', defense: 'LB' }, height: 177, weight: 73 },
   { id: 'p27', grade: 4, year: 22, number: 2, numbersBySeason: { 2025: 2 }, name: '고극', positions: { offense: 'WR', defense: 'DB' }, height: 178, weight: 65 },
-  { id: 'p28', grade: 4, year: 22, number: 29, numbersBySeason: { 2025: 19, 2026: 29 }, name: '최재서', positions: { offense: 'RB', defense: 'DB' }, height: 177, weight: 70 },
+  { id: 'p28', grade: 4, year: 22, number: 29, numbersBySeason: { 2024: 19, 2025: 19, 2026: 29 }, name: '최재서', positions: { offense: 'RB', defense: 'DB' }, height: 177, weight: 70 },
 
   // 4학년 21학번
   { id: 'p29', grade: 4, year: 21, number: 60, numbersBySeason: { 2025: 60 }, name: '최호재', positions: { offense: 'OL', defense: 'DL' }, height: 180, weight: 120 },
@@ -99,7 +99,7 @@ export function getPlayerPositionsInSeason(player, season) {
 // 주의: player.year(학번/입학년도)와는 다른 개념이다 — 섞어 쓰지 말 것.
 export const rosterByYear = {
   2024: [
-    'p10', 'p11', 'p12', 'p13', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20',
+    'p10', 'p11', 'p12', 'p13', 'p16', 'p17', 'p18', 'p19', 'p20',
     'p21', 'p22', 'p23', 'p24', 'p25', 'p26', 'p27', 'p28', 'p29', 'p30',
     'p31', 'p32',
   ],
