@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { players } from '../data/dummy'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
@@ -13,7 +13,11 @@ const STATUS_LABEL = { injury: '부상', military: '군대' }
 
 export default function PlayerDetail() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
   const globGames = useGlobGames()
+
+  const yearParam = searchParams.get('year')
+  const seasonYear = yearParam != null ? Number(yearParam) : null
 
   const player = players.find((p) => p.id === id)
 
@@ -24,25 +28,34 @@ export default function PlayerDetail() {
     return [...deduped, ...globGames]
   }, [globGames])
 
+  const seasonGames = useMemo(() => {
+    if (seasonYear == null) return realGames
+    return realGames.filter((g) => g.season === seasonYear)
+  }, [realGames, seasonYear])
+
   // player.number(현재/최신 등번호)로 모든 시즌의 경기를 조회한다. 지금은 로스터 전원의
   // numbersBySeason이 2026 한 시즌뿐이라 안전하지만, 과거 시즌에 지금과 다른 번호를 썼던
   // 선수가 확인되면 이 페이지도 경기별로 getPlayerNumberInSeason(player, game.season)을
   // 써서 시즌별 조회로 바꿔야 한다.
   const gameRows = useMemo(() => {
     if (!player || player.number == null) return []
-    return getSeasonPlayerStats(realGames, player.number, OUR_TEAM)
-  }, [realGames, player])
+    return getSeasonPlayerStats(seasonGames, player.number, OUR_TEAM)
+  }, [seasonGames, player])
+
+  const rosterBackTo = seasonYear != null ? `/roster?year=${seasonYear}` : '/roster'
 
   if (!player) {
     return (
       <div className="container page-detail">
         <p>선수를 찾을 수 없습니다.</p>
-        <Link to="/roster">로스터로 돌아가기</Link>
+        <Link to={rosterBackTo}>로스터로 돌아가기</Link>
       </div>
     )
   }
 
   const playerStatus = getPlayerStatus(player.id)
+  const seasonLabel = seasonYear != null ? `${seasonYear} 시즌 스탯` : '전체 시즌 누적 스탯'
+  const seasonBoxTitle = seasonYear != null ? `${seasonYear} 시즌 누적 스탯` : '시즌 누적 스탯'
 
   // 시즌 누적
   const { sOff, sDef, sKick } = computeSeasonTotals(gameRows)
@@ -103,7 +116,7 @@ export default function PlayerDetail() {
       <div className="player-hero">
         <div className="container player-hero-inner">
           <div>
-            <Link to="/roster" className="back-link">← 로스터</Link>
+            <Link to={rosterBackTo} className="back-link">← 로스터</Link>
             <div className="player-hero-number">{player.number ? `#${player.number}` : '#-'}</div>
             <div className="player-hero-name-row">
               <h1>{player.name}</h1>
@@ -124,6 +137,7 @@ export default function PlayerDetail() {
               {player.grade}학년 · {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
               {player.weight ? `${player.weight}kg` : '-'}
             </p>
+            <p className="player-hero-season-label">{seasonLabel}</p>
             {playerStatus.status !== 'healthy' && playerStatus.note && (
               <p className="player-status-note">{playerStatus.note}</p>
             )}
@@ -135,7 +149,7 @@ export default function PlayerDetail() {
         {hasAnyStats ? (
           <>
             <section className="section">
-              <h3 className="section-title">시즌 누적 스탯</h3>
+              <h3 className="section-title">{seasonBoxTitle}</h3>
               <div className="season-stats">
                 {seasonBoxes.map((s) => (
                   <div key={s.name} className="season-stat-box">
@@ -147,7 +161,7 @@ export default function PlayerDetail() {
             </section>
 
             <section className="section">
-              <h3 className="section-title">경기별 스탯</h3>
+              <h3 className="section-title">{seasonYear != null ? `${seasonYear} 경기별 스탯` : '경기별 스탯'}</h3>
               {activeRows.length === 0 ? (
                 <p className="empty-note">아직 경기 데이터가 없습니다.</p>
               ) : (

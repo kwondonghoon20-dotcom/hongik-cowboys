@@ -4,11 +4,12 @@ import './PlayerCard.css'
 
 const STATUS_LABEL = { injury: '부상', military: '군대' }
 
-export default function PlayerCard({ player }) {
+export default function PlayerCard({ player, year }) {
   const { status } = getPlayerStatus(player.id)
+  const to = year != null ? `/roster/${player.id}?year=${year}` : `/roster/${player.id}`
 
   return (
-    <Link to={`/roster/${player.id}`} className="player-card">
+    <Link to={to} className="player-card">
       {status !== 'healthy' && (
         <span className={'player-status-badge ' + status}>{STATUS_LABEL[status]}</span>
       )}

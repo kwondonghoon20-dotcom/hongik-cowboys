@@ -87,6 +87,26 @@ export function findPlayerByNumberInSeason(number, season, teamPlayers = players
   return teamPlayers.find((p) => String(getPlayerNumberInSeason(p, season)) === numStr) ?? null
 }
 
+// 시즌(연도)별 실제 로스터 소속 선수 id 목록. 관리자가 매년 직접 입력/갱신한다.
+// 아직 입력되지 않은 과거 시즌은 이 맵에 키가 없을 수 있다 (그 경우 UI에서 "데이터 없음" 처리).
+// 주의: player.year(학번/입학년도)와는 다른 개념이다 — 섞어 쓰지 말 것.
+export const rosterByYear = {
+  2026: players.map((p) => p.id), // 2026 시즌: 현재 전체 로스터 32명 그대로
+}
+
+// 주어진 연도의 로스터 소속 선수 목록을 반환한다. 데이터가 없는 연도는 null을 반환한다.
+export function getRosterForYear(year) {
+  const ids = rosterByYear[year]
+  if (!ids) return null
+  const idSet = new Set(ids)
+  return players.filter((p) => idSet.has(p.id))
+}
+
+// rosterByYear에 데이터가 있는 연도 목록 (내림차순)
+export function getRosterYears() {
+  return Object.keys(rosterByYear).map(Number).sort((a, b) => b - a)
+}
+
 export const managers = [
   { id: 'm1', name: '노경주', year: '22' },
   { id: 'm2', name: '김영현', year: '22' },
