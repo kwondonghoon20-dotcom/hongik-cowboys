@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { players } from '../data/dummy'
+import { players, getPlayerNumberInSeason, getRosterForYear } from '../data/dummy'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import {
@@ -33,13 +33,24 @@ export default function PlayerDetail() {
     return realGames.filter((g) => g.season === seasonYear)
   }, [realGames, seasonYear])
 
-  // player.number(현재/최신 등번호)로 모든 시즌의 경기를 조회한다. 지금은 로스터 전원의
-  // numbersBySeason이 2026 한 시즌뿐이라 안전하지만, 과거 시즌에 지금과 다른 번호를 썼던
-  // 선수가 확인되면 이 페이지도 경기별로 getPlayerNumberInSeason(player, game.season)을
-  // 써서 시즌별 조회로 바꿔야 한다.
+  // 등번호는 시즌마다 바뀔 수 있어(numbersBySeason), 경기를 시즌별로 묶은 뒤 그 시즌에
+  // 실제로 달았던 번호로 각각 조회해서 합친다 — player.number(최신 번호) 하나로 전체
+  // 경기를 조회하면 번호가 바뀐 선수의 과거 시즌 경기가 누락된다.
+  // numbersBySeason에 그 시즌 키가 없으면 player.number로 폴백하는데, 이 폴백은 그 해에
+  // 실제로 로스터에 있었던 선수에게만 유효하다 — rosterByYear에 그 시즌 데이터가 있고
+  // 이 선수가 명단에 없으면(예: 2026년에 합류해 2025년엔 아예 없었던 선수) 다른 선수가
+  // 그 번호를 썼을 수 있으므로 조회 자체를 건너뛴다.
   const gameRows = useMemo(() => {
-    if (!player || player.number == null) return []
-    return getSeasonPlayerStats(seasonGames, player.number, OUR_TEAM)
+    if (!player) return []
+    const seasonsPresent = [...new Set(seasonGames.map((g) => g.season))]
+    return seasonsPresent.flatMap((season) => {
+      const rosterForSeason = getRosterForYear(season)
+      if (rosterForSeason != null && !rosterForSeason.some((p) => p.id === player.id)) return []
+      const num = getPlayerNumberInSeason(player, season)
+      if (num == null) return []
+      const gamesInSeason = seasonGames.filter((g) => g.season === season)
+      return getSeasonPlayerStats(gamesInSeason, num, OUR_TEAM)
+    })
   }, [seasonGames, player])
 
   const rosterBackTo = seasonYear != null ? `/roster?year=${seasonYear}` : '/roster'
