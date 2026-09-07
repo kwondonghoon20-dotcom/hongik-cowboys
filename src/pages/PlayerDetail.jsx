@@ -11,6 +11,63 @@ import './PlayerDetail.css'
 
 const STATUS_LABEL = { injury: '부상', military: '군대' }
 
+// 경기별 로우(rowsForSeason) → 시즌 누적 스탯 카드 + 경기별 스탯 테이블 컬럼 + 활동 있는 로우.
+// 시즌마다 스탯 카테고리 구성(cols)이 다를 수 있어(예: 어떤 해는 패싱 기록이 없음) 연도별로 새로 계산한다.
+function buildSeasonSection(rowsForSeason) {
+  const { sOff, sDef, sKick } = computeSeasonTotals(rowsForSeason)
+  const flags = getStatFlags(sOff, sDef, sKick)
+  const {
+    hasRushing, hasReceiving, hasPassing, hasTackles, hasSacks, hasTFL, hasINT,
+    hasFumbleRec, hasDefTD, hasKicking, hasAnyStats,
+  } = flags
+
+  const seasonBoxes = buildSeasonBoxes(sOff, sDef, sKick, flags)
+
+  const cols = []
+  if (hasRushing) cols.push({
+    key: 'rush', label: 'Rushing',
+    render: (o) => `${o.rushAttempts} car · ${o.rushYards} yds${o.rushTD ? ` · ${o.rushTD} TD` : ''}`,
+  })
+  if (hasReceiving) cols.push({
+    key: 'rec', label: 'Receiving',
+    render: (o) => `${o.receptions} rec · ${o.recYards} yds${o.recTD ? ` · ${o.recTD} TD` : ''}`,
+  })
+  if (hasPassing) cols.push({
+    key: 'pass', label: 'Passing',
+    render: (o) => `${o.completions}/${o.passAttempts} · ${o.passYards} yds · ${o.passTD} TD · ${o.passINT} INT`,
+  })
+  if (hasTackles) cols.push({
+    key: 'tkl', label: 'Tackles',
+    render: (_, d) => `${d.tackles} solo · ${d.assists} ast`,
+  })
+  if (hasSacks)     cols.push({ key: 'sck', label: 'Sacks',   render: (_, d) => d.sacks })
+  if (hasTFL)       cols.push({ key: 'tfl', label: 'TFL',     render: (_, d) => d.tfl })
+  if (hasINT)       cols.push({ key: 'int', label: 'INT',     render: (_, d) => d.interceptions })
+  if (hasFumbleRec) cols.push({ key: 'fur', label: 'Fum Rec', render: (_, d) => d.fumbleRec })
+  if (hasDefTD)     cols.push({ key: 'dtd', label: 'Def TD',  render: (_, d) => d.touchdowns })
+  if (hasKicking) cols.push({
+    key: 'kick', label: 'Kicking',
+    render: (_o, _d, k) => {
+      const parts = []
+      if (k.kickoffs > 0) parts.push(`킥오프 ${k.kickoffs}개`)
+      if (k.punts > 0) {
+        const distance = k.puntYardsCounted > 0
+          ? `평균 ${(k.puntYards / k.puntYardsCounted).toFixed(1)}yd`
+          : '거리 미기록'
+        parts.push(`펀트 ${k.punts}개(${distance})`)
+      }
+      if (k.patAtt > 0) parts.push(`PAT ${k.patMade}/${k.patAtt}`)
+      if (k.fgAtt > 0) parts.push(`FG ${k.fgMade}/${k.fgAtt}`)
+      if (k.returns > 0) parts.push(`리턴 ${k.returns}회${k.returnYards ? `(${k.returnYards}yd)` : ''}`)
+      return parts.join(' · ')
+    },
+  })
+
+  const activeRows = rowsForSeason.filter((r) => hasActivity(r.offense, r.defense, r.kicking))
+
+  return { seasonBoxes, cols, activeRows, hasAnyStats }
+}
+
 export default function PlayerDetail() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
@@ -53,6 +110,12 @@ export default function PlayerDetail() {
     })
   }, [seasonGames, player])
 
+  // ?year= 쿼리가 있으면 그 해만, 없으면 실제 경기 데이터가 있는 모든 시즌을 최신순으로 나열.
+  const seasonsToShow = useMemo(() => {
+    if (seasonYear != null) return [seasonYear]
+    return [...new Set(gameRows.map((r) => r.game.season))].sort((a, b) => b - a)
+  }, [gameRows, seasonYear])
+
   const rosterBackTo = seasonYear != null ? `/roster?year=${seasonYear}` : '/roster'
 
   if (!player) {
@@ -66,62 +129,14 @@ export default function PlayerDetail() {
 
   const playerStatus = getPlayerStatus(player.id)
   const positions = getPlayerPositionsInSeason(player, seasonYear)
-  const seasonLabel = seasonYear != null ? `${seasonYear} 시즌 스탯` : '전체 시즌 누적 스탯'
-  const seasonBoxTitle = seasonYear != null ? `${seasonYear} 시즌 누적 스탯` : '시즌 누적 스탯'
+  const seasonLabel = seasonYear != null ? `${seasonYear} 시즌 스탯` : null
 
-  // 시즌 누적
-  const { sOff, sDef, sKick } = computeSeasonTotals(gameRows)
-  const flags = getStatFlags(sOff, sDef, sKick)
-  const {
-    hasRushing, hasReceiving, hasPassing, hasTackles, hasSacks, hasTFL, hasINT,
-    hasFumbleRec, hasDefTD, hasKicking, hasAnyStats,
-  } = flags
-
-  // 시즌 스탯 박스
-  const seasonBoxes = buildSeasonBoxes(sOff, sDef, sKick, flags)
-
-  // 경기별 테이블 컬럼 정의
-  const cols = []
-  if (hasRushing) cols.push({
-    key: 'rush', label: 'Rushing',
-    render: (o) => `${o.rushAttempts} car · ${o.rushYards} yds${o.rushTD ? ` · ${o.rushTD} TD` : ''}`,
-  })
-  if (hasReceiving) cols.push({
-    key: 'rec', label: 'Receiving',
-    render: (o) => `${o.receptions} rec · ${o.recYards} yds${o.recTD ? ` · ${o.recTD} TD` : ''}`,
-  })
-  if (hasPassing) cols.push({
-    key: 'pass', label: 'Passing',
-    render: (o) => `${o.completions}/${o.passAttempts} · ${o.passYards} yds · ${o.passTD} TD · ${o.passINT} INT`,
-  })
-  if (hasTackles) cols.push({
-    key: 'tkl', label: 'Tackles',
-    render: (_, d) => `${d.tackles} solo · ${d.assists} ast`,
-  })
-  if (hasSacks)     cols.push({ key: 'sck', label: 'Sacks',   render: (_, d) => d.sacks })
-  if (hasTFL)       cols.push({ key: 'tfl', label: 'TFL',     render: (_, d) => d.tfl })
-  if (hasINT)       cols.push({ key: 'int', label: 'INT',     render: (_, d) => d.interceptions })
-  if (hasFumbleRec) cols.push({ key: 'fur', label: 'Fum Rec', render: (_, d) => d.fumbleRec })
-  if (hasDefTD)     cols.push({ key: 'dtd', label: 'Def TD',  render: (_, d) => d.touchdowns })
-  if (hasKicking) cols.push({
-    key: 'kick', label: 'Kicking',
-    render: (_o, _d, k) => {
-      const parts = []
-      if (k.kickoffs > 0) parts.push(`킥오프 ${k.kickoffs}개`)
-      if (k.punts > 0) {
-        const distance = k.puntYardsCounted > 0
-          ? `평균 ${(k.puntYards / k.puntYardsCounted).toFixed(1)}yd`
-          : '거리 미기록'
-        parts.push(`펀트 ${k.punts}개(${distance})`)
-      }
-      if (k.patAtt > 0) parts.push(`PAT ${k.patMade}/${k.patAtt}`)
-      if (k.fgAtt > 0) parts.push(`FG ${k.fgMade}/${k.fgAtt}`)
-      if (k.returns > 0) parts.push(`리턴 ${k.returns}회${k.returnYards ? `(${k.returnYards}yd)` : ''}`)
-      return parts.join(' · ')
-    },
-  })
-
-  const activeRows = gameRows.filter((r) => hasActivity(r.offense, r.defense, r.kicking))
+  // 연도별 섹션: 시즌마다 스탯 카테고리(cols)가 다를 수 있어 각각 따로 계산한다.
+  const sections = seasonsToShow.map((season) => ({
+    season,
+    ...buildSeasonSection(gameRows.filter((r) => r.game.season === season)),
+  }))
+  const hasAnyStats = sections.some((s) => s.hasAnyStats)
 
   return (
     <div className="page-detail">
@@ -149,7 +164,7 @@ export default function PlayerDetail() {
               {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
               {player.weight ? `${player.weight}kg` : '-'}
             </p>
-            <p className="player-hero-season-label">{seasonLabel}</p>
+            {seasonLabel && <p className="player-hero-season-label">{seasonLabel}</p>}
             {playerStatus.status !== 'healthy' && playerStatus.note && (
               <p className="player-status-note">{playerStatus.note}</p>
             )}
@@ -159,9 +174,9 @@ export default function PlayerDetail() {
 
       <div className="container">
         {hasAnyStats ? (
-          <>
-            <section className="section">
-              <h3 className="section-title">{seasonBoxTitle}</h3>
+          sections.map(({ season, seasonBoxes, cols, activeRows }) => (
+            <section className="section player-season-block" key={season}>
+              <h2 className="player-season-heading">{season} 시즌</h2>
               <div className="season-stats">
                 {seasonBoxes.map((s) => (
                   <div key={s.name} className="season-stat-box">
@@ -170,10 +185,8 @@ export default function PlayerDetail() {
                   </div>
                 ))}
               </div>
-            </section>
 
-            <section className="section">
-              <h3 className="section-title">{seasonYear != null ? `${seasonYear} 경기별 스탯` : '경기별 스탯'}</h3>
+              <h3 className="section-title">{season} 경기별 스탯</h3>
               {activeRows.length === 0 ? (
                 <p className="empty-note">아직 경기 데이터가 없습니다.</p>
               ) : (
@@ -201,7 +214,7 @@ export default function PlayerDetail() {
                 </div>
               )}
             </section>
-          </>
+          ))
         ) : (
           <section className="section">
             <p className="empty-note">플레이별 데이터가 있는 경기가 로드되면 스탯이 표시됩니다.</p>

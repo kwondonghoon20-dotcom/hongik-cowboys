@@ -60,6 +60,15 @@ const SEASON_STATS_2025_FALL = {
   ],
 }
 
+// 특정 연도에 해당 학기(춘계/추계) 경기(스코어 확정)가 있는지 판단
+function semesterHasGames(games, year, semester) {
+  return games.some((g) =>
+    g.season === year &&
+    (semester === 'spring' ? g.semester === 'spring' : (g.semester === 'fall' || !g.semester)) &&
+    g.homeScore != null && g.awayScore != null
+  )
+}
+
 // 경기 목록에서 OUR_TEAM 소속 선수 등번호 전체 수집
 function collectPlayerNums(games) {
   const nums = new Set()
@@ -112,7 +121,6 @@ function RankCard({ title, players: list, statKey, unit, season }) {
 
 export default function Season() {
   const globGames = useGlobGames()
-  const [activeSemester, setActiveSemester] = useState('spring')
 
   const allGames = useMemo(() => {
     const sync = getAllGames()
@@ -127,7 +135,20 @@ export default function Season() {
     [allGames]
   )
 
+  // 그 연도에 실제로 경기가 있는 학기를 기본값으로: 추계 우선, 없으면 춘계
+  function defaultSemesterFor(year) {
+    if (semesterHasGames(allGames, year, 'fall')) return 'fall'
+    if (semesterHasGames(allGames, year, 'spring')) return 'spring'
+    return 'fall'
+  }
+
   const [selectedYear, setSelectedYear] = useState(() => availableYears[0])
+  const [activeSemester, setActiveSemester] = useState(() => defaultSemesterFor(availableYears[0]))
+
+  function selectYear(year) {
+    setSelectedYear(year)
+    setActiveSemester(defaultSemesterFor(year))
+  }
 
   const realGames = useMemo(() => {
     const year = selectedYear ?? availableYears[0]
@@ -189,6 +210,7 @@ export default function Season() {
         pass: top3sorted(SEASON_STATS_2025_FALL.pass, 'passYds'),
         rec:  top3sorted(SEASON_STATS_2025_FALL.rec,  'recYds'),
         tackles: top3sorted(SEASON_STATS_2025_FALL.tackles, 'tackles', 0.5),
+        return: [],
       }
     }
 
@@ -202,7 +224,8 @@ export default function Season() {
       const passYds = rows.reduce((s, r) => s + r.offense.passYards, 0)
       const recYds  = rows.reduce((s, r) => s + r.offense.recYards, 0)
       const tackles = rows.reduce((s, r) => s + r.defense.tackles, 0)
-      list.push({ number: num, rushYds, passYds, recYds, tackles })
+      const returnYds = rows.reduce((s, r) => s + (r.kicking?.returnYards ?? 0), 0)
+      list.push({ number: num, rushYds, passYds, recYds, tackles, returnYds })
     }
     const top3 = (key, min = 1) =>
       list.filter((p) => p[key] >= min).sort((a, b) => b[key] - a[key]).slice(0, 3)
@@ -211,6 +234,7 @@ export default function Season() {
       pass: top3('passYds'),
       rec:  top3('recYds'),
       tackles: top3('tackles', 0.5),
+      return: top3('returnYds'),
     }
   }, [activeSemester, semesterGames, selectedYear])
 
@@ -226,7 +250,7 @@ export default function Season() {
             <select
               className="season-select"
               value={selectedYear ?? ''}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              onChange={(e) => selectYear(Number(e.target.value))}
             >
               {availableYears.map((year) => (
                 <option key={year} value={year}>{year}년</option>
@@ -345,6 +369,7 @@ export default function Season() {
             <RankCard title="🎯 패스 야드" players={playerRankings.pass} statKey="passYds" unit="야드" season={selectedYear} />
             <RankCard title="🙌 리시빙 야드" players={playerRankings.rec} statKey="recYds" unit="야드" season={selectedYear} />
             <RankCard title="🛡️ 태클" players={playerRankings.tackles} statKey="tackles" unit="" season={selectedYear} />
+            <RankCard title="🔄 리턴 야드" players={playerRankings.return} statKey="returnYds" unit="야드" season={selectedYear} />
           </div>
         </section>
       </div>
