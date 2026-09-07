@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { findPlayerByNumberInSeason } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
 import { getTouchdownClip, getTDPlayOverride } from '../data/touchdownClips'
-import { OUR_TEAM, normalizeTeamName, normalizeNum } from '../utils/parseExcel'
+import { OUR_TEAM, normalizeTeamName, normalizeNum, isDefensiveTouchdown } from '../utils/parseExcel'
 import { catmullRomPath } from '../utils/fieldGeometry'
 
 // ── 유틸 ──────────────────────────────────────────────────────
@@ -225,10 +225,21 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const pt = String(effectivePlay.PlayType ?? '').trim().toUpperCase()
   const isPass = pt === 'PASS'
   const isRun = pt === 'RUN'
-  const isOurTD = normalizeTeamName(effectivePlay.OffenseTeam) === OUR_TEAM
 
-  const scorerNum = effectivePlay.CARNum ? String(effectivePlay.CARNum) : null
-  const qbNum = effectivePlay.CAR2Num ? String(effectivePlay.CAR2Num) : null
+  const isDefTD = isDefensiveTouchdown(effectivePlay)
+  const offenseTeamNorm = normalizeTeamName(effectivePlay.OffenseTeam)
+  // 수비 터치다운(펌블/인터셉트 리턴)은 OffenseTeam의 상대 팀이 실제 득점 팀이다
+  // (parseExcel.js의 isDefensiveTouchdown 주석과 동일한 근거).
+  const otherTeamNorm = offenseTeamNorm === game.homeTeam ? game.awayTeam : game.homeTeam
+  const scoringTeamNorm = isDefTD ? otherTeamNorm : offenseTeamNorm
+  const isOurTD = scoringTeamNorm === OUR_TEAM
+
+  // 수비 터치다운의 실제 득점(리턴) 선수는 TKLNum에 기록된다(CARNum은 펌블한/
+  // 인터셉트당한 원래 오펜스 선수라 득점자가 아니다).
+  const scorerNum = isDefTD
+    ? (effectivePlay.TKLNum ? String(effectivePlay.TKLNum) : null)
+    : (effectivePlay.CARNum ? String(effectivePlay.CARNum) : null)
+  const qbNum = isDefTD ? null : (effectivePlay.CAR2Num ? String(effectivePlay.CAR2Num) : null)
   const yards = effectivePlay.GainYard ?? effectivePlay.Gain ?? 0
   const quarter = effectivePlay.Quarter ? `Q${effectivePlay.Quarter}` : '-'
 
@@ -237,13 +248,13 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const scorerName = scorerPlayer ? scorerPlayer.name : scorerNum ? `#${scorerNum}` : '-'
   const qbName = qbPlayer ? qbPlayer.name : qbNum ? `#${qbNum}` : null
 
-  const teamLabel = isOurTD ? 'HIcowboys' : (effectivePlay.OffenseTeam ?? '?')
-  const tdTypeLabel = isPass ? 'PASS TD' : isRun ? 'RUN TD' : 'TD'
+  const teamLabel = isOurTD ? OUR_TEAM : scoringTeamNorm
+  const tdTypeLabel = isDefTD ? 'DEF TD' : isPass ? 'PASS TD' : isRun ? 'RUN TD' : 'TD'
 
-  const teamColor = getTeamColor(normalizeTeamName(effectivePlay.OffenseTeam))
+  const teamColor = getTeamColor(scoringTeamNorm)
 
   const routeData = game.gameKey ? getTouchdownRoute(game.gameKey, play.ClipKey) : null
-  const clipUrl = game.gameKey ? getTouchdownClip(game.gameKey, play.OffenseTeam) : null
+  const clipUrl = game.gameKey ? getTouchdownClip(game.gameKey, scoringTeamNorm) : null
 
   const hasNewRoute = (routeData?.route?.length ?? 0) > 0
   const hasLegacyRoute = (routeData?.points?.length ?? 0) > 0
