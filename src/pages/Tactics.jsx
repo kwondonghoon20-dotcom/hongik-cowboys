@@ -22,7 +22,7 @@ function keyOf(side, playerId) {
 
 // 포메이션 슬롯에 로스터 선수를 자동 배정한다(순수 함수 — 상태에 의존하지 않는다).
 // 1) 슬롯 순서대로 positions[side]가 slot.pos와 같고 이 사이드에서 아직 안 쓰인 선수 중
-//    학년 높은 순 → 등번호 낮은 순으로 1명 선택
+//    등번호 낮은 순으로 1명 선택
 // 2) 후보가 없으면 이 사이드에서 안 쓰인 아무 선수나 배정(TE처럼 로스터에 1명뿐인 포지션 대비)
 function computeSidePlacements(formationKey, side) {
   const formation = FORMATIONS[formationKey]
@@ -35,7 +35,6 @@ function computeSidePlacements(formationKey, side) {
     const posMatch = players
       .filter((p) => p.positions[side] === posGroupOf(slot.pos) && !alreadyUsed.has(p.id))
       .sort((a, b) => {
-        if (b.grade !== a.grade) return b.grade - a.grade
         const na = a.number ?? Infinity
         const nb = b.number ?? Infinity
         return na - nb

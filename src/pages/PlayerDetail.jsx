@@ -145,7 +145,7 @@ export default function PlayerDetail() {
               )}
             </div>
             <p className="player-hero-meta">
-              {player.grade}학년 · {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
+              {player.year}학번 · {player.height ? `${player.height}cm` : '-'} /{' '}
               {player.weight ? `${player.weight}kg` : '-'}
             </p>
             <p className="player-hero-season-label">{seasonLabel}</p>

@@ -31,7 +31,7 @@ export default function PlayerCard({ player, year }) {
       </div>
       <div className="player-card-meta">
         <span>
-          {player.grade}학년 · {player.year}학번
+          {player.year}학번
         </span>
         <span>
           {player.height ? `${player.height}cm` : '-'} / {player.weight ? `${player.weight}kg` : '-'}

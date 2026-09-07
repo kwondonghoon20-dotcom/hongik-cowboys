@@ -54,7 +54,7 @@ export default function Roster() {
       const matchesYear = yearFilter === '전체' || p.year === yearFilter
       return matchesPosition && matchesYear
     })
-    .sort((a, b) => b.grade - a.grade || a.year - b.year)
+    .sort((a, b) => a.year - b.year)
 
   const headCoach = coaches.find((c) => c.isHeadCoach)
   const otherCoaches = coaches.filter((c) => !c.isHeadCoach)

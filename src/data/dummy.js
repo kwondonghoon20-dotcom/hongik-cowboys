@@ -91,7 +91,11 @@ export function findPlayerByNumberInSeason(number, season, teamPlayers = players
 // 아직 입력되지 않은 과거 시즌은 이 맵에 키가 없을 수 있다 (그 경우 UI에서 "데이터 없음" 처리).
 // 주의: player.year(학번/입학년도)와는 다른 개념이다 — 섞어 쓰지 말 것.
 export const rosterByYear = {
-  2024: ['p10', 'p11', 'p12', 'p13', 'p18'],
+  2024: [
+    'p10', 'p11', 'p12', 'p13', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20',
+    'p21', 'p22', 'p23', 'p24', 'p25', 'p26', 'p27', 'p28', 'p29', 'p30',
+    'p31', 'p32',
+  ],
   2025: [
     'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p15', 'p16', 'p17', 'p19', 'p20',
     'p21', 'p22', 'p23', 'p24', 'p25', 'p26', 'p27', 'p28', 'p29', 'p30',

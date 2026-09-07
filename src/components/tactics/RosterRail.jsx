@@ -75,7 +75,7 @@ export default function RosterRail({
                       <span className="roster-player-badge">{otherLabel}</span>
                     )}
                     <span className="roster-player-meta">
-                      {player.grade}학년 {player.year}학번
+                      {player.year}학번
                     </span>
                   </div>
                 )

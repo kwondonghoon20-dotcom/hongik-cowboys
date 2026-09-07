@@ -39,7 +39,6 @@ function PlayerPicker({ label, selected, onSelect, onClear, excludeId }) {
             <div className="picker-selected-meta">
               {selected.positions.offense} / {selected.positions.defense}
               {selected.positions?.special ? ` / ${selected.positions.special}` : ''}
-              {' · '}{selected.grade}학년
             </div>
           </div>
           <button className="picker-clear-btn" onClick={onClear}>변경</button>
