@@ -70,7 +70,7 @@ function buildSeasonSection(rowsForSeason) {
 
 export default function PlayerDetail() {
   const { id } = useParams()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const globGames = useGlobGames()
 
   const yearParam = searchParams.get('year')
@@ -115,6 +115,18 @@ export default function PlayerDetail() {
     if (seasonYear != null) return [seasonYear]
     return [...new Set(gameRows.map((r) => r.game.season))].sort((a, b) => b - a)
   }, [gameRows, seasonYear])
+
+  const availableSeasons = useMemo(
+    () => [...new Set(gameRows.map((r) => r.game.season))].sort((a, b) => b - a),
+    [gameRows]
+  )
+
+  function handleSeasonSelect(value) {
+    const next = new URLSearchParams(searchParams)
+    if (value === '') next.delete('year')
+    else next.set('year', value)
+    setSearchParams(next)
+  }
 
   const rosterBackTo = seasonYear != null ? `/roster?year=${seasonYear}` : '/roster'
 
@@ -169,6 +181,16 @@ export default function PlayerDetail() {
               <p className="player-status-note">{playerStatus.note}</p>
             )}
           </div>
+          <select
+            className="season-select"
+            value={seasonYear ?? ''}
+            onChange={(e) => handleSeasonSelect(e.target.value)}
+          >
+            <option value="">전체 시즌</option>
+            {availableSeasons.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import {
   ResponsiveContainer, LabelList,
 } from 'recharts'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
-import { findPlayerByNumberInSeason } from '../data/dummy'
+import { findPlayerByNumberInSeason, getRosterForYear, getPlayerNumberInSeason } from '../data/dummy'
 import { getPlayerTotalYards, getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import './Season.css'
 
@@ -70,7 +70,7 @@ function semesterHasGames(games, year, semester) {
 }
 
 // 경기 목록에서 OUR_TEAM 소속 선수 등번호 전체 수집
-function collectPlayerNums(games) {
+function collectPlayerNums(games, season) {
   const nums = new Set()
   for (const game of games) {
     if (game.homeTeam !== OUR_TEAM && game.awayTeam !== OUR_TEAM) continue
@@ -81,6 +81,15 @@ function collectPlayerNums(games) {
       const raw = getPlayerTotalYards(game.plays, game.homeTeam, game.awayTeam, 50)
       raw.filter((p) => p.team === OUR_TEAM).forEach((p) => nums.add(Number(p.number)))
     }
+  }
+  // 오펜스 스탯이 하나도 없는 순수 수비수는 위 로직으로 못 찾으므로, 그 시즌 실제 로스터
+  // 선수들의 등번호를 전부 합쳐서 후보에서 빠지지 않게 한다.
+  const rosterForSeason = season != null ? getRosterForYear(season) : null
+  if (rosterForSeason) {
+    rosterForSeason.forEach((p) => {
+      const num = getPlayerNumberInSeason(p, season)
+      if (num != null) nums.add(Number(num))
+    })
   }
   return nums
 }
@@ -211,11 +220,12 @@ export default function Season() {
         rec:  top3sorted(SEASON_STATS_2025_FALL.rec,  'recYds'),
         tackles: top3sorted(SEASON_STATS_2025_FALL.tackles, 'tackles', 0.5),
         return: [],
+        tflSack: [],
       }
     }
 
     // 그 외: 동적 계산
-    const playerNums = collectPlayerNums(semesterGames)
+    const playerNums = collectPlayerNums(semesterGames, selectedYear)
     const list = []
     for (const num of playerNums) {
       if (!num || isNaN(num)) continue
@@ -223,9 +233,10 @@ export default function Season() {
       const rushYds = rows.reduce((s, r) => s + r.offense.rushYards, 0)
       const passYds = rows.reduce((s, r) => s + r.offense.passYards, 0)
       const recYds  = rows.reduce((s, r) => s + r.offense.recYards, 0)
-      const tackles = rows.reduce((s, r) => s + r.defense.tackles, 0)
+      const tackles = rows.reduce((s, r) => s + r.defense.tackles + r.defense.assists, 0)
       const returnYds = rows.reduce((s, r) => s + (r.kicking?.returnYards ?? 0), 0)
-      list.push({ number: num, rushYds, passYds, recYds, tackles, returnYds })
+      const tflSack = rows.reduce((s, r) => s + r.defense.tfl + r.defense.sacks, 0)
+      list.push({ number: num, rushYds, passYds, recYds, tackles, returnYds, tflSack })
     }
     const top3 = (key, min = 1) =>
       list.filter((p) => p[key] >= min).sort((a, b) => b[key] - a[key]).slice(0, 3)
@@ -235,6 +246,7 @@ export default function Season() {
       rec:  top3('recYds'),
       tackles: top3('tackles', 0.5),
       return: top3('returnYds'),
+      tflSack: top3('tflSack', 0.5),
     }
   }, [activeSemester, semesterGames, selectedYear])
 
@@ -370,6 +382,7 @@ export default function Season() {
             <RankCard title="🙌 리시빙 야드" players={playerRankings.rec} statKey="recYds" unit="야드" season={selectedYear} />
             <RankCard title="🛡️ 태클" players={playerRankings.tackles} statKey="tackles" unit="" season={selectedYear} />
             <RankCard title="🔄 리턴 야드" players={playerRankings.return} statKey="returnYds" unit="야드" season={selectedYear} />
+            <RankCard title="💥 TFL + Sack" players={playerRankings.tflSack} statKey="tflSack" unit="" season={selectedYear} />
           </div>
         </section>
       </div>
