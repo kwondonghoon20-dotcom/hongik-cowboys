@@ -647,8 +647,12 @@ export function getPlayerStats(plays, playerNum, teamName) {
       }
     } else {
       // 상대 팀 오펜스 = 우리 팀 디펜스 플레이
-      if (pt === 'RETURN') {
+      if (pt === 'RETURN' && isTurnover(play)) {
         // 인터셉트/펌블 리커버리 턴오버의 리턴 전용 행 — TKLNum = 리턴한 선수.
+        // (일반 턴오버는 TURNOVER 태그가 붙지만, 리턴이 그대로 수비 터치다운으로 끝난 경우는
+        // TURNOVER 없이 FUMBLERECDEF/INTERCEPT + TOUCHDOWN만 붙는다 — isTurnover()가 이 경우까지
+        // 포괄한다. 태그가 전혀 없는 RETURN 행은 킥오프/펀트 리턴이고 TKLNum이 그걸 막은 태클러라
+        // else 분기로 보내 일반 태클로 집계해야 한다.)
         // 원래 턴오버 행에서 이미 태클/인터셉트/펌블리커버리를 집계했으므로 여기선 중복 집계하지 않고
         // 리턴 야드와(수비 TD가 있다면) 터치다운만 반영한다.
         // GainYard는 오펜스 기준 진행 방향으로 기록돼 있어(리턴 방향은 반대) 음수로 찍히는 경우가
@@ -844,9 +848,8 @@ export function pickDefenseMvp(plays, teamName) {
   for (const play of plays) {
     if (play.OffenseTeam === teamName) continue
     const pt = playType(play)
-    if (pt === 'RETURN') continue // 턴오버 리턴 행은 원래 행에서 이미 집계됨 — MVP 점수에 중복 반영 방지
-
     const tags = significantPlayTags(play)
+    if (pt === 'RETURN' && isTurnover(play)) continue // 턴오버 리턴 행은 원래 행에서 이미 집계됨 — MVP 점수에 중복 반영 방지
 
     for (const [rawKey, posKey] of [['TKLNum', 'TKLPos'], ['TKL2Num', 'TKL2Pos']]) {
       const raw = play[rawKey]
