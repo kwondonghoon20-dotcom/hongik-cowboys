@@ -4,7 +4,7 @@ import {
   ResponsiveContainer, LabelList,
 } from 'recharts'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
-import { players } from '../data/dummy'
+import { findPlayerByNumberInSeason } from '../data/dummy'
 import { getPlayerTotalYards, getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import './Season.css'
 
@@ -60,8 +60,12 @@ const SEASON_STATS_2025_FALL = {
   ],
 }
 
+// 이 페이지는 2025 시즌 고정이라(아래 SEASON 상수) 랭킹에 쓰이는 등번호도 그 시즌
+// 기준으로 찾아야 한다 — 과거 시즌에 지금과 다른 번호를 썼던 선수가 있을 수 있어서다.
+const SEASON = 2025
+
 function findPlayer(number) {
-  return players.find((p) => p.number === number) ?? null
+  return findPlayerByNumberInSeason(number, SEASON)
 }
 
 // 경기 목록에서 OUR_TEAM 소속 선수 등번호 전체 수집

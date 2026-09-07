@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { parseGame, calcTeamStats, getTouchdownPlays } from '../utils/parseExcel'
+import { parseGame, calcTeamStats, getTouchdownPlays, isDefensiveTouchdown } from '../utils/parseExcel'
 import { validateGameData } from '../utils/validateUpload'
 import { addUploadedGame, getUploadedGames } from '../data/uploadedGames'
 import { getKnownGameKeys, useGlobGames } from '../data/gameRepository'
@@ -37,9 +37,15 @@ export default function ExcelUploader({ onUploaded }) {
       const { meta, plays } = await parseGame(file)
       const homeStats = calcTeamStats(plays, meta.home ?? 'Home')
       const awayStats = calcTeamStats(plays, meta.away ?? 'Away')
+      // 수비 터치다운(펌블/인터셉트 리턴)은 OffenseTeam이 상대팀으로 기록돼 있어
+      // 상대에서 빼서 자기 팀으로 옮긴다(validateUpload.js의 estimateScore와 동일한 패턴).
       const touchdownPlays = getTouchdownPlays(plays)
-      const homeTouchdowns = touchdownPlays.filter((p) => p.OffenseTeam === meta.home).length
-      const awayTouchdowns = touchdownPlays.filter((p) => p.OffenseTeam === meta.away).length
+      const homeTouchdowns =
+        touchdownPlays.filter((p) => p.OffenseTeam === meta.home && !isDefensiveTouchdown(p)).length +
+        touchdownPlays.filter((p) => p.OffenseTeam === meta.away && isDefensiveTouchdown(p)).length
+      const awayTouchdowns =
+        touchdownPlays.filter((p) => p.OffenseTeam === meta.away && !isDefensiveTouchdown(p)).length +
+        touchdownPlays.filter((p) => p.OffenseTeam === meta.home && isDefensiveTouchdown(p)).length
 
       console.log('[엑셀 파싱] meta:', meta)
       console.log('[엑셀 파싱] plays:', plays)

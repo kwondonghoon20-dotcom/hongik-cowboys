@@ -1,5 +1,5 @@
-import { OUR_TEAM, KNOWN_TEAMS, normalizeNum, getTouchdownPlays, playType, hasTag } from './parseExcel'
-import { players } from '../data/dummy'
+import { OUR_TEAM, KNOWN_TEAMS, normalizeNum, getTouchdownPlays, playType, hasTag, isDefensiveTouchdown } from './parseExcel'
+import { findPlayerByNumberInSeason } from '../data/dummy'
 
 // getPlayerStats()의 ok() 체크와 동일한 기준(0/빈 값 제외).
 function ok(raw) {
@@ -10,7 +10,12 @@ function ok(raw) {
 // 실제 3경기(국민/외대/연세)에는 TPT(2점 컨버전으로 추정) 행이 없어 계산식에서 제외했다 —
 // 태그 의미가 확인되면 나중에 추가할 것.
 function estimateScore(plays, teamName, opponentName) {
-  const touchdowns = getTouchdownPlays(plays).filter((p) => p.OffenseTeam === teamName).length
+  const tdPlays = getTouchdownPlays(plays)
+  // 수비 터치다운(펌블/인터셉트 리턴)은 OffenseTeam이 상대팀으로 기록돼 있어 상대에서
+  // 빼서 자기 팀으로 옮긴다(세이프티와 동일한 패턴).
+  const touchdowns =
+    tdPlays.filter((p) => p.OffenseTeam === teamName && !isDefensiveTouchdown(p)).length +
+    tdPlays.filter((p) => p.OffenseTeam === opponentName && isDefensiveTouchdown(p)).length
   const patGood = plays.filter(
     (p) => playType(p) === 'PAT' && p.OffenseTeam === teamName && hasTag(p, 'PATGOOD')
   ).length
@@ -49,9 +54,9 @@ export function validateGameData({ meta, plays, existingGameKeys = [] }) {
   const ourTeamName = meta?.home === OUR_TEAM ? meta.home : meta?.away === OUR_TEAM ? meta.away : null
 
   if (ourTeamName && Array.isArray(plays)) {
-    const rosterNums = new Set(
-      players.filter((p) => p.number != null).map((p) => normalizeNum(p.number))
-    )
+    // meta.date(예: '2026-09-05')에서 연도를 뽑아 그 시즌 등번호 기준으로 확인한다.
+    // 날짜를 못 읽은 경우 findPlayerByNumberInSeason이 player.number로 폴백한다.
+    const season = meta?.date ? Number(String(meta.date).slice(0, 4)) : null
 
     const counts = new Map()
     const bump = (raw) => {
@@ -71,7 +76,7 @@ export function validateGameData({ meta, plays, existingGameKeys = [] }) {
     }
 
     const unknownNums = [...counts.entries()]
-      .filter(([num]) => !rosterNums.has(num))
+      .filter(([num]) => !findPlayerByNumberInSeason(num, season))
       .sort((a, b) => Number(a[0]) - Number(b[0]))
 
     for (const [num, count] of unknownNums) {

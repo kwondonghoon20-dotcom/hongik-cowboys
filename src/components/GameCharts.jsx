@@ -8,13 +8,13 @@ import {
   getPenaltyStats, getPlayerTotalYards,
   getDriveMomentum, getKeyStats, OUR_TEAM,
 } from '../utils/parseExcel'
-import { players as rosterPlayers } from '../data/dummy'
+import { findPlayerByNumberInSeason } from '../data/dummy'
 import './GameCharts.css'
 
-function findRosterPlayer(number) {
+function findRosterPlayer(number, season) {
   const n = parseInt(number, 10)
   if (isNaN(n)) return null
-  return rosterPlayers.find((p) => p.number === n) ?? null
+  return findPlayerByNumberInSeason(n, season)
 }
 
 const SCARLET = '#CC0000'
@@ -63,7 +63,7 @@ function teamAbbr(teamName) {
   return TEAM_ABBR_MAP[key] ?? String(teamName ?? '').replace(/[^a-zA-Z가-힣]/g, '').slice(0, 3).toUpperCase()
 }
 
-function PlayerTooltip({ active, payload, topPlayers }) {
+function PlayerTooltip({ active, payload, topPlayers, season }) {
   if (!active || !payload?.length) return null
   const p = topPlayers.find((r) => r.label === payload[0]?.payload?.label)
   if (!p) return null
@@ -76,7 +76,7 @@ function PlayerTooltip({ active, payload, topPlayers }) {
     scrimmageYards,
   } = p
   const abbr = teamAbbr(team)
-  const roster = findRosterPlayer(number)
+  const roster = findRosterPlayer(number, season)
   const displayName = roster ? roster.name : null
   const divider = { borderTop: '1px solid #333', margin: '6px 0 8px' }
   const lbl = { color: '#888', paddingRight: 14, paddingBottom: 4, whiteSpace: 'nowrap' }
@@ -479,7 +479,7 @@ export default function GameCharts({ game }) {
     ? (() => {
         const raw = getPlayerTotalYards(game.plays, game.homeTeam, game.awayTeam, 5)
         return raw.map((r) => {
-          const rPlayer = r.team === OUR_TEAM ? findRosterPlayer(r.number) : null
+          const rPlayer = r.team === OUR_TEAM ? findRosterPlayer(r.number, game.season) : null
           const abbr = teamAbbr(r.team)
           let label
           if (rPlayer) {
@@ -525,7 +525,7 @@ export default function GameCharts({ game }) {
               <XAxis type="number" tick={TICK_STYLE} />
               <YAxis type="category" dataKey="label" tick={TICK_STYLE} width={90} />
               <Tooltip
-                content={(props) => <PlayerTooltip {...props} topPlayers={topPlayers} />}
+                content={(props) => <PlayerTooltip {...props} topPlayers={topPlayers} season={game.season} />}
                 cursor={{ fill: 'rgba(255,255,255,0.05)' }}
               />
               <Bar dataKey="scrimmageYards" name="Scrimmage Yds">

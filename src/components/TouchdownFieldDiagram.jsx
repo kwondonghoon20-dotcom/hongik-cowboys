@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { players } from '../data/dummy'
+import { findPlayerByNumberInSeason } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
 import { getTouchdownClip, getTDPlayOverride } from '../data/touchdownClips'
 import { OUR_TEAM, normalizeTeamName, normalizeNum } from '../utils/parseExcel'
@@ -7,10 +7,10 @@ import { catmullRomPath } from '../utils/fieldGeometry'
 
 // ── 유틸 ──────────────────────────────────────────────────────
 
-function findRosterPlayer(number) {
+function findRosterPlayer(number, season) {
   const n = parseInt(number, 10)
   if (isNaN(n)) return null
-  return players.find((p) => p.number === n) ?? null
+  return findPlayerByNumberInSeason(n, season)
 }
 
 const TEAM_COLORS = {
@@ -232,8 +232,8 @@ export default function TouchdownFieldDiagram({ play, game }) {
   const yards = effectivePlay.GainYard ?? effectivePlay.Gain ?? 0
   const quarter = effectivePlay.Quarter ? `Q${effectivePlay.Quarter}` : '-'
 
-  const scorerPlayer = isOurTD && scorerNum ? findRosterPlayer(scorerNum) : null
-  const qbPlayer = isOurTD && qbNum ? findRosterPlayer(qbNum) : null
+  const scorerPlayer = isOurTD && scorerNum ? findRosterPlayer(scorerNum, game.season) : null
+  const qbPlayer = isOurTD && qbNum ? findRosterPlayer(qbNum, game.season) : null
   const scorerName = scorerPlayer ? scorerPlayer.name : scorerNum ? `#${scorerNum}` : '-'
   const qbName = qbPlayer ? qbPlayer.name : qbNum ? `#${qbNum}` : null
 

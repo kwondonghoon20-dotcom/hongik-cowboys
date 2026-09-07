@@ -1,13 +1,13 @@
 import { useParams, Link } from 'react-router-dom'
 import { getGameById, useGlobGames } from '../data/gameRepository'
 import { pickOffenseMvp, pickDefenseMvp, OUR_TEAM } from '../utils/parseExcel'
-import { players } from '../data/dummy'
+import { findPlayerByNumberInSeason } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
 import TouchdownHighlights from '../components/TouchdownHighlights'
 import './GameDetail.css'
 
-function findPlayer(number) {
-  return players.find((p) => String(p.number) === String(number))
+function findPlayer(number, season) {
+  return findPlayerByNumberInSeason(number, season)
 }
 
 const STAT_ROWS = [
@@ -89,8 +89,8 @@ export default function GameDetail() {
         {Array.isArray(game.plays) && game.plays.length > 0 && (() => {
           const offMvp = pickOffenseMvp(game.plays, OUR_TEAM)
           const defMvp = pickDefenseMvp(game.plays, OUR_TEAM)
-          const offPlayer = offMvp ? findPlayer(offMvp.number) : null
-          const defPlayer = defMvp ? findPlayer(defMvp.number) : null
+          const offPlayer = offMvp ? findPlayer(offMvp.number, game.season) : null
+          const defPlayer = defMvp ? findPlayer(defMvp.number, game.season) : null
 
           return (
             <section className="section">

@@ -24,6 +24,10 @@ export default function PlayerDetail() {
     return [...deduped, ...globGames]
   }, [globGames])
 
+  // player.number(현재/최신 등번호)로 모든 시즌의 경기를 조회한다. 지금은 로스터 전원의
+  // numbersBySeason이 2026 한 시즌뿐이라 안전하지만, 과거 시즌에 지금과 다른 번호를 썼던
+  // 선수가 확인되면 이 페이지도 경기별로 getPlayerNumberInSeason(player, game.season)을
+  // 써서 시즌별 조회로 바꿔야 한다.
   const gameRows = useMemo(() => {
     if (!player || player.number == null) return []
     return getSeasonPlayerStats(realGames, player.number, OUR_TEAM)
@@ -45,7 +49,7 @@ export default function PlayerDetail() {
   const flags = getStatFlags(sOff, sDef, sKick)
   const {
     hasRushing, hasReceiving, hasPassing, hasTackles, hasSacks, hasTFL, hasINT,
-    hasFumbleRec, hasKicking, hasAnyStats,
+    hasFumbleRec, hasDefTD, hasKicking, hasAnyStats,
   } = flags
 
   // 시즌 스탯 박스
@@ -73,6 +77,7 @@ export default function PlayerDetail() {
   if (hasTFL)       cols.push({ key: 'tfl', label: 'TFL',     render: (_, d) => d.tfl })
   if (hasINT)       cols.push({ key: 'int', label: 'INT',     render: (_, d) => d.interceptions })
   if (hasFumbleRec) cols.push({ key: 'fur', label: 'Fum Rec', render: (_, d) => d.fumbleRec })
+  if (hasDefTD)     cols.push({ key: 'dtd', label: 'Def TD',  render: (_, d) => d.touchdowns })
   if (hasKicking) cols.push({
     key: 'kick', label: 'Kicking',
     render: (_o, _d, k) => {

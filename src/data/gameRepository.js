@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { games as dummyGames, players } from './dummy'
+import { games as dummyGames, findPlayerByNumberInSeason } from './dummy'
 import { calcTeamStats, toPlayLogEntries, pickRushMvp, parseGame, parseAlternateGame, OUR_TEAM } from '../utils/parseExcel'
 import { getUploadedGames } from './uploadedGames'
 
@@ -9,11 +9,11 @@ function getSemester(dateStr) {
   return month >= 3 && month <= 7 ? 'spring' : 'fall'
 }
 
-function resolveMvp(plays, teamName) {
+function resolveMvp(plays, teamName, season) {
   const rushMvp = pickRushMvp(plays, teamName)
   if (!rushMvp) return null
 
-  const player = players.find((p) => String(p.number) === rushMvp.number)
+  const player = findPlayerByNumberInSeason(rushMvp.number, season)
   if (player) {
     return {
       id: player.id,
@@ -39,12 +39,13 @@ function buildFromUpload(record) {
   const awayTeam = meta.away ?? 'Away'
   const isHome = homeTeam === OUR_TEAM
   const ourTeam = isHome ? homeTeam : awayTeam === OUR_TEAM ? awayTeam : homeTeam
+  const season = meta.date ? Number(meta.date.slice(0, 4)) : new Date().getFullYear()
 
   return {
     id: record.id,
     gameKey: meta.gameKey ?? record.id,
     source: 'upload',
-    season: meta.date ? Number(meta.date.slice(0, 4)) : new Date().getFullYear(),
+    season,
     semester: getSemester(meta.date ?? meta.dateRaw),
     week: null,
     date: meta.date ?? meta.dateRaw ?? '',
@@ -60,7 +61,7 @@ function buildFromUpload(record) {
       away: { ...calcTeamStats(plays, awayTeam), ...(meta.overrideStats?.away ?? {}) },
     },
     overrideStats: meta.overrideStats ?? null,
-    mvp: resolveMvp(plays, ourTeam),
+    mvp: resolveMvp(plays, ourTeam, season),
     playLog: toPlayLogEntries(plays),
     plays,
   }
@@ -147,15 +148,6 @@ const GAMES_WITHOUT_PLAYS = [
     },
   },
   // ── 예정 경기 (결과 미확정) ──────────────────────────────────
-  {
-    gameKey: 'HIcowboys_20260905_vs_DGTuskers',
-    date: '2026-09-05',
-    time: '16:00',
-    type: 'League',
-    home: OUR_TEAM,
-    away: 'DGTuskers',
-    location: '양천구 해마루 축구장',
-  },
   {
     gameKey: 'HIcowboys_20260912_vs_CABluedragons',
     date: '2026-09-12',

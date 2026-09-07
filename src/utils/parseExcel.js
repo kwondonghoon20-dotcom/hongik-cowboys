@@ -10,6 +10,7 @@ const TEAM_NAME_MAP = {
   samsungbluestorm: 'SamsungBluestorm',
   gunwipheonix: 'GunwiPheonix',
   gunwiphonix: 'GunwiPheonix',
+  dongkuktuskers: 'DongkukTuskers',
 }
 
 // 한글 팀명 직접 매핑 (OffenseTeam에 한글로 기록된 파일용)
@@ -309,6 +310,13 @@ export function getTouchdownPlays(plays) {
   return (plays ?? []).filter((p) => isTouchdown(p) && playType(p) !== 'PAT')
 }
 
+// 수비가 펌블/인터셉트를 리턴해서 만든 터치다운은 SignificantPlay에 TOUCHDOWN과 함께
+// FUMBLERECDEF/INTERCEPT가 붙지만 OffenseTeam은 여전히 원래 오펜스 팀으로 기록된다
+// (세이프티와 동일한 패턴). 이 경우 실제 득점 팀은 OffenseTeam의 상대 팀이다.
+export function isDefensiveTouchdown(play) {
+  return isTouchdown(play) && (hasTag(play, 'FUMBLERECDEF') || hasTag(play, 'INTERCEPT'))
+}
+
 // 실제 스크리미지(공격) 플레이만: RUN/PASS/NOPAS. KICKOFF/PUNT/PAT/FG/RETURN/SACK 등 스페셜팀·기타 플레이는 제외.
 function isScrimmagePlay(play) {
   return isRun(play) || isPassAttempt(play)
@@ -541,7 +549,7 @@ export function getPlayerStats(plays, playerNum, teamName) {
     recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
     passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
   }
-  const defense = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
+  const defense = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0 }
   const kicking = {
     kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
     punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
@@ -626,6 +634,8 @@ export function getPlayerStats(plays, playerNum, teamName) {
         if (tags.includes('TFL')) defense.tfl += 1
         if (tags.includes('INTERCEPT')) defense.interceptions += 1
         if (tags.includes('FUMBLERECDEF')) defense.fumbleRec += 1
+        if (tags.includes('TOUCHDOWN') && (tags.includes('FUMBLERECDEF') || tags.includes('INTERCEPT')))
+          defense.touchdowns += 1
       }
       if (ok(play.TKL2Num) && normalizeNum(play.TKL2Num) === numStr) {
         defense.assists += 1
@@ -646,7 +656,7 @@ export function getSeasonPlayerStats(games, playerNumber, ourTeam) {
     recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
     passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
   }
-  const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0 }
+  const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0 }
   const ZERO_KICK = {
     kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
     punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
