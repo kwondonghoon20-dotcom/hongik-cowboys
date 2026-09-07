@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { findPlayerByNumberInSeason } from '../data/dummy'
 import { getTouchdownRoute } from '../data/touchdownRoutes'
 import { getTouchdownClip, getTDPlayOverride } from '../data/touchdownClips'
-import { OUR_TEAM, normalizeTeamName, normalizeNum, isDefensiveTouchdown } from '../utils/parseExcel'
+import { OUR_TEAM, normalizeTeamName, normalizeNum, isDefensiveTouchdown, getPassRoles } from '../utils/parseExcel'
 import { catmullRomPath } from '../utils/fieldGeometry'
 
 // ── 유틸 ──────────────────────────────────────────────────────
@@ -236,10 +236,17 @@ export default function TouchdownFieldDiagram({ play, game }) {
 
   // 수비 터치다운의 실제 득점(리턴) 선수는 TKLNum에 기록된다(CARNum은 펌블한/
   // 인터셉트당한 원래 오펜스 선수라 득점자가 아니다).
+  const passRoles = isPass ? getPassRoles(effectivePlay) : null
   const scorerNum = isDefTD
     ? (effectivePlay.TKLNum ? String(effectivePlay.TKLNum) : null)
-    : (effectivePlay.CARNum ? String(effectivePlay.CARNum) : null)
-  const qbNum = isDefTD ? null : (effectivePlay.CAR2Num ? String(effectivePlay.CAR2Num) : null)
+    : isPass
+      ? (passRoles.recNum ? String(passRoles.recNum) : null)
+      : (effectivePlay.CARNum ? String(effectivePlay.CARNum) : null)
+  const qbNum = isDefTD
+    ? null
+    : isPass
+      ? (passRoles.qbNum ? String(passRoles.qbNum) : null)
+      : null
   const yards = effectivePlay.GainYard ?? effectivePlay.Gain ?? 0
   const quarter = effectivePlay.Quarter ? `Q${effectivePlay.Quarter}` : '-'
 

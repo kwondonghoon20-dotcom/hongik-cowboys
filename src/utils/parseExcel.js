@@ -345,6 +345,19 @@ function gain(play) {
 // 선수 번호 정규화: '09' → '9', 9 → '9' (앞자리 0 제거 + 타입 통일)
 export const normalizeNum = (n) => String(parseInt(n || 0, 10))
 
+// PASS/NOPAS/NOPASS 플레이에서 QB(패서)와 리시버(타겟)를 CARPos/CAR2Pos로 판별한다.
+// 대부분의 경기 파일은 CAR2Num=QB, CARNum=리시버로 기록되지만, 일부 파일(예: 2026 추계 동국대전)은
+// 반대로(CARNum=QB, CAR2Num=리시버) 기록되어 있어 컬럼 순서를 고정으로 가정하면 안 된다.
+export function getPassRoles(play) {
+  const carPos = String(play.CARPos ?? '').trim().toUpperCase()
+  const car2Pos = String(play.CAR2Pos ?? '').trim().toUpperCase()
+  if (carPos === 'QB' && car2Pos !== 'QB') {
+    return { qbNum: play.CARNum, qbPos: play.CARPos, recNum: play.CAR2Num, recPos: play.CAR2Pos }
+  }
+  // 기본(및 애매한 경우): 기존 관례대로 CAR2Num=QB, CARNum=리시버
+  return { qbNum: play.CAR2Num, qbPos: play.CAR2Pos, recNum: play.CARNum, recPos: play.CARPos }
+}
+
 function isOffensePlay(play) {
   return isRun(play) || isPassAttempt(play) || isSackPlay(play)
 }
@@ -471,20 +484,21 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       if (isTouchdown(play)) s.rushTD += 1
 
     } else if (pt === 'PASS') {
-      // CAR2Num = QB (패서, CAR2Pos=QB)
-      if (ok(play.CAR2Num)) {
-        const s = getOrCreate(normalizeNum(play.CAR2Num), team)
-        recordPos(normalizeNum(play.CAR2Num), team, play.CAR2Pos)
+      const { qbNum, qbPos, recNum, recPos } = getPassRoles(play)
+      // qbNum = QB (패서)
+      if (ok(qbNum)) {
+        const s = getOrCreate(normalizeNum(qbNum), team)
+        recordPos(normalizeNum(qbNum), team, qbPos)
         s.passAttempts += 1
         s.completions += 1
         s.passYards += gain(play)
         if (isTouchdown(play)) s.passTD += 1
         if (hasTag(play, 'INTERCEPT')) s.passINT += 1
       }
-      // CARNum = 리시버 (볼 받는 선수, CARPos=WR/RB)
-      if (ok(play.CARNum)) {
-        const s = getOrCreate(normalizeNum(play.CARNum), team)
-        recordPos(normalizeNum(play.CARNum), team, play.CARPos)
+      // recNum = 리시버 (볼 받는 선수)
+      if (ok(recNum)) {
+        const s = getOrCreate(normalizeNum(recNum), team)
+        recordPos(normalizeNum(recNum), team, recPos)
         s.recTargets += 1
         s.receptions += 1
         s.recYards += gain(play)
@@ -492,15 +506,16 @@ export function getPlayerTotalYards(plays, homeTeam, awayTeam, limit = 5) {
       }
 
     } else if (pt === 'NOPAS' || pt === 'NOPASS') {
-      // CAR2Num = QB (불완전 패스, 야드 없음)
-      if (ok(play.CAR2Num)) {
-        getOrCreate(normalizeNum(play.CAR2Num), team).passAttempts += 1
-        recordPos(normalizeNum(play.CAR2Num), team, play.CAR2Pos)
+      const { qbNum, qbPos, recNum, recPos } = getPassRoles(play)
+      // qbNum = QB (불완전 패스, 야드 없음)
+      if (ok(qbNum)) {
+        getOrCreate(normalizeNum(qbNum), team).passAttempts += 1
+        recordPos(normalizeNum(qbNum), team, qbPos)
       }
-      // CARNum = 타겟 (패스 받지 못한 선수)
-      if (ok(play.CARNum)) {
-        getOrCreate(normalizeNum(play.CARNum), team).recTargets += 1
-        recordPos(normalizeNum(play.CARNum), team, play.CARPos)
+      // recNum = 타겟 (패스 받지 못한 선수)
+      if (ok(recNum)) {
+        getOrCreate(normalizeNum(recNum), team).recTargets += 1
+        recordPos(normalizeNum(recNum), team, recPos)
       }
 
     } else if (pt === 'SACK') {
@@ -604,14 +619,15 @@ export function getPlayerStats(plays, playerNum, teamName) {
         if (isTouchdown(play)) offense.rushTD += 1
       }
       if (pt === 'PASS') {
-        if (ok(play.CAR2Num) && normalizeNum(play.CAR2Num) === numStr) {
+        const { qbNum, recNum } = getPassRoles(play)
+        if (ok(qbNum) && normalizeNum(qbNum) === numStr) {
           offense.passAttempts += 1
           offense.completions += 1
           offense.passYards += gain(play)
           if (isTouchdown(play)) offense.passTD += 1
           if (tags.includes('INTERCEPT')) offense.passINT += 1
         }
-        if (ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) {
+        if (ok(recNum) && normalizeNum(recNum) === numStr) {
           offense.recTargets += 1
           offense.receptions += 1
           offense.recYards += gain(play)
@@ -619,8 +635,9 @@ export function getPlayerStats(plays, playerNum, teamName) {
         }
       }
       if ((pt === 'NOPAS' || pt === 'NOPASS')) {
-        if (ok(play.CAR2Num) && normalizeNum(play.CAR2Num) === numStr) offense.passAttempts += 1
-        if (ok(play.CARNum) && normalizeNum(play.CARNum) === numStr) offense.recTargets += 1
+        const { qbNum, recNum } = getPassRoles(play)
+        if (ok(qbNum) && normalizeNum(qbNum) === numStr) offense.passAttempts += 1
+        if (ok(recNum) && normalizeNum(recNum) === numStr) offense.recTargets += 1
       }
       if (pt === 'SACK' && ok(play.CAR2Num) && normalizeNum(play.CAR2Num) === numStr) {
         offense.passAttempts += 1
@@ -748,12 +765,13 @@ export function pickOffenseMvp(plays, teamName) {
       s.rushYards += gain(play)
       if (isTouchdown(play)) s.rushTD += 1
     } else if (isPassAttempt(play)) {
-      // CAR2Num = QB (패서)
-      const qbRaw = play.CAR2Num
+      const { qbNum, qbPos, recNum, recPos } = getPassRoles(play)
+      // qbNum = QB (패서)
+      const qbRaw = qbNum
       if (qbRaw != null && qbRaw !== '' && Number(qbRaw) !== 0) {
         const key = normalizeNum(qbRaw)
         const s = getOrCreate(key)
-        recordPos(key, play.CAR2Pos)
+        recordPos(key, qbPos)
         s.passAttempts += 1
         if (isCompletePass(play)) {
           s.completions += 1
@@ -762,12 +780,12 @@ export function pickOffenseMvp(plays, teamName) {
         }
         if (hasTag(play, 'INTERCEPT')) s.passINT += 1
       }
-      // CARNum = 리시버
-      const recRaw = play.CARNum
+      // recNum = 리시버
+      const recRaw = recNum
       if (recRaw != null && recRaw !== '' && Number(recRaw) !== 0 && isCompletePass(play)) {
         const key = normalizeNum(recRaw)
         const s = getOrCreate(key)
-        recordPos(key, play.CARPos)
+        recordPos(key, recPos)
         s.receptions += 1
         s.recYards += gain(play)
         if (isTouchdown(play)) s.recTD += 1
