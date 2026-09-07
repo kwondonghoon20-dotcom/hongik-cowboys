@@ -60,14 +60,6 @@ const SEASON_STATS_2025_FALL = {
   ],
 }
 
-// 이 페이지는 2025 시즌 고정이라(아래 SEASON 상수) 랭킹에 쓰이는 등번호도 그 시즌
-// 기준으로 찾아야 한다 — 과거 시즌에 지금과 다른 번호를 썼던 선수가 있을 수 있어서다.
-const SEASON = 2025
-
-function findPlayer(number) {
-  return findPlayerByNumberInSeason(number, SEASON)
-}
-
 // 경기 목록에서 OUR_TEAM 소속 선수 등번호 전체 수집
 function collectPlayerNums(games) {
   const nums = new Set()
@@ -84,7 +76,7 @@ function collectPlayerNums(games) {
   return nums
 }
 
-function RankCard({ title, players: list, statKey, unit }) {
+function RankCard({ title, players: list, statKey, unit, season }) {
   return (
     <div className="rank-card">
       <h4 className="rank-card-title">{title}</h4>
@@ -92,7 +84,7 @@ function RankCard({ title, players: list, statKey, unit }) {
         <div className="rank-empty">데이터 없음</div>
       ) : (
         list.map((p, i) => {
-          const rp = findPlayer(p.number)
+          const rp = findPlayerByNumberInSeason(p.number, season)
           const name = rp ? rp.name : `선수`
           const val = p[statKey]
           const display = typeof val === 'number' && !Number.isInteger(val)
@@ -122,14 +114,27 @@ export default function Season() {
   const globGames = useGlobGames()
   const [activeSemester, setActiveSemester] = useState('spring')
 
-  const realGames = useMemo(() => {
+  const allGames = useMemo(() => {
     const sync = getAllGames()
     const globIds = new Set(globGames.map((g) => g.id))
     const deduped = sync.filter((g) => !globIds.has(g.id))
     return [...deduped, ...globGames]
-      .filter((g) => g.season === 2025 && (g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM))
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .filter((g) => g.homeTeam === OUR_TEAM || g.awayTeam === OUR_TEAM)
   }, [globGames])
+
+  const availableYears = useMemo(
+    () => [...new Set(allGames.map((g) => g.season))].sort((a, b) => b - a),
+    [allGames]
+  )
+
+  const [selectedYear, setSelectedYear] = useState(() => availableYears[0])
+
+  const realGames = useMemo(() => {
+    const year = selectedYear ?? availableYears[0]
+    return allGames
+      .filter((g) => g.season === year)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+  }, [allGames, selectedYear, availableYears])
 
   const semesterGames = useMemo(
     () => realGames.filter((g) =>
@@ -177,8 +182,8 @@ export default function Season() {
     const top3sorted = (arr, key, min = 1) =>
       [...arr].filter((p) => p[key] >= min).sort((a, b) => b[key] - a[key]).slice(0, 3)
 
-    // 추계: 공식 보고서 확정값 사용
-    if (activeSemester === 'fall') {
+    // 2025 추계: 공식 보고서 확정값 사용 (당시 플레이 단위 데이터가 불완전했기 때문)
+    if (selectedYear === 2025 && activeSemester === 'fall') {
       return {
         rush: top3sorted(SEASON_STATS_2025_FALL.rush, 'rushYds'),
         pass: top3sorted(SEASON_STATS_2025_FALL.pass, 'passYds'),
@@ -187,7 +192,7 @@ export default function Season() {
       }
     }
 
-    // 춘계: 동적 계산
+    // 그 외: 동적 계산
     const playerNums = collectPlayerNums(semesterGames)
     const list = []
     for (const num of playerNums) {
@@ -207,7 +212,7 @@ export default function Season() {
       rec:  top3('recYds'),
       tackles: top3('tackles', 0.5),
     }
-  }, [activeSemester, semesterGames])
+  }, [activeSemester, semesterGames, selectedYear])
 
   const n = teamStats.games
   const avg = (v) => (n > 0 ? Math.round(v / n) : 0)
@@ -216,7 +221,18 @@ export default function Season() {
     <div className="page-season">
       <div className="season-page-hero">
         <div className="container">
-          <h1>2025 시즌</h1>
+          <div className="page-hero-inner">
+            <h1>{selectedYear} 시즌</h1>
+            <select
+              className="season-select"
+              value={selectedYear ?? ''}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+            >
+              {availableYears.map((year) => (
+                <option key={year} value={year}>{year}년</option>
+              ))}
+            </select>
+          </div>
           <div className="season-sem-tabs">
             <button
               className={'season-sem-tab' + (activeSemester === 'spring' ? ' active' : '')}
@@ -325,10 +341,10 @@ export default function Season() {
         <section className="s-section">
           <h3 className="s-section-title">선수별 시즌 스탯 랭킹</h3>
           <div className="rankings-grid">
-            <RankCard title="🏃 러시 야드" players={playerRankings.rush} statKey="rushYds" unit="야드" />
-            <RankCard title="🎯 패스 야드" players={playerRankings.pass} statKey="passYds" unit="야드" />
-            <RankCard title="🙌 리시빙 야드" players={playerRankings.rec} statKey="recYds" unit="야드" />
-            <RankCard title="🛡️ 태클" players={playerRankings.tackles} statKey="tackles" unit="" />
+            <RankCard title="🏃 러시 야드" players={playerRankings.rush} statKey="rushYds" unit="야드" season={selectedYear} />
+            <RankCard title="🎯 패스 야드" players={playerRankings.pass} statKey="passYds" unit="야드" season={selectedYear} />
+            <RankCard title="🙌 리시빙 야드" players={playerRankings.rec} statKey="recYds" unit="야드" season={selectedYear} />
+            <RankCard title="🛡️ 태클" players={playerRankings.tackles} statKey="tackles" unit="" season={selectedYear} />
           </div>
         </section>
       </div>

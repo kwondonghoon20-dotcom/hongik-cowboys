@@ -67,24 +67,24 @@ export default function Games() {
   return (
     <div className="page-games">
       <div className="page-hero">
-        <div className="container">
-          <h1>경기 일정 & 결과</h1>
-          <p>홍익대학교 카우보이스</p>
+        <div className="container page-hero-inner">
+          <div>
+            <h1>경기 일정 & 결과</h1>
+            <p>홍익대학교 카우보이스</p>
+          </div>
+          <select
+            className="season-select"
+            value={currentTab ?? ''}
+            onChange={(e) => setActiveTab(e.target.value)}
+          >
+            {tabs.map((tab) => (
+              <option key={tab.key} value={tab.key}>{tab.label}</option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="container">
         {import.meta.env.DEV && <ExcelUploader onUploaded={() => setUploadedGames(getAllGames())} />}
-        <div className="season-tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              className={'season-tab' + (tab.key === currentTab ? ' active' : '')}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
         <div className="game-grid">
           {filteredGames.map((game) => (
             <GameCard key={game.id} game={game} />

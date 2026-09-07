@@ -20,32 +20,35 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
-.season-tabs {
+.page-hero-inner {
   display: flex;
-  gap: 8px;
-  margin-bottom: 28px;
-  border-bottom: 1px solid var(--color-border);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.season-tab {
-  background: none;
-  border: none;
+.season-select {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--color-white);
   font-family: var(--font-impact);
-  font-size: 18px;
-  letter-spacing: 0.04em;
-  color: var(--color-text-secondary);
-  padding: 10px 18px;
-  border-bottom: 3px solid transparent;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.season-tab:hover {
-  color: var(--color-text);
+.season-select:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
-.season-tab.active {
+.season-select option {
+  background: var(--color-bg-card);
   color: var(--color-text);
-  border-bottom-color: var(--color-scarlet);
 }
 
 .game-grid {
@@ -61,9 +64,5 @@
 
   .game-grid {
     grid-template-columns: 1fr;
-  }
-
-  .season-tabs {
-    flex-wrap: wrap;
   }
 }

@@ -17,7 +17,43 @@
   margin-bottom: 16px;
 }
 
+.page-hero-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-hero-inner h1 {
+  margin-bottom: 0;
+}
+
+.season-select {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--color-white);
+  font-family: var(--font-impact);
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.season-select:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.season-select option {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+}
+
 .season-sem-tabs {
+  margin-top: 16px;
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
