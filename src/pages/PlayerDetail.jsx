@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { players, getPlayerNumberInSeason, getRosterForYear } from '../data/dummy'
+import { players, getPlayerNumberInSeason, getPlayerPositionsInSeason, getRosterForYear } from '../data/dummy'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
 import {
@@ -65,6 +65,7 @@ export default function PlayerDetail() {
   }
 
   const playerStatus = getPlayerStatus(player.id)
+  const positions = getPlayerPositionsInSeason(player, seasonYear)
   const seasonLabel = seasonYear != null ? `${seasonYear} 시즌 스탯` : '전체 시즌 누적 스탯'
   const seasonBoxTitle = seasonYear != null ? `${seasonYear} 시즌 누적 스탯` : '시즌 누적 스탯'
 
@@ -138,10 +139,10 @@ export default function PlayerDetail() {
               )}
             </div>
             <div className="player-hero-positions">
-              <span className="position-badge offense">{player.positions.offense}</span>
-              <span className="position-badge defense">{player.positions.defense}</span>
-              {player.positions?.special && (
-                <span className="position-badge special">{player.positions.special}</span>
+              <span className="position-badge offense">{positions.offense}</span>
+              <span className="position-badge defense">{positions.defense}</span>
+              {positions?.special && (
+                <span className="position-badge special">{positions.special}</span>
               )}
             </div>
             <p className="player-hero-meta">

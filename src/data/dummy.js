@@ -12,14 +12,14 @@ export const players = [
   // 2학년 25학번
   { id: 'p4', grade: 2, year: 25, number: 81, numbersBySeason: { 2025: 81 }, name: '김세윤', positions: { offense: 'RB', defense: 'LB' }, height: 169, weight: 67 },
   { id: 'p5', grade: 2, year: 25, number: 73, numbersBySeason: { 2025: 73 }, name: '김동현', positions: { offense: 'OL', defense: 'DL' }, height: 194, weight: 110 },
-  { id: 'p6', grade: 2, year: 25, number: 12, numbersBySeason: { 2025: 12 }, name: '김주찬', positions: { offense: 'QB', defense: 'DL' }, height: 182, weight: 81 },
+  { id: 'p6', grade: 2, year: 25, number: 12, numbersBySeason: { 2025: 12 }, name: '김주찬', positions: { offense: 'QB', defense: 'DL', special: 'TE' }, height: 182, weight: 81 },
   { id: 'p7', grade: 2, year: 25, number: 4, numbersBySeason: { 2025: 4 }, name: '김민성', positions: { offense: 'WR', defense: 'DB' }, height: 175, weight: 71 },
   { id: 'p8', grade: 2, year: 25, number: 74, numbersBySeason: { 2025: 74 }, name: '전규환', positions: { offense: 'OL', defense: 'DL' }, height: 176, weight: 90 },
   { id: 'p9', grade: 2, year: 25, number: 1, numbersBySeason: { 2025: 1 }, name: '어서검', positions: { offense: 'WR', defense: 'DB' }, height: 185, weight: 80 },
 
   // 2학년 24학번
   { id: 'p10', grade: 2, year: 24, number: 7, numbersBySeason: { 2025: 10, 2026: 7 }, name: '박은민', positions: { offense: 'WR', defense: 'DB' }, height: 179, weight: 68 },
-  { id: 'p11', grade: 2, year: 24, number: 27, numbersBySeason: { 2025: 27 }, name: '정형민', positions: { offense: 'OL', defense: 'DL' }, height: 176, weight: 82 },
+  { id: 'p11', grade: 2, year: 24, number: 54, numbersBySeason: { 2025: 54 }, name: '정형민', positions: { offense: 'OL', defense: 'LB' }, height: 176, weight: 82 },
   { id: 'p12', grade: 2, year: 24, number: 11, numbersBySeason: { 2025: 11 }, name: '이성원', positions: { offense: 'RB', defense: 'LB' }, height: 179, weight: 76 },
   { id: 'p13', grade: 2, year: 24, number: 22, numbersBySeason: { 2025: 22 }, name: '김민혁', positions: { offense: 'RB', defense: 'LB' }, height: 171, weight: 74 },
 
@@ -38,7 +38,7 @@ export const players = [
   { id: 'p21', grade: 3, year: 22, number: 7, numbersBySeason: { 2025: 7 }, name: '양준환', positions: { offense: 'QB', defense: 'DB' }, height: null, weight: null },
 
   // 3학년 21학번
-  { id: 'p22', grade: 3, year: 21, number: 52, numbersBySeason: { 2025: 26, 2026: 52 }, name: '권순웅', positions: { offense: 'RB', defense: 'LB' }, height: 170, weight: 77 },
+  { id: 'p22', grade: 3, year: 21, number: 52, numbersBySeason: { 2025: 26, 2026: 52 }, name: '권순웅', positions: { offense: 'RB', defense: 'LB' }, positionsBySeason: { 2026: { offense: 'OL', defense: 'LB' } }, height: 170, weight: 77 },
   { id: 'p23', grade: 3, year: 21, number: 33, numbersBySeason: { 2025: 33 }, name: '김기웅', positions: { offense: 'WR', defense: 'DB' }, height: 178, weight: 74 },
   { id: 'p24', grade: 3, year: 21, number: 25, numbersBySeason: { 2025: 25 }, name: '김준호', positions: { offense: 'RB', defense: 'DL' }, height: 171, weight: 75 },
 
@@ -47,7 +47,7 @@ export const players = [
   { id: 'p32', grade: 4, year: 23, number: 15, numbersBySeason: { 2025: 15 }, name: '김대웅', positions: { offense: 'QB', defense: 'DB', special: 'K' }, height: 177, weight: 72 },
 
   // 4학년 22학번
-  { id: 'p26', grade: 4, year: 22, number: 17, numbersBySeason: { 2025: 17 }, name: '김찬용', positions: { offense: 'WR', defense: 'LB' }, height: 177, weight: 73 },
+  { id: 'p26', grade: 4, year: 22, number: 17, numbersBySeason: { 2025: 17 }, name: '김찬용', positions: { offense: 'TE', defense: 'LB' }, height: 177, weight: 73 },
   { id: 'p27', grade: 4, year: 22, number: 2, numbersBySeason: { 2025: 2 }, name: '고극', positions: { offense: 'WR', defense: 'DB' }, height: 178, weight: 65 },
   { id: 'p28', grade: 4, year: 22, number: 29, numbersBySeason: { 2025: 19, 2026: 29 }, name: '최재서', positions: { offense: 'RB', defense: 'DB' }, height: 177, weight: 70 },
 
@@ -85,6 +85,13 @@ export function getPlayerNumberInSeason(player, season) {
 export function findPlayerByNumberInSeason(number, season, teamPlayers = players) {
   const numStr = String(number)
   return teamPlayers.find((p) => String(getPlayerNumberInSeason(p, season)) === numStr) ?? null
+}
+
+export function getPlayerPositionsInSeason(player, season) {
+  if (season != null && player.positionsBySeason && player.positionsBySeason[season]) {
+    return player.positionsBySeason[season]
+  }
+  return player.positions
 }
 
 // 시즌(연도)별 실제 로스터 소속 선수 id 목록. 관리자가 매년 직접 입력/갱신한다.

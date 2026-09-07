@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getPlayerStatus } from '../data/playerStatus'
-import { getPlayerNumberInSeason } from '../data/dummy'
+import { getPlayerNumberInSeason, getPlayerPositionsInSeason } from '../data/dummy'
 import './PlayerCard.css'
 
 const STATUS_LABEL = { injury: '부상', military: '군대' }
@@ -9,6 +9,7 @@ export default function PlayerCard({ player, year }) {
   const { status } = getPlayerStatus(player.id)
   const to = year != null ? `/roster/${player.id}?year=${year}` : `/roster/${player.id}`
   const displayNumber = getPlayerNumberInSeason(player, year)
+  const positions = getPlayerPositionsInSeason(player, year)
 
   return (
     <Link to={to} className="player-card">
@@ -23,10 +24,10 @@ export default function PlayerCard({ player, year }) {
       <div className="player-card-number">{displayNumber ? `#${displayNumber}` : '#-'}</div>
       <h3 className="player-card-name">{player.name}</h3>
       <div className="player-card-positions">
-        <span className="position-badge offense">{player.positions.offense}</span>
-        <span className="position-badge defense">{player.positions.defense}</span>
-        {player.positions?.special && (
-          <span className="position-badge special">{player.positions.special}</span>
+        <span className="position-badge offense">{positions.offense}</span>
+        <span className="position-badge defense">{positions.defense}</span>
+        {positions?.special && (
+          <span className="position-badge special">{positions.special}</span>
         )}
       </div>
       <div className="player-card-meta">
