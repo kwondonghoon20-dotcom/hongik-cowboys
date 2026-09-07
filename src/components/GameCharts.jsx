@@ -76,7 +76,7 @@ function PlayerTooltip({ active, payload, topPlayers, season }) {
     scrimmageYards,
   } = p
   const abbr = teamAbbr(team)
-  const roster = findRosterPlayer(number, season)
+  const roster = team === OUR_TEAM ? findRosterPlayer(number, season) : null
   const displayName = roster ? roster.name : null
   const divider = { borderTop: '1px solid #333', margin: '6px 0 8px' }
   const lbl = { color: '#888', paddingRight: 14, paddingBottom: 4, whiteSpace: 'nowrap' }
@@ -370,7 +370,7 @@ function TeamRadarChart({ game }) {
   if (!hasRawPlays) return null
 
   const keyStats = getKeyStats(game.plays, game.homeTeam, game.awayTeam)
-  const { possession, redZone, thirdDown } = keyStats
+  const { possession, redZoneConversion, thirdDown } = keyStats
 
   const sides = ['home', 'away']
   const teamOf = { home: game.homeTeam, away: game.awayTeam }
@@ -386,7 +386,7 @@ function TeamRadarChart({ game }) {
       rushRatio: total > 0 ? Math.round((rushAtt / total) * 100) : 0,
       passComp:  passAtt > 0 ? Math.round((comp / passAtt) * 100) : 0,
       thirdDown: parseRatio(thirdDown[side]),
-      redZone:   parseRatio(redZone[side]),
+      redZone:   parseRatio(redZoneConversion[side]),
       possession: possession[side] ?? 0,
     }
   }

@@ -382,6 +382,7 @@ export function calcTeamStats(plays, teamName) {
 
   const rushAttempts = offensePlays.filter(isRun).length
   const passAttempts = offensePlays.filter(isPassAttempt).length
+  const completions = offensePlays.filter(isCompletePass).length
   const totalPlays = rushAttempts + passAttempts
 
   const thirdDownPlays = offensePlays.filter(
@@ -398,6 +399,7 @@ export function calcTeamStats(plays, teamName) {
     turnovers,
     rushAttempts,
     passAttempts,
+    completions,
     totalPlays,
     thirdDownAttempts: thirdDownPlays.length,
     thirdDownConversions: thirdDownConversions.length,
@@ -891,7 +893,16 @@ export function getPenaltyStats(plays, homeTeam, awayTeam) {
     const penaltyTag = tags.find((t) => t.startsWith('PENALTY.'))
     if (!penaltyTag) continue
 
-    const penalizedTeam = normalizeTeamName(penaltyTag.slice('PENALTY.'.length))
+    const raw = penaltyTag.slice('PENALTY.'.length)
+    const rawUpper = raw.trim().toUpperCase()
+    let penalizedTeam
+    if (rawUpper === 'HOME') {
+      penalizedTeam = homeTeam
+    } else if (rawUpper === 'AWAY') {
+      penalizedTeam = awayTeam
+    } else {
+      penalizedTeam = normalizeTeamName(raw)
+    }
     const yards = penaltyYards(play)
 
     if (penalizedTeam === homeTeam) {
@@ -1104,26 +1115,27 @@ export function getKeyStats(plays, homeTeam, awayTeam) {
   // 드라이브당 1회 카운트: 팀별로 플레이를 순회하며 드라이브 전환을 감지
   function countRedZoneDrives(teamName) {
     const teamPlays = plays.filter((p) => p.OffenseTeam === teamName)
-    let count = 0
+    let entries = 0
+    let conversions = 0
     let inRedZoneDrive = false
-    let prevDriveKey = null
+    let driveConverted = false
 
     for (const p of teamPlays) {
-      // 드라이브 식별: Quarter + 드라이브 번호가 없으므로 연속 플레이를 기준으로
-      // 레드존 진입 후 레드존 밖으로 나가면 다음 진입을 새 드라이브로 취급하지 않으나,
-      // 실제로는 드라이브가 바뀌면 레드존에서 벗어남. isScrimmagePlay 흐름 상 드라이브
-      // 내에서 레드존을 벗어나는 경우는 없으므로, 첫 진입만 카운트하면 충분.
-      //
-      // 단순 구현: 레드존 진입 플레이가 나올 때마다 직전 플레이가 레드존이 아니었으면 카운트
       const inRZ = isRedZonePlay(p)
       if (inRZ && !inRedZoneDrive) {
-        count++
+        entries++
         inRedZoneDrive = true
-      } else if (!inRZ && isOffensePlay(p)) {
+        driveConverted = false
+      }
+      if (inRedZoneDrive && isTDPlay(p) && !driveConverted) {
+        conversions++
+        driveConverted = true
+      }
+      if (!inRZ && isOffensePlay(p)) {
         inRedZoneDrive = false
       }
     }
-    return count
+    return { entries, conversions }
   }
 
   const homeRedZone = countRedZoneDrives(homeTeam)
@@ -1135,7 +1147,11 @@ export function getKeyStats(plays, homeTeam, awayTeam) {
       away: Math.round((awayScrimmage / total) * 100),
     },
     touchdowns: { home: homeTDs, away: awayTDs },
-    redZone: { home: homeRedZone, away: awayRedZone },
+    redZone: { home: homeRedZone.entries, away: awayRedZone.entries }, // 기존 "레드존 진입" 행용, 그대로 유지
+    redZoneConversion: {
+      home: `${homeRedZone.conversions}/${homeRedZone.entries}`,
+      away: `${awayRedZone.conversions}/${awayRedZone.entries}`,
+    },
     thirdDown: { home: homeStats.thirdDown, away: awayStats.thirdDown },
     turnovers: { home: homeStats.turnovers, away: awayStats.turnovers },
   }

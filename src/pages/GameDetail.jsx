@@ -153,26 +153,28 @@ export default function GameDetail() {
             <TouchdownHighlights game={game} />
             <section className="section">
               <h3 className="section-title">플레이 로그</h3>
-              <table className="playlog-table">
-                <thead>
-                  <tr>
-                    <th>쿼터</th>
-                    <th>시간</th>
-                    <th>팀</th>
-                    <th>플레이</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {game.playLog.map((play, idx) => (
-                    <tr key={idx}>
-                      <td>{play.quarter != null ? `Q${play.quarter}` : '-'}</td>
-                      <td>{play.time}</td>
-                      <td>{play.team}</td>
-                      <td>{play.description}</td>
+              <div className="playlog-scroll">
+                <table className="playlog-table">
+                  <thead>
+                    <tr>
+                      <th>쿼터</th>
+                      <th>시간</th>
+                      <th>팀</th>
+                      <th>플레이</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {game.playLog.map((play, idx) => (
+                      <tr key={idx}>
+                        <td>{play.quarter != null ? `Q${play.quarter}` : '-'}</td>
+                        <td>{play.time}</td>
+                        <td>{play.team}</td>
+                        <td>{play.description}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           </>
         ) : (
