@@ -7,7 +7,7 @@ export const ZERO_OFF = {
   recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
   passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
 }
-export const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0 }
+export const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0, returnYards: 0 }
 export const ZERO_KICK = {
   kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
   punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
@@ -36,6 +36,7 @@ export function hasActivity(offense, defense, kicking) {
     offense.rushAttempts > 0 || offense.recTargets > 0 || offense.passAttempts > 0 ||
     defense.tackles > 0 || defense.assists > 0 || defense.sacks > 0 ||
     defense.tfl > 0 || defense.interceptions > 0 || defense.fumbleRec > 0 || defense.touchdowns > 0 ||
+    defense.returnYards !== 0 ||
     (kicking?.kickoffs > 0 || kicking?.punts > 0 || kicking?.patAtt > 0 ||
       kicking?.fgAtt > 0 || kicking?.returns > 0)
   )
@@ -60,6 +61,7 @@ export function getStatFlags(sOff, sDef, sKick) {
   const hasINT       = sDef.interceptions > 0
   const hasFumbleRec = sDef.fumbleRec > 0
   const hasDefTD     = sDef.touchdowns > 0
+  const hasDefReturnYards = sDef.returnYards !== 0
   const hasFG        = sKick.fgAtt > 0
   const hasPAT       = sKick.patAtt > 0
   const hasKickoffs  = sKick.kickoffs > 0
@@ -68,10 +70,11 @@ export function getStatFlags(sOff, sDef, sKick) {
   const hasKicking   = hasFG || hasPAT || hasKickoffs || hasPunts || hasReturns
   const hasAnyStats  = hasRushing || hasReceiving || hasPassing ||
                        hasTackles || hasSacks || hasTFL || hasINT || hasFumbleRec || hasDefTD ||
-                       hasKicking
+                       hasDefReturnYards || hasKicking
   return {
     hasRushing, hasReceiving, hasPassing, hasTackles, hasSacks, hasTFL, hasINT,
-    hasFumbleRec, hasDefTD, hasFG, hasPAT, hasKickoffs, hasPunts, hasReturns, hasKicking, hasAnyStats,
+    hasFumbleRec, hasDefTD, hasDefReturnYards, hasFG, hasPAT, hasKickoffs, hasPunts, hasReturns,
+    hasKicking, hasAnyStats,
   }
 }
 
@@ -105,6 +108,7 @@ const STAT_ROWS = [
   { name: 'Interceptions', flag: 'hasINT', get: (_o, d) => d.interceptions },
   { name: 'Fum Rec', flag: 'hasFumbleRec', get: (_o, d) => d.fumbleRec },
   { name: 'Def TD', flag: 'hasDefTD', get: (_o, d) => d.touchdowns },
+  { name: 'INT/펌블 리턴 야드', flag: 'hasDefReturnYards', get: (_o, d) => d.returnYards },
   {
     name: 'FG', flag: 'hasFG',
     get: (_o, _d, k) => (k.fgAtt > 0 ? `${k.fgMade}/${k.fgAtt}` : '-'),

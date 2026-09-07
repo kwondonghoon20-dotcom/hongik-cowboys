@@ -566,7 +566,7 @@ export function getPlayerStats(plays, playerNum, teamName) {
     recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
     passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
   }
-  const defense = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0 }
+  const defense = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0, returnYards: 0 }
   const kicking = {
     kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
     punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
@@ -647,17 +647,28 @@ export function getPlayerStats(plays, playerNum, teamName) {
       }
     } else {
       // 상대 팀 오펜스 = 우리 팀 디펜스 플레이
-      if (ok(play.TKLNum) && normalizeNum(play.TKLNum) === numStr) {
-        defense.tackles += 1
-        if (tags.includes('SACK')) defense.sacks += 1
-        if (tags.includes('TFL')) defense.tfl += 1
-        if (tags.includes('INTERCEPT')) defense.interceptions += 1
-        if (tags.includes('FUMBLERECDEF')) defense.fumbleRec += 1
-        if (tags.includes('TOUCHDOWN') && (tags.includes('FUMBLERECDEF') || tags.includes('INTERCEPT')))
-          defense.touchdowns += 1
-      }
-      if (ok(play.TKL2Num) && normalizeNum(play.TKL2Num) === numStr) {
-        defense.assists += 1
+      if (pt === 'RETURN') {
+        // 인터셉트/펌블 리커버리 턴오버의 리턴 전용 행 — TKLNum = 리턴한 선수.
+        // 원래 턴오버 행에서 이미 태클/인터셉트/펌블리커버리를 집계했으므로 여기선 중복 집계하지 않고
+        // 리턴 야드와(수비 TD가 있다면) 터치다운만 반영한다.
+        // GainYard는 오펜스 기준 진행 방향으로 기록돼 있어(리턴 방향은 반대) 음수로 찍히는 경우가
+        // 흔하다(예: 97야드 펌블 리턴 TD가 -97로 기록) — 리턴 야드는 항상 양수(진행 거리)로 표시한다.
+        if (ok(play.TKLNum) && normalizeNum(play.TKLNum) === numStr) {
+          defense.returnYards += Math.abs(gain(play))
+          if (tags.includes('TOUCHDOWN') && (tags.includes('FUMBLERECDEF') || tags.includes('INTERCEPT')))
+            defense.touchdowns += 1
+        }
+      } else {
+        if (ok(play.TKLNum) && normalizeNum(play.TKLNum) === numStr) {
+          defense.tackles += 1
+          if (tags.includes('SACK')) defense.sacks += 1
+          if (tags.includes('TFL')) defense.tfl += 1
+          if (tags.includes('INTERCEPT')) defense.interceptions += 1
+          if (tags.includes('FUMBLERECDEF')) defense.fumbleRec += 1
+        }
+        if (ok(play.TKL2Num) && normalizeNum(play.TKL2Num) === numStr) {
+          defense.assists += 1
+        }
       }
     }
   }
@@ -675,7 +686,7 @@ export function getSeasonPlayerStats(games, playerNumber, ourTeam) {
     recTargets: 0, receptions: 0, recYards: 0, recTD: 0,
     passAttempts: 0, completions: 0, passYards: 0, passTD: 0, passINT: 0,
   }
-  const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0 }
+  const ZERO_DEF = { tackles: 0, assists: 0, sacks: 0, tfl: 0, interceptions: 0, fumbleRec: 0, touchdowns: 0, returnYards: 0 }
   const ZERO_KICK = {
     kickoffs: 0, kickoffYards: 0, kickoffYardsCounted: 0,
     punts: 0, puntYards: 0, puntYardsCounted: 0, puntLong: 0,
@@ -832,6 +843,8 @@ export function pickDefenseMvp(plays, teamName) {
 
   for (const play of plays) {
     if (play.OffenseTeam === teamName) continue
+    const pt = playType(play)
+    if (pt === 'RETURN') continue // 턴오버 리턴 행은 원래 행에서 이미 집계됨 — MVP 점수에 중복 반영 방지
 
     const tags = significantPlayTags(play)
 

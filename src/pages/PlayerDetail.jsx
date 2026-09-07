@@ -18,7 +18,7 @@ function buildSeasonSection(rowsForSeason) {
   const flags = getStatFlags(sOff, sDef, sKick)
   const {
     hasRushing, hasReceiving, hasPassing, hasTackles, hasSacks, hasTFL, hasINT,
-    hasFumbleRec, hasDefTD, hasKicking, hasAnyStats,
+    hasFumbleRec, hasDefTD, hasDefReturnYards, hasKicking, hasAnyStats,
   } = flags
 
   const seasonBoxes = buildSeasonBoxes(sOff, sDef, sKick, flags)
@@ -45,6 +45,7 @@ function buildSeasonSection(rowsForSeason) {
   if (hasINT)       cols.push({ key: 'int', label: 'INT',     render: (_, d) => d.interceptions })
   if (hasFumbleRec) cols.push({ key: 'fur', label: 'Fum Rec', render: (_, d) => d.fumbleRec })
   if (hasDefTD)     cols.push({ key: 'dtd', label: 'Def TD',  render: (_, d) => d.touchdowns })
+  if (hasDefReturnYards) cols.push({ key: 'dret', label: 'Def Ret Yds', render: (_, d) => d.returnYards })
   if (hasKicking) cols.push({
     key: 'kick', label: 'Kicking',
     render: (_o, _d, k) => {

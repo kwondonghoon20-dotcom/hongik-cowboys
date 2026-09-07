@@ -221,6 +221,7 @@ export default function Season() {
         tackles: top3sorted(SEASON_STATS_2025_FALL.tackles, 'tackles', 0.5),
         return: [],
         tflSack: [],
+        defReturnYds: [],
       }
     }
 
@@ -236,7 +237,8 @@ export default function Season() {
       const tackles = rows.reduce((s, r) => s + r.defense.tackles + r.defense.assists * 0.5, 0)
       const returnYds = rows.reduce((s, r) => s + (r.kicking?.returnYards ?? 0), 0)
       const tflSack = rows.reduce((s, r) => s + r.defense.tfl + r.defense.sacks, 0)
-      list.push({ number: num, rushYds, passYds, recYds, tackles, returnYds, tflSack })
+      const defReturnYds = rows.reduce((s, r) => s + (r.defense?.returnYards ?? 0), 0)
+      list.push({ number: num, rushYds, passYds, recYds, tackles, returnYds, tflSack, defReturnYds })
     }
     const top3 = (key, min = 1) =>
       list.filter((p) => p[key] >= min).sort((a, b) => b[key] - a[key]).slice(0, 3)
@@ -247,6 +249,7 @@ export default function Season() {
       tackles: top3('tackles', 0.5),
       return: top3('returnYds'),
       tflSack: top3('tflSack', 0.5),
+      defReturnYds: top3('defReturnYds'),
     }
   }, [activeSemester, semesterGames, selectedYear])
 
@@ -383,6 +386,7 @@ export default function Season() {
             <RankCard title="🛡️ 태클" players={playerRankings.tackles} statKey="tackles" unit="" season={selectedYear} />
             <RankCard title="🔄 리턴 야드" players={playerRankings.return} statKey="returnYds" unit="야드" season={selectedYear} />
             <RankCard title="💥 TFL + Sack" players={playerRankings.tflSack} statKey="tflSack" unit="" season={selectedYear} />
+            <RankCard title="🏈 인터셉트/펌블 리턴 야드" players={playerRankings.defReturnYds} statKey="defReturnYds" unit="야드" season={selectedYear} />
           </div>
         </section>
       </div>
