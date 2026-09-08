@@ -47,13 +47,6 @@ export default function Navbar({ darkMode, toggleDark }) {
         </NavLink>
         <div className="navbar-right">
           <button
-            className="theme-toggle"
-            onClick={toggleDark}
-            aria-label="테마 전환"
-          >
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-          <button
             className={'navbar-hamburger' + (open ? ' open' : '')}
             onClick={toggleHamburger}
             aria-label="메뉴 열기"
@@ -97,6 +90,13 @@ export default function Navbar({ darkMode, toggleDark }) {
               </div>
             )}
           </div>
+          <button
+            className="theme-toggle"
+            onClick={toggleDark}
+            aria-label="테마 전환"
+          >
+            {darkMode ? '라이트 모드' : '다크 모드'}
+          </button>
         </nav>
       </div>
     </header>
