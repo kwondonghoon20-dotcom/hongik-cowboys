@@ -978,7 +978,12 @@ function fieldPos(play) {
 export function getDriveMomentum(plays, homeTeam, awayTeam) {
   const relevant = plays.filter((p) => {
     const pt = playType(p)
-    return isScrimmagePlay(p) || pt === 'FG' || pt === 'PUNT'
+    // 일반 인터셉트/펌블 턴오버는 원래 행(NOPASS/RUN 등)에 INTERCEPT·FUMBLERECDEF·TURNOVER
+    // 태그가 붙어 있어 그 행만으로 드라이브가 정상적으로 끊긴다. 하지만 리턴이 그대로
+    // 수비 터치다운으로 이어지는 경우엔 FUMBLERECDEF/INTERCEPT + TOUCHDOWN 태그가 전부
+    // 별도 RETURN 행(TKLNum=리턴한 선수)에만 붙는다 — isScrimmagePlay() 기준만으로 걸러내면
+    // 이 행이 통째로 빠져서 드라이브가 그 지점에서 끊기지 않고 TOUCHDOWN 이벤트도 누락된다.
+    return isScrimmagePlay(p) || pt === 'FG' || pt === 'PUNT' || (pt === 'RETURN' && isDefensiveTouchdown(p))
   })
 
   // 드라이브 그룹핑: 공격팀 전환 또는 종결 이벤트에서 새 드라이브
@@ -1066,7 +1071,10 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
 
       let event = null
       if (isLastPlay) {
-        if (tags.includes('TOUCHDOWN')) event = 'TD'
+        // 펌블/인터셉트 리턴 터치다운은 OffenseTeam이 여전히 공을 뺏긴 원래 공격팀으로
+        // 기록되므로(세이프티와 동일 패턴), 이 드라이브가 정상적으로 TD를 낸 것처럼 보이면
+        // 안 된다 — 별도 'DEF_TD' 이벤트로 구분해서 실제 득점팀(상대) 축에 표시한다.
+        if (tags.includes('TOUCHDOWN')) event = isDefensiveTouchdown(play) ? 'DEF_TD' : 'TD'
         else if (pt === 'FG' && tags.includes('FIELDGOALGOOD')) event = 'FG'
         else if (tags.includes('INTERCEPT')) event = 'INTERCEPT'
         else if (tags.includes('FUMBLERECDEF')) event = 'FUMBLE'
@@ -1075,9 +1083,11 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
         else if (drive.is4thDownFail) event = 'DOWN_FAIL'
       }
 
-      // TD: 마지막 포인트를 ±100으로 강제 설정
-      const pos = event === 'TD' ? 100 : fieldPos(play)
-      const displayValue = isOurs ? pos : -pos
+      // TD/DEF_TD: 마지막 포인트를 ±100으로 강제 설정
+      const pos = (event === 'TD' || event === 'DEF_TD') ? 100 : fieldPos(play)
+      // DEF_TD는 실제 득점팀이 드라이브의 원래 팀(원 공격팀)과 반대이므로 표시 축을 뒤집는다.
+      const pointIsOurs = event === 'DEF_TD' ? !isOurs : isOurs
+      const displayValue = pointIsOurs ? pos : -pos
 
       // FG 거리: OPP {n}야드 기준 → n + 17야드 (스냅 + 엔드존)
       const fgDist = pt === 'FG'
@@ -1090,8 +1100,8 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
 
       chartPoints.push({
         index: pointIndex,
-        home: isOurs ? displayValue : null,
-        away: isOurs ? null : displayValue,
+        home: pointIsOurs ? displayValue : null,
+        away: pointIsOurs ? null : displayValue,
         event,
         quarter: q,
         driveNum: driveIdx + 1,
@@ -1125,10 +1135,14 @@ export function getKeyStats(plays, homeTeam, awayTeam) {
 
   // PAT 플레이는 TD 집계에서 제외 (PAT도 TOUCHDOWN 태그를 가질 수 있음)
   const isTDPlay = (p) => isTouchdown(p) && playType(p) !== 'PAT'
-  const homeTDPlays = plays.filter((p) => p.OffenseTeam === homeTeam && isTDPlay(p))
-  const awayTDPlays = plays.filter((p) => p.OffenseTeam === awayTeam && isTDPlay(p))
-  const homeTDs = homeTDPlays.length
-  const awayTDs = awayTDPlays.length
+  // 펌블/인터셉트 리턴 터치다운은 OffenseTeam이 여전히 공을 뺏긴 원래 공격팀으로 기록되므로
+  // (세이프티와 동일 패턴), isDefensiveTouchdown()으로 실제 득점팀 기준으로 보정한다.
+  const homeTDs =
+    plays.filter((p) => p.OffenseTeam === homeTeam && isTDPlay(p) && !isDefensiveTouchdown(p)).length +
+    plays.filter((p) => p.OffenseTeam === awayTeam && isTDPlay(p) && isDefensiveTouchdown(p)).length
+  const awayTDs =
+    plays.filter((p) => p.OffenseTeam === awayTeam && isTDPlay(p) && !isDefensiveTouchdown(p)).length +
+    plays.filter((p) => p.OffenseTeam === homeTeam && isTDPlay(p) && isDefensiveTouchdown(p)).length
 
   // 레드존: 스크리미지 플레이에서만, 드라이브당 최대 1회 카운트
   // - EndYardLocation=OPP && EndYard<=20  또는  StartYardLocation=OPP && StartYard<=20

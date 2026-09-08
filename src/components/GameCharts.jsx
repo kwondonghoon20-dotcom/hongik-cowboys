@@ -152,6 +152,7 @@ function DriveEventDot(props) {
   if (!event || cx == null || cy == null) return null
 
   if (event === 'TD') return <circle cx={cx} cy={cy} r={6} fill="#FFD700" stroke="#000" strokeWidth={1} />
+  if (event === 'DEF_TD') return <circle cx={cx} cy={cy} r={6} fill="#FFD700" stroke={SCARLET} strokeWidth={2} />
   if (event === 'FG') return <circle cx={cx} cy={cy} r={5} fill="#00BFFF" stroke="#000" strokeWidth={1} />
   // 인터셉트/펌블/턴오버/다운 실패 → 모두 빨간 X로 통합
   if (event === 'INTERCEPT' || event === 'FUMBLE' || event === 'TURNOVER' || event === 'DOWN_FAIL') {
@@ -171,6 +172,7 @@ function driveResultText(d) {
   const sign = g >= 0 ? '+' : ''
   if (!d.event) return `${sign}${g}야드`
   if (d.event === 'TD') return '터치다운!'
+  if (d.event === 'DEF_TD') return '수비 터치다운!'
   if (d.event === 'FG') return `필드골 성공${d.fgDist ? ` (${d.fgDist}야드)` : ''}`
   if (d.event === 'PUNT') return '펀트'
   if (d.event === 'INTERCEPT') return '인터셉트 턴오버'
@@ -198,6 +200,8 @@ function DriveMomentumChart({ game }) {
         <span style={{ color: ourColor }}>■</span> {OUR_TEAM}&nbsp;&nbsp;
         <span style={{ color: opponentColor }}>■</span> {opponent}&nbsp;&nbsp;
         <span style={{ color: '#FFD700' }}>●</span> TD&nbsp;
+        <span style={{ color: '#FFD700', border: `2px solid ${SCARLET}`, borderRadius: '50%', display: 'inline-block', width: 8, height: 8, marginRight: 2 }} />
+        수비 TD&nbsp;
         <span style={{ color: '#00BFFF' }}>●</span> FG&nbsp;
         <span style={{ color: '#FF6B00' }}>✕</span> 턴오버&nbsp;
         <span style={{ color: '#AAA' }}>▽</span> PUNT
@@ -233,7 +237,7 @@ function DriveMomentumChart({ game }) {
               const team = isOurs ? OUR_TEAM : opponent
               const teamColor = isOurs ? ourColor : opponentColor
               const eventColors = {
-                TD: '#FFD700', FG: '#00BFFF',
+                TD: '#FFD700', DEF_TD: '#FFD700', FG: '#00BFFF',
                 INTERCEPT: SCARLET, FUMBLE: SCARLET, TURNOVER: SCARLET,
                 DOWN_FAIL: SCARLET, PUNT: '#AAA',
               }
