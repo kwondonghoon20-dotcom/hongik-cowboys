@@ -90,14 +90,14 @@ export default function Navbar({ darkMode, toggleDark }) {
               </div>
             )}
           </div>
-          <button
-            className="theme-toggle"
-            onClick={toggleDark}
-            aria-label="테마 전환"
-          >
-            {darkMode ? '라이트 모드' : '다크 모드'}
-          </button>
         </nav>
+        <button
+          className="theme-toggle"
+          onClick={toggleDark}
+          aria-label="테마 전환"
+        >
+          {darkMode ? '라이트 모드' : '다크 모드'}
+        </button>
       </div>
     </header>
   )

@@ -10,7 +10,6 @@
 .navbar-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: 72px;
 }
 
@@ -20,6 +19,7 @@
   letter-spacing: 0.06em;
   color: var(--color-text);
   flex-shrink: 0;
+  margin-right: auto;
 }
 
 .navbar-logo span {
@@ -36,21 +36,23 @@
 }
 
 .theme-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
+  margin-left: 20px;
+  padding: 4px 12px;
   font: inherit;
-  font-family: var(--font-impact);
-  font-size: 18px;
-  letter-spacing: 0.04em;
+  font-size: 12px;
   color: var(--color-text-secondary);
-  padding: 8px 0;
-  border-bottom: 3px solid transparent;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .theme-toggle:hover {
   color: var(--color-text);
+  border-color: var(--color-text-secondary);
 }
 
 .navbar-hamburger {
@@ -186,7 +188,8 @@
   }
 
   .navbar-inner {
-    height: 60px;
+    height: auto;
+    min-height: 60px;
     flex-wrap: wrap;
     align-items: center;
   }
@@ -260,11 +263,13 @@
   }
 
   .theme-toggle {
-    width: 100%;
-    text-align: left;
-    font-size: 20px;
-    padding: 16px 0;
-    border-bottom: none;
-    color: var(--color-text-secondary);
+    display: none;
+  }
+
+  .navbar-links.open ~ .theme-toggle {
+    display: block;
+    margin: 4px 0 12px;
+    margin-left: 0;
+    padding: 8px 14px;
   }
 }
