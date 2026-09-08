@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { players, getPlayerNumberInSeason, getPlayerPositionsInSeason, getRosterForYear } from '../data/dummy'
 import { getAllGames, useGlobGames } from '../data/gameRepository'
-import { getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
+import { getSeasonPlayerStats, OUR_TEAM, passerRating } from '../utils/parseExcel'
 import {
   ZERO_KICK, hasActivity, computeSeasonTotals, getStatFlags, buildSeasonBoxes,
 } from '../utils/seasonStats'
@@ -34,7 +34,11 @@ function buildSeasonSection(rowsForSeason) {
   })
   if (hasPassing) cols.push({
     key: 'pass', label: 'Passing',
-    render: (o) => `${o.completions}/${o.passAttempts} · ${o.passYards} yds · ${o.passTD} TD · ${o.passINT} INT`,
+    render: (o) => {
+      const rating = passerRating(o)
+      const ratingStr = rating != null ? ` · ${rating.toFixed(1)} RTG` : ''
+      return `${o.completions}/${o.passAttempts} · ${o.passYards} yds · ${o.passTD} TD · ${o.passINT} INT${ratingStr}`
+    },
   })
   if (hasTackles) cols.push({
     key: 'tkl', label: 'Tackles',

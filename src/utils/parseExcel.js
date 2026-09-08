@@ -358,6 +358,18 @@ export function getPassRoles(play) {
   return { qbNum: play.CAR2Num, qbPos: play.CAR2Pos, recNum: play.CARNum, recPos: play.CARPos }
 }
 
+// NFL 방식 패서 레이팅. completions/attempts/yards/TD/INT로 계산하며 0~158.3 범위.
+// 시도(attempts)가 0이면 계산 불가이므로 null을 반환한다.
+export function passerRating({ completions, passAttempts, passYards, passTD, passINT }) {
+  if (!passAttempts || passAttempts <= 0) return null
+  const clamp = (v) => Math.min(Math.max(v, 0), 2.375)
+  const a = clamp(((completions / passAttempts) - 0.3) * 5)
+  const b = clamp(((passYards / passAttempts) - 3) * 0.25)
+  const c = clamp((passTD / passAttempts) * 20)
+  const d = clamp(2.375 - (passINT / passAttempts) * 25)
+  return ((a + b + c + d) / 6) * 100
+}
+
 function isOffensePlay(play) {
   return isRun(play) || isPassAttempt(play) || isSackPlay(play)
 }

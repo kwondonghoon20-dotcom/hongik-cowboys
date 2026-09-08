@@ -1,6 +1,7 @@
 // PlayerDetail(단일 선수)과 Compare(두 선수 비교)가 공유하는 시즌 누적 스탯 로직.
 // getSeasonPlayerStats()가 돌려주는 경기별 {offense, defense, kicking} 로우를 합산하고,
 // 어떤 스탯 카테고리를 표시할지 판단한 뒤, 표시용 로우(seasonBoxes/compareRows)로 변환한다.
+import { passerRating } from './parseExcel'
 
 export const ZERO_OFF = {
   rushAttempts: 0, rushYards: 0, rushTD: 0,
@@ -101,6 +102,10 @@ const STAT_ROWS = [
   { name: 'Pass Yds', flag: 'hasPassing', get: (o) => o.passYards },
   { name: 'Pass TD', flag: 'hasPassing', get: (o) => o.passTD },
   { name: 'INT', flag: 'hasPassing', get: (o) => o.passINT },
+  { name: 'Passer Rating', flag: 'hasPassing', get: (o) => {
+      const r = passerRating(o)
+      return r != null ? r.toFixed(1) : '-'
+    } },
   { name: 'Tackles', flag: 'hasTackles', get: (_o, d) => d.tackles },
   { name: 'Assists', flag: 'hasTackles', get: (_o, d) => d.assists },
   { name: 'Sacks', flag: 'hasSacks', get: (_o, d) => d.sacks },

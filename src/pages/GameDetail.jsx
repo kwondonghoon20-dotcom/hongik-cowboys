@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { getGameById, useGlobGames } from '../data/gameRepository'
-import { pickOffenseMvp, pickDefenseMvp, OUR_TEAM } from '../utils/parseExcel'
+import { pickOffenseMvp, pickDefenseMvp, OUR_TEAM, passerRating } from '../utils/parseExcel'
 import { findPlayerByNumberInSeason } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
 import TouchdownHighlights from '../components/TouchdownHighlights'
@@ -107,7 +107,10 @@ export default function GameDetail() {
                       <div className="mvp-divider" />
                       <div className="mvp-stats">
                         {offMvp.passYards > 0 && (
-                          <div>Passing: {offMvp.completions}/{offMvp.passAttempts} comp · {offMvp.passYards} yds · {offMvp.passTD} TD · {offMvp.passINT} INT</div>
+                          <div>
+                            Passing: {offMvp.completions}/{offMvp.passAttempts} comp · {offMvp.passYards} yds · {offMvp.passTD} TD · {offMvp.passINT} INT
+                            {passerRating(offMvp) != null && ` · ${passerRating(offMvp).toFixed(1)} RTG`}
+                          </div>
                         )}
                         {offMvp.rushYards > 0 && (
                           <div>Rushing: {offMvp.rushAttempts} car · {offMvp.rushYards} yds · {offMvp.rushTD} TD</div>
