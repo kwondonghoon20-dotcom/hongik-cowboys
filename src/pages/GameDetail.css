@@ -199,6 +199,7 @@
   max-height: 480px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   border-radius: 8px;
 }
 

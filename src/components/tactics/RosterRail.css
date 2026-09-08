@@ -54,6 +54,7 @@
   max-height: 460px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .roster-group-label {
