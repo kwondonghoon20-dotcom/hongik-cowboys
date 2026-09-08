@@ -224,6 +224,7 @@
 
 .gamelog-scroll {
   overflow-x: auto;
+  overscroll-behavior: contain;
 }
 
 .empty-note {

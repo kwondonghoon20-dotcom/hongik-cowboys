@@ -39,6 +39,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-body);
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   width: 100%;
   transition: background 0.2s ease, color 0.2s ease;
 }

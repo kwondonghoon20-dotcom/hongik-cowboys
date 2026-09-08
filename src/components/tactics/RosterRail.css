@@ -53,6 +53,7 @@
 .roster-player-list {
   max-height: 460px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .roster-group-label {

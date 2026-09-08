@@ -198,6 +198,7 @@
 .playlog-scroll {
   max-height: 480px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: 8px;
 }
 
