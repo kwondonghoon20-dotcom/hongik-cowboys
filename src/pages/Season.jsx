@@ -6,6 +6,7 @@ import {
 import { getAllGames, useGlobGames } from '../data/gameRepository'
 import { findPlayerByNumberInSeason, getRosterForYear, getPlayerNumberInSeason } from '../data/dummy'
 import { getPlayerTotalYards, getSeasonPlayerStats, OUR_TEAM } from '../utils/parseExcel'
+import { useChartTheme } from '../hooks/useChartTheme'
 import './Season.css'
 
 const SCARLET = '#CC0000'
@@ -129,6 +130,7 @@ function RankCard({ title, players: list, statKey, unit, season }) {
 }
 
 export default function Season() {
+  const theme = useChartTheme()
   const globGames = useGlobGames()
 
   const allGames = useMemo(() => {
@@ -313,14 +315,14 @@ export default function Season() {
           <div className="s-chart-card">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={chartData} margin={{ top: 24, right: 24, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis dataKey="name" tick={{ fill: '#ccc', fontSize: 13 }} />
-                <YAxis tick={{ fill: '#ccc', fontSize: 12 }} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
+                <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: 13 }} />
+                <YAxis tick={{ fill: theme.tick, fontSize: 12 }} allowDecimals={false} />
                 <Tooltip
-                  contentStyle={{ background: '#242424', border: '1px solid #444', color: '#fff' }}
-                  labelStyle={{ color: '#fff' }}
+                  contentStyle={{ background: theme.tooltipBg, border: `1px solid ${theme.tooltipBorder}`, color: theme.tooltipText }}
+                  labelStyle={{ color: theme.tooltipText }}
                 />
-                <Legend wrapperStyle={{ color: '#ccc' }} />
+                <Legend wrapperStyle={{ color: theme.legend }} />
                 <Line
                   type="monotone" dataKey="홍익대" stroke={SCARLET} strokeWidth={2.5}
                   dot={{ r: 5, fill: SCARLET }} activeDot={{ r: 7 }}
@@ -336,7 +338,7 @@ export default function Season() {
                 >
                   <LabelList
                     dataKey="상대팀" position="bottom"
-                    style={{ fill: '#aaa', fontSize: 13 }}
+                    style={{ fill: theme.tick, fontSize: 13 }}
                   />
                 </Line>
               </LineChart>

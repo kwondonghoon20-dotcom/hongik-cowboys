@@ -9,6 +9,7 @@ import {
   getDriveMomentum, getKeyStats, OUR_TEAM,
 } from '../utils/parseExcel'
 import { findPlayerByNumberInSeason } from '../data/dummy'
+import { useChartTheme } from '../hooks/useChartTheme'
 import './GameCharts.css'
 
 function findRosterPlayer(number, season) {
@@ -19,12 +20,6 @@ function findRosterPlayer(number, season) {
 
 const SCARLET = '#CC0000'
 const CHARCOAL_GRAY = '#888888'
-
-const TICK_STYLE = { fill: '#ccc', fontSize: 12 }
-const TOOLTIP_STYLE = {
-  contentStyle: { background: '#242424', border: '1px solid #444', color: '#fff' },
-  labelStyle: { color: '#fff' },
-}
 
 const TEAM_ABBR_MAP = {
   gunwipheonix: 'PH',
@@ -183,6 +178,7 @@ function driveResultText(d) {
 }
 
 function DriveMomentumChart({ game }) {
+  const theme = useChartTheme()
   const opponent = game.homeTeam === OUR_TEAM ? game.awayTeam : game.homeTeam
   const ourColor = getTeamColor(OUR_TEAM)
   const opponentColor = getTeamColor(opponent)
@@ -218,17 +214,18 @@ function DriveMomentumChart({ game }) {
               <stop offset="95%" stopColor={opponentColor} stopOpacity={0.05} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+          <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
           <XAxis dataKey="index" tick={false} height={0} />
           <YAxis
             domain={[-105, 105]}
             ticks={[-100, -50, 0, 50, 100]}
-            tick={{ fill: '#999', fontSize: 10 }}
+            tick={{ fill: theme.tick, fontSize: 10 }}
             tickFormatter={(v) => String(Math.abs(v))}
             width={30}
           />
           <Tooltip
-            {...TOOLTIP_STYLE}
+            contentStyle={{ background: theme.tooltipBg, border: `1px solid ${theme.tooltipBorder}`, color: theme.tooltipText }}
+            labelStyle={{ color: theme.tooltipText }}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null
               const d = payload[0]?.payload
@@ -239,48 +236,48 @@ function DriveMomentumChart({ game }) {
               const eventColors = {
                 TD: '#FFD700', DEF_TD: '#FFD700', FG: '#00BFFF',
                 INTERCEPT: SCARLET, FUMBLE: SCARLET, TURNOVER: SCARLET,
-                DOWN_FAIL: SCARLET, PUNT: '#AAA',
+                DOWN_FAIL: SCARLET, PUNT: theme.tick,
               }
               const resultStr = driveResultText(d)
               const g = d.gainYard ?? 0
               return (
-                <div style={{ ...TOOLTIP_STYLE.contentStyle, padding: '6px 10px', minWidth: 160 }}>
-                  <div style={{ color: '#888', fontSize: 11, marginBottom: 4 }}>
+                <div style={{ background: theme.tooltipBg, border: `1px solid ${theme.tooltipBorder}`, color: theme.tooltipText, padding: '6px 10px', minWidth: 160 }}>
+                  <div style={{ color: theme.mutedLabel, fontSize: 11, marginBottom: 4 }}>
                     {d.quarter ? `Q${d.quarter}` : ''}{d.driveNum ? ` · 드라이브 ${d.driveNum}` : ''}
                   </div>
                   <div style={{ color: teamColor, fontWeight: 600 }}>{team}</div>
-                  <div style={{ color: '#ddd', fontSize: 12, marginTop: 2 }}>
+                  <div style={{ color: theme.tooltipText, fontSize: 12, marginTop: 2 }}>
                     {d.playTypeStr ?? ''}&nbsp;
                     <span style={{ color: g >= 0 ? '#6f6' : '#f66' }}>
                       {g >= 0 ? '+' : ''}{g}야드
                     </span>
                   </div>
-                  <div style={{ color: '#bbb', fontSize: 12 }}>
+                  <div style={{ color: theme.tick, fontSize: 12 }}>
                     필드 위치 {d.fieldPosition != null ? `${d.fieldPosition}야드` : '-'}
                   </div>
-                  <div style={{ color: eventColors[d.event] ?? '#ccc', marginTop: 4, fontSize: 12 }}>
+                  <div style={{ color: eventColors[d.event] ?? theme.tick, marginTop: 4, fontSize: 12 }}>
                     {resultStr}
                   </div>
                 </div>
               )
             }}
           />
-          <ReferenceLine y={0} stroke="#fff" strokeWidth={1.5} strokeOpacity={0.3} />
+          <ReferenceLine y={0} stroke={theme.baselineSubtle} strokeOpacity={1} strokeWidth={1.5} />
           {q1Boundary != null && (
             <ReferenceLine
               x={q1Boundary.index}
               stroke="transparent"
-              label={{ value: 'Q1', fill: '#666', fontSize: 11, position: 'insideTopRight', dy: 14 }}
+              label={{ value: 'Q1', fill: theme.mutedLabel, fontSize: 11, position: 'insideTopRight', dy: 14 }}
             />
           )}
           {dividers.map((b) => (
             <ReferenceLine
               key={b.quarter}
               x={b.index}
-              stroke="#555"
+              stroke={theme.tick}
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: `Q${b.quarter}`, fill: '#777', fontSize: 11, position: 'insideTopRight', dy: 14 }}
+              label={{ value: `Q${b.quarter}`, fill: theme.mutedLabel, fontSize: 11, position: 'insideTopRight', dy: 14 }}
             />
           ))}
           <Area
@@ -314,6 +311,7 @@ function DriveMomentumChart({ game }) {
 // ── Key Stats ────────────────────────────────────────────────────────────────
 
 function KeyStatsPanel({ game }) {
+  const theme = useChartTheme()
   const stats = getKeyStats(game.plays, game.homeTeam, game.awayTeam)
   const { possession, touchdowns, redZone, thirdDown, turnovers } = stats
   const homeColor = getTeamColor(game.homeTeam)
@@ -341,7 +339,7 @@ function KeyStatsPanel({ game }) {
         </div>
         <div className="possession-pct-row">
           <span style={{ color: homeColor }}>{possession.home}%</span>
-          <span style={{ color: '#aaa', fontSize: 11 }}>오펜스 플레이 점유</span>
+          <span style={{ color: theme.tick, fontSize: 11 }}>오펜스 플레이 점유</span>
           <span style={{ color: awayColor }}>{possession.away}%</span>
         </div>
       </div>
@@ -370,6 +368,7 @@ function parseRatio(str) {
 }
 
 function TeamRadarChart({ game }) {
+  const theme = useChartTheme()
   const hasRawPlays = Array.isArray(game.plays) && game.plays.length > 0
   if (!hasRawPlays) return null
 
@@ -415,8 +414,8 @@ function TeamRadarChart({ game }) {
       <div className="chart-card" style={{ padding: '16px 8px' }}>
         <ResponsiveContainer width="100%" height={340}>
           <RadarChart data={radarData} margin={{ top: 16, right: 32, bottom: 16, left: 32 }}>
-            <PolarGrid stroke="#333" />
-            <PolarAngleAxis dataKey="axis" tick={{ fill: '#ccc', fontSize: 12 }} />
+            <PolarGrid stroke={theme.gridSubtle} />
+            <PolarAngleAxis dataKey="axis" tick={{ fill: theme.tick, fontSize: 12 }} />
             <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
             <Radar
               name={game.homeTeam}
@@ -434,10 +433,10 @@ function TeamRadarChart({ game }) {
               fillOpacity={0.3}
               strokeWidth={2}
             />
-            <Legend wrapperStyle={{ color: '#ccc' }} />
+            <Legend wrapperStyle={{ color: theme.legend }} />
             <Tooltip
-              contentStyle={{ background: '#242424', border: '1px solid #444', color: '#fff' }}
-              labelStyle={{ color: '#fff' }}
+              contentStyle={{ background: theme.tooltipBg, border: `1px solid ${theme.tooltipBorder}`, color: theme.tooltipText }}
+              labelStyle={{ color: theme.tooltipText }}
               formatter={(value) => `${value}%`}
             />
           </RadarChart>
@@ -467,6 +466,12 @@ function GameFlowSection({ game }) {
 // ── 기존 차트 4개 ─────────────────────────────────────────────────────────
 
 export default function GameCharts({ game }) {
+  const theme = useChartTheme()
+  const tickStyle = { fill: theme.tick, fontSize: 12 }
+  const tooltipStyle = {
+    contentStyle: { background: theme.tooltipBg, border: `1px solid ${theme.tooltipBorder}`, color: theme.tooltipText },
+    labelStyle: { color: theme.tooltipText },
+  }
   const hasRawPlays = Array.isArray(game.plays) && game.plays.length > 0
   const teamNameOf = (seriesKey) => (seriesKey === 'home' ? game.homeTeam : game.awayTeam)
 
@@ -510,11 +515,11 @@ export default function GameCharts({ game }) {
           <h4 className="chart-title">패널티 비교</h4>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={penaltyComparison}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="metric" tick={TICK_STYLE} />
-              <YAxis tick={TICK_STYLE} allowDecimals={false} />
-              <Tooltip {...TOOLTIP_STYLE} formatter={(value, name) => [value, teamNameOf(name)]} />
-              <Legend wrapperStyle={{ color: '#ccc' }} formatter={teamNameOf} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
+              <XAxis dataKey="metric" tick={tickStyle} />
+              <YAxis tick={tickStyle} allowDecimals={false} />
+              <Tooltip {...tooltipStyle} formatter={(value, name) => [value, teamNameOf(name)]} />
+              <Legend wrapperStyle={{ color: theme.legend }} formatter={teamNameOf} />
               <Bar dataKey="home" name="home" fill={getTeamColor(game.homeTeam)} />
               <Bar dataKey="away" name="away" fill={getTeamColor(game.awayTeam)} />
             </BarChart>
@@ -525,12 +530,12 @@ export default function GameCharts({ game }) {
           <h4 className="chart-title">Total Yards TOP 5</h4>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={topPlayers} layout="vertical" margin={{ left: 16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis type="number" tick={TICK_STYLE} />
-              <YAxis type="category" dataKey="label" tick={TICK_STYLE} width={90} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
+              <XAxis type="number" tick={tickStyle} />
+              <YAxis type="category" dataKey="label" tick={tickStyle} width={90} />
               <Tooltip
                 content={(props) => <PlayerTooltip {...props} topPlayers={topPlayers} season={game.season} />}
-                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                cursor={{ fill: theme.highlightCursor }}
               />
               <Bar dataKey="scrimmageYards" name="Scrimmage Yds">
                 {topPlayers.map((entry, idx) => (
