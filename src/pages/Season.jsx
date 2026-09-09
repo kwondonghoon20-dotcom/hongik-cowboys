@@ -315,8 +315,8 @@ export default function Season() {
           <div className="s-chart-card">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={chartData} margin={{ top: 24, right: 24, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
-                <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: 13 }} />
+                <CartesianGrid stroke={theme.gridSubtle} />
+                <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: 13, fontWeight: 500 }} />
                 <YAxis tick={{ fill: theme.tick, fontSize: 12 }} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{ background: theme.tooltipBg, border: `1px solid ${theme.tooltipBorder}`, color: theme.tooltipText }}

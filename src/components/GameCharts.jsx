@@ -214,7 +214,7 @@ function DriveMomentumChart({ game }) {
               <stop offset="95%" stopColor={opponentColor} stopOpacity={0.05} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
+          <CartesianGrid stroke={theme.gridSubtle} />
           <XAxis dataKey="index" tick={false} height={0} />
           <YAxis
             domain={[-105, 105]}
@@ -262,7 +262,7 @@ function DriveMomentumChart({ game }) {
               )
             }}
           />
-          <ReferenceLine y={0} stroke={theme.baselineSubtle} strokeOpacity={1} strokeWidth={1.5} />
+          <ReferenceLine y={0} stroke={theme.baselineSubtle} strokeWidth={1.5} />
           {q1Boundary != null && (
             <ReferenceLine
               x={q1Boundary.index}
@@ -274,7 +274,7 @@ function DriveMomentumChart({ game }) {
             <ReferenceLine
               key={b.quarter}
               x={b.index}
-              stroke={theme.tick}
+              stroke={theme.quarterDivider}
               strokeDasharray="4 4"
               strokeWidth={1.5}
               label={{ value: `Q${b.quarter}`, fill: theme.mutedLabel, fontSize: 11, position: 'insideTopRight', dy: 14 }}
@@ -515,7 +515,7 @@ export default function GameCharts({ game }) {
           <h4 className="chart-title">패널티 비교</h4>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={penaltyComparison}>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
+              <CartesianGrid stroke={theme.gridSubtle} />
               <XAxis dataKey="metric" tick={tickStyle} />
               <YAxis tick={tickStyle} allowDecimals={false} />
               <Tooltip {...tooltipStyle} formatter={(value, name) => [value, teamNameOf(name)]} />
@@ -530,7 +530,7 @@ export default function GameCharts({ game }) {
           <h4 className="chart-title">Total Yards TOP 5</h4>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={topPlayers} layout="vertical" margin={{ left: 16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.gridSubtle} />
+              <CartesianGrid stroke={theme.gridSubtle} />
               <XAxis type="number" tick={tickStyle} />
               <YAxis type="category" dataKey="label" tick={tickStyle} width={90} />
               <Tooltip
