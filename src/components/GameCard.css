@@ -125,6 +125,16 @@
 
 @media (max-width: 768px) {
   .game-card {
-    padding: 18px 16px;
+    padding: 20px 18px;
+  }
+
+  .game-card-score {
+    font-size: 30px;
+    margin-bottom: 14px;
+  }
+
+  .game-card-opponent {
+    font-size: 19px;
+    margin-bottom: 10px;
   }
 }
