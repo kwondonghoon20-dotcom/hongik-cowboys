@@ -241,12 +241,21 @@
 /* ── Responsive ───────────────────────────────────────────── */
 
 @media (max-width: 768px) {
+  .season-page-hero {
+    padding: 32px 0;
+    margin-bottom: 28px;
+  }
+
   .season-page-hero h1 {
     font-size: 36px;
   }
 
   .season-record-badge {
     font-size: 26px;
+  }
+
+  .s-section {
+    margin-bottom: 36px;
   }
 
   .season-stats-grid {
