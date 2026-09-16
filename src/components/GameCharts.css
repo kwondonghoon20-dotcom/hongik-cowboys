@@ -80,10 +80,14 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.ks-home {
-  color: #CC0000;
+.ks-home,
+.ks-away {
+  color: var(--color-text-secondary);
   font-size: 18px;
   font-weight: 700;
+}
+
+.ks-home {
   text-align: left;
 }
 
@@ -97,10 +101,12 @@
 }
 
 .ks-away {
-  color: var(--color-text-secondary);
-  font-size: 18px;
-  font-weight: 700;
   text-align: right;
+}
+
+/* 실제 스탯상 더 나은 쪽에만 붙는 강조색 (홈/어웨이 고정 아님) */
+.ks-winner {
+  color: #CC0000;
 }
 
 @media (max-width: 760px) {

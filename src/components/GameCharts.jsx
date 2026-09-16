@@ -33,6 +33,8 @@ const TEAM_ABBR_MAP = {
   krtigers: 'KR',
   sngreenterrors: 'SN',
   kkragingbulls: 'KK',
+  seoulvikings: 'SVI',
+  seoulgoldeneagles: 'SGE',
 }
 
 const TEAM_COLORS = {
@@ -46,6 +48,9 @@ const TEAM_COLORS = {
   krtigers: '#8B0000',
   sngreenterrors: '#006400',
   kkragingbulls: '#8B4513',
+  seoulvikings: '#FF8C00',
+  // 드라이브 차트 TD 마커(#FFD700)와 헷갈리지 않도록 톤을 살짝 낮춘 골드
+  seoulgoldeneagles: '#E6B800',
 }
 
 function getTeamColor(teamName) {
@@ -179,9 +184,13 @@ function driveResultText(d) {
 
 function DriveMomentumChart({ game }) {
   const theme = useChartTheme()
-  const opponent = game.homeTeam === OUR_TEAM ? game.awayTeam : game.homeTeam
-  const ourColor = getTeamColor(OUR_TEAM)
-  const opponentColor = getTeamColor(opponent)
+  // getDriveMomentum과 동일한 규칙: 홍익이 뛰는 경기는 홍익을 위쪽에, 둘 다
+  // 홍익이 아닌 사회인 경기는 실제 홈팀을 위쪽에 표시한다.
+  const involvesOurTeam = game.homeTeam === OUR_TEAM || game.awayTeam === OUR_TEAM
+  const topTeam = involvesOurTeam ? OUR_TEAM : game.homeTeam
+  const bottomTeam = topTeam === game.homeTeam ? game.awayTeam : game.homeTeam
+  const topColor = getTeamColor(topTeam)
+  const bottomColor = getTeamColor(bottomTeam)
   const { points: chartData, quarterBoundaries } = getDriveMomentum(
     game.plays, game.homeTeam, game.awayTeam,
   )
@@ -193,8 +202,8 @@ function DriveMomentumChart({ game }) {
     <div className="flow-chart-wrapper chart-card">
       <h4 className="chart-title">드라이브 전진 거리</h4>
       <div className="momentum-legend">
-        <span style={{ color: ourColor }}>■</span> {OUR_TEAM}&nbsp;&nbsp;
-        <span style={{ color: opponentColor }}>■</span> {opponent}&nbsp;&nbsp;
+        <span style={{ color: topColor }}>■</span> {topTeam}&nbsp;&nbsp;
+        <span style={{ color: bottomColor }}>■</span> {bottomTeam}&nbsp;&nbsp;
         <span style={{ color: '#FFD700' }}>●</span> TD&nbsp;
         <span style={{ color: '#FFD700', border: `2px solid ${SCARLET}`, borderRadius: '50%', display: 'inline-block', width: 8, height: 8, marginRight: 2 }} />
         수비 TD&nbsp;
@@ -206,12 +215,12 @@ function DriveMomentumChart({ game }) {
         <AreaChart data={chartData} margin={{ top: 30, right: 10, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="homeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={ourColor} stopOpacity={0.7} />
-              <stop offset="95%" stopColor={ourColor} stopOpacity={0.05} />
+              <stop offset="5%" stopColor={topColor} stopOpacity={0.7} />
+              <stop offset="95%" stopColor={topColor} stopOpacity={0.05} />
             </linearGradient>
             <linearGradient id="awayGrad" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="5%" stopColor={opponentColor} stopOpacity={0.7} />
-              <stop offset="95%" stopColor={opponentColor} stopOpacity={0.05} />
+              <stop offset="5%" stopColor={bottomColor} stopOpacity={0.7} />
+              <stop offset="95%" stopColor={bottomColor} stopOpacity={0.05} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke={theme.gridSubtle} />
@@ -230,9 +239,9 @@ function DriveMomentumChart({ game }) {
               if (!active || !payload?.length) return null
               const d = payload[0]?.payload
               if (d.home == null && d.away == null) return null
-              const isOurs = d.home != null
-              const team = isOurs ? OUR_TEAM : opponent
-              const teamColor = isOurs ? ourColor : opponentColor
+              const isTop = d.home != null
+              const team = isTop ? topTeam : bottomTeam
+              const teamColor = isTop ? topColor : bottomColor
               const eventColors = {
                 TD: '#FFD700', DEF_TD: '#FFD700', FG: '#00BFFF',
                 INTERCEPT: SCARLET, FUMBLE: SCARLET, TURNOVER: SCARLET,
@@ -283,7 +292,7 @@ function DriveMomentumChart({ game }) {
           <Area
             type="monotone"
             dataKey="home"
-            stroke={ourColor}
+            stroke={topColor}
             strokeWidth={1.5}
             fill="url(#homeGrad)"
             connectNulls={false}
@@ -294,7 +303,7 @@ function DriveMomentumChart({ game }) {
           <Area
             type="monotone"
             dataKey="away"
-            stroke={opponentColor}
+            stroke={bottomColor}
             strokeWidth={1.5}
             fill="url(#awayGrad)"
             connectNulls={false}
@@ -310,6 +319,16 @@ function DriveMomentumChart({ game }) {
 
 // ── Key Stats ────────────────────────────────────────────────────────────────
 
+// 각 행마다 실제로 더 나은 쪽을 계산한다. 3rd Down은 "성공/시도" 문자열이라
+// 성공률로 환산해서 비교하고, 턴오버는 적은 쪽이 더 나은 쪽이다.
+function rowWinner(row) {
+  const home = row.ratio ? parseRatio(row.home) : Number(row.home) || 0
+  const away = row.ratio ? parseRatio(row.away) : Number(row.away) || 0
+  if (home === away) return null
+  const homeIsBetter = row.lowerIsBetter ? home < away : home > away
+  return homeIsBetter ? 'home' : 'away'
+}
+
 function KeyStatsPanel({ game }) {
   const theme = useChartTheme()
   const stats = getKeyStats(game.plays, game.homeTeam, game.awayTeam)
@@ -320,8 +339,8 @@ function KeyStatsPanel({ game }) {
   const rows = [
     { label: 'TD', home: touchdowns.home, away: touchdowns.away },
     { label: '레드존 진입', home: redZone.home, away: redZone.away },
-    { label: '3rd Down', home: thirdDown.home, away: thirdDown.away },
-    { label: '턴오버', home: turnovers.home, away: turnovers.away },
+    { label: '3rd Down', home: thirdDown.home, away: thirdDown.away, ratio: true },
+    { label: '턴오버', home: turnovers.home, away: turnovers.away, lowerIsBetter: true },
   ]
 
   return (
@@ -345,13 +364,16 @@ function KeyStatsPanel({ game }) {
       </div>
       {/* 스탯 행 */}
       <div className="key-stats-rows">
-        {rows.map((row) => (
-          <div key={row.label} className="key-stat-row">
-            <span className="ks-home">{row.home}</span>
-            <span className="ks-label">{row.label}</span>
-            <span className="ks-away">{row.away}</span>
-          </div>
-        ))}
+        {rows.map((row) => {
+          const winner = rowWinner(row)
+          return (
+            <div key={row.label} className="key-stat-row">
+              <span className={`ks-home${winner === 'home' ? ' ks-winner' : ''}`}>{row.home}</span>
+              <span className="ks-label">{row.label}</span>
+              <span className={`ks-away${winner === 'away' ? ' ks-winner' : ''}`}>{row.away}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

@@ -978,6 +978,9 @@ function fieldPos(play) {
 }
 
 export function getDriveMomentum(plays, homeTeam, awayTeam) {
+  // 홍익이 뛰는 경기는 항상 홍익을 위쪽(양수)에 표시한다. 두 팀 다 홍익이 아닌
+  // 사회인 경기는 위쪽에 놓을 "홍익"이 없으므로 대신 실제 홈팀을 위쪽에 표시한다.
+  const topTeam = (homeTeam === OUR_TEAM || awayTeam === OUR_TEAM) ? OUR_TEAM : homeTeam
   const relevant = plays.filter((p) => {
     const pt = playType(p)
     // 일반 인터셉트/펌블 턴오버는 원래 행(NOPASS/RUN 등)에 INTERCEPT·FUMBLERECDEF·TURNOVER
@@ -1038,8 +1041,7 @@ export function getDriveMomentum(plays, homeTeam, awayTeam) {
   let lastQuarter = null
 
   drives.forEach((drive, driveIdx) => {
-    // HIcowboys는 항상 위쪽(양수)에 표시 — home/away 여부에 무관
-    const isOurs = drive.team === OUR_TEAM
+    const isOurs = drive.team === topTeam
     const firstPlay = drive.plays[0]
 
     // 드라이브 시작점: 첫 플레이의 실제 필드 포지션

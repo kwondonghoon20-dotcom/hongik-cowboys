@@ -87,8 +87,12 @@ export default function GameDetail() {
         </section>
 
         {Array.isArray(game.plays) && game.plays.length > 0 && (() => {
-          const offMvp = pickOffenseMvp(game.plays, OUR_TEAM)
-          const defMvp = pickDefenseMvp(game.plays, OUR_TEAM)
+          // 홍익이 안 뛰는 사회인 경기는 MVP 집계 기준 팀을 홈팀으로 대체한다.
+          const mvpTeam = (game.homeTeam === OUR_TEAM || game.awayTeam === OUR_TEAM)
+            ? OUR_TEAM
+            : game.homeTeam
+          const offMvp = pickOffenseMvp(game.plays, mvpTeam)
+          const defMvp = pickDefenseMvp(game.plays, mvpTeam)
           const offPlayer = offMvp ? findPlayer(offMvp.number, game.season) : null
           const defPlayer = defMvp ? findPlayer(defMvp.number, game.season) : null
 
