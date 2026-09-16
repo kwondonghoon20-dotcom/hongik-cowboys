@@ -329,6 +329,21 @@ export function useGlobGames() {
   return globGames
 }
 
+// glob 경기(xlsm/xlsx) 파싱이 끝났는지 여부. 공개 공유 라우트(/share/games/:id)에서
+// 이 값이 true가 되기 전에 "찾을 수 없음"으로 판단해 로그인으로 리다이렉트하면
+// 아직 파싱 중인 경기가 매번 잘못 튕겨나가므로, 로딩 완료 여부를 별도로 노출한다.
+export function useGlobGamesLoaded() {
+  const [loaded, setLoaded] = useState(false)
+  useEffect(() => {
+    _globGamesPromise.then(() => setLoaded(true))
+  }, [])
+  return loaded
+}
+
+// 로그인 없이 볼 수 있는 공개 공유 경기 목록(/share/games/:id에서 사용).
+// 새 경기를 공개하려면 그 경기의 gameKey를 여기에 추가하면 된다.
+export const PUBLIC_GAME_KEYS = ['VIGE20260906']
+
 export function getAllGames() {
   const uploaded = getUploadedGames().map(buildFromUpload)
   const metaGames = GAMES_WITHOUT_PLAYS.map(buildFromMeta)

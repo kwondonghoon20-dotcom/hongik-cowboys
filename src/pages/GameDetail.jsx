@@ -1,5 +1,5 @@
-import { useParams, Link } from 'react-router-dom'
-import { getGameById, useGlobGames } from '../data/gameRepository'
+import { useParams, useLocation, Navigate, Link } from 'react-router-dom'
+import { getGameById, useGlobGames, useGlobGamesLoaded, PUBLIC_GAME_KEYS } from '../data/gameRepository'
 import { pickOffenseMvp, pickDefenseMvp, OUR_TEAM, passerRating } from '../utils/parseExcel'
 import { findPlayerByNumberInSeason } from '../data/dummy'
 import GameCharts from '../components/GameCharts'
@@ -23,8 +23,20 @@ const STAT_ROWS = [
 
 export default function GameDetail() {
   const { id } = useParams()
+  const location = useLocation()
   const globGames = useGlobGames()
+  const globLoaded = useGlobGamesLoaded()
   const game = getGameById(id) ?? globGames.find((g) => g.id === id) ?? null
+
+  const isSharePath = location.pathname.startsWith('/share')
+  if (isSharePath) {
+    // glob 경기(xlsm) 파싱이 아직 안 끝났으면 판단을 미룬다 — 안 그러면 실제로는
+    // 공개 대상인 경기도 로딩 중엔 "못 찾음"으로 보여 로그인으로 잘못 튕겨나간다.
+    if (!globLoaded) return null
+    if (!game || !PUBLIC_GAME_KEYS.includes(game.gameKey)) {
+      return <Navigate to="/login" replace />
+    }
+  }
 
   if (!game) {
     return (

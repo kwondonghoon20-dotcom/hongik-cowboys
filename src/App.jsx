@@ -16,6 +16,9 @@ import CoverageQuiz from './pages/CoverageQuiz'
 export default function App() {
   const location = useLocation()
   const isLoginPage = location.pathname === '/login'
+  // 공개 공유 링크(/share/games/:id)로 들어온 외부인에게는 다른 메뉴를 눌러도
+  // 로그인 화면으로 튕길 뿐이니 애초에 Navbar를 보여주지 않는다.
+  const hideNavbar = isLoginPage || location.pathname.startsWith('/share')
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('hicowboys_theme') === 'dark'
@@ -30,7 +33,7 @@ export default function App() {
 
   return (
     <>
-      {!isLoginPage && <Navbar darkMode={darkMode} toggleDark={toggleDark} />}
+      {!hideNavbar && <Navbar darkMode={darkMode} toggleDark={toggleDark} />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -57,6 +60,9 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        {/* 특정 경기만 로그인 없이 공유하기 위한 라우트. 공개 허용 여부는
+            GameDetail 내부에서 PUBLIC_GAME_KEYS로 검사한다. */}
+        <Route path="/share/games/:id" element={<GameDetail />} />
         <Route
           path="/season"
           element={
