@@ -11,6 +11,8 @@ const TEAM_NAME_MAP = {
   gunwipheonix: 'GunwiPheonix',
   gunwiphonix: 'GunwiPheonix',
   dongkuktuskers: 'DongkukTuskers',
+  seoulvi: 'SeoulVikings',
+  seoulge: 'SeoulGoldenEagles',
 }
 
 // 한글 팀명 직접 매핑 (OffenseTeam에 한글로 기록된 파일용)
